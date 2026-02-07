@@ -17,15 +17,22 @@
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{background:transparent;overflow:hidden;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;font-family:var(--ff)}
-  .ctr{display:flex;padding:24px;gap:12px;opacity:0;animation:fin .6s ease-out .5s forwards}
-  .ctr.stack{flex-direction:column;align-items:center}
-  .ctr.inline{flex-direction:row;align-items:baseline}
+  .ctr{display:flex;padding:var(--py) var(--px);gap:12px;opacity:0;animation:fin .6s ease-out .5s forwards;width:var(--w);height:var(--h)}
+  .ctr.stack{flex-direction:column}
+  .ctr.stack.align-center{align-items:center}
+  .ctr.stack.align-left{align-items:flex-start}
+  .ctr.stack.align-right{align-items:flex-end}
+  .ctr.inline{flex-direction:row}
+  .ctr.inline.align-center{align-items:center}
+  .ctr.inline.align-left{align-items:flex-start}
+  .ctr.inline.align-right{align-items:flex-end}
   .ctr.has-bg{background:var(--pbg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:16px;border:1px solid var(--pbr);box-shadow:0 4px 24px rgba(0,0,0,.2)}
   .top{display:flex;align-items:center;gap:12px}
   .ico svg{width:calc(var(--fs)*.7);height:calc(var(--fs)*.7);color:var(--ac)}
   .num{font-family:var(--nf);font-size:var(--fs);font-weight:700;color:var(--tc);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
   .pre,.suf{font-family:var(--nf);font-size:calc(var(--fs)*.6);font-weight:500;color:var(--ac);opacity:.8}
   .lbl{font-size:var(--ls);font-weight:500;color:var(--tm);letter-spacing:.05em;text-transform:uppercase}
+  .trend{font-size:calc(var(--fs)*.5);margin-left:8px;font-weight:700}
   .bump{animation:bump .3s ease-out}
   @keyframes fin{to{opacity:1}}
   @keyframes bump{50%{transform:scale(1.1)}}
@@ -34,7 +41,29 @@
 <body>
 <script src="brand.js"></script>
 <script src="brand-helpers.js"></script>
+<script src="preview-wrapper.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script>
+// API Service Configurations
+const API_SERVICES = {
+  youtube: {
+    url: (id, key) => `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${id}&key=${key}`,
+    path: 'items.0.statistics.subscriberCount',
+    requiresAuth: true
+  },
+  twitch: {
+    url: (id, key) => `https://api.twitch.tv/helix/users/follows?to_id=${id}`,
+    path: 'total',
+    requiresAuth: true,
+    headers: (key) => ({ 'Client-ID': key })
+  },
+  github: {
+    url: (username, metric='followers') => `https://api.github.com/users/${username}`,
+    path: 'followers',  // or 'public_repos'
+    requiresAuth: false
+  }
+};
+
 const ICONS={
   heart:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>`,
   star:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`,
@@ -53,14 +82,46 @@ const icon=$.str('icon','none'), sz=$.num('size',48), lsz=$.num('labelsize',16);
 const font=$.str('font','mono'), showBg=$.bool('bg',true), layout=$.str('layout','stack');
 const animate=$.bool('animate',true), dur=$.num('duration',2);
 const sep=$.bool('separator',true), dec=$.num('decimals',0);
+
+// API Integration
+const service=$.str('service','custom'), apikey=$.str('apikey',''), userid=$.str('userid','');
+const metric=$.str('metric','followers');
 const poll=$.str('poll',''), pollKey=$.str('pollkey','value'), pollRate=$.num('pollrate',30);
 
-$.css('--ff',B.fonts.body); $.css('--nf',B.fonts[font]||B.fonts.mono);
+// Visual enhancements
+const counterpadx=$.num('counterpadx',0), counterpady=$.num('counterpady',0);
+const iconcolor=$.str('iconcolor',''), numbercolor=$.str('numbercolor','');
+const trend=$.bool('trend',false), trendcolor=$.str('trendcolor','#10b981');
+
+// Number formatting
+const notation=$.str('notation','standard'), abbreviate=$.bool('abbreviate',false);
+
+// Layout flexibility
+const width=$.str('width','auto'), height=$.str('height','auto');
+const aligncontent=$.str('aligncontent','center');
+
+$.css('--ff',$.font('body')); $.css('--nf',$.font(font));
 $.css('--fs',sz+'px'); $.css('--ls',lsz+'px');
-$.css('--tc',t.text); $.css('--tm',t.textMuted); $.css('--ac',ac.primary);
-$.css('--pbg',t.bg+'cc'); $.css('--pbr',t.border);
+const finalNumColor = numbercolor || t.text;
+const finalIconColor = iconcolor || ac.primary;
+$.css('--tc',finalNumColor);
+$.css('--tm',t.textMuted);
+$.css('--ac',finalIconColor);
+$.css('--pbg',t.bg+'cc');
+$.css('--pbr',t.border);
+
+// Layout customization
+const finalPadX = counterpadx || 24;
+const finalPadY = counterpady || 24;
+$.css('--px', finalPadX+'px');
+$.css('--py', finalPadY+'px');
+$.css('--w', width==='auto' ? 'auto' : width+'px');
+$.css('--h', height==='auto' ? 'auto' : height+'px');
 
 function fmt(n){
+  if(notation==='compact' || abbreviate){
+    return new Intl.NumberFormat('en-US',{notation:'compact',compactDisplay:'short'}).format(n);
+  }
   const f=n.toFixed(dec);
   if(!sep)return f;
   const[i,d]=f.split('.');
@@ -68,13 +129,18 @@ function fmt(n){
 }
 
 const wrap=document.createElement('div');
-wrap.className=`ctr ${layout}`+(showBg?' has-bg':'');
+wrap.className=`ctr ${layout} align-${aligncontent}`+(showBg?' has-bg':'');
 const top=document.createElement('div');top.className='top';
 
 if(icon!=='none'&&ICONS[icon]){const ic=document.createElement('div');ic.className='ico';ic.innerHTML=ICONS[icon];top.appendChild(ic);}
 if(prefix){const p=document.createElement('span');p.className='pre';p.textContent=prefix;top.appendChild(p);}
 const numEl=document.createElement('span');numEl.className='num';numEl.id='n';top.appendChild(numEl);
 if(suffix){const s=document.createElement('span');s.className='suf';s.textContent=suffix;top.appendChild(s);}
+
+// Trend indicator
+let trendEl;
+if(trend){trendEl=document.createElement('span');trendEl.className='trend';trendEl.textContent='';top.appendChild(trendEl);}
+
 wrap.appendChild(top);
 if(label){const l=document.createElement('div');l.className='lbl';l.textContent=label;wrap.appendChild(l);}
 document.body.appendChild(wrap);
@@ -92,14 +158,76 @@ function countUp(from,to,d){
 if(animate){numEl.textContent=fmt(0);setTimeout(()=>countUp(0,val,dur),500);}
 else numEl.textContent=fmt(val);
 
-if(poll){
-  setInterval(async()=>{
-    try{
-      const r=await fetch(poll);const d=await r.json();
-      let nv=d;pollKey.split('.').forEach(k=>{if(nv)nv=nv[k];});nv=parseFloat(nv);
-      if(!isNaN(nv)&&nv!==val){const old=val;val=nv;countUp(old,nv,1);numEl.classList.add('bump');setTimeout(()=>numEl.classList.remove('bump'),300);}
-    }catch(e){console.warn('Poll failed:',e);}
-  },pollRate*1000);
+// Polling function - supports both API services and custom endpoints
+let lastValue=val;
+async function pollData(){
+  try{
+    let fetchUrl, fetchHeaders={};
+
+    // Check if using API service or custom endpoint
+    if(service && service!=='custom' && API_SERVICES[service]){
+      const svc=API_SERVICES[service];
+      if(!userid){console.warn(`${service} requires userid parameter`);return;}
+
+      fetchUrl=svc.url(userid,apikey);
+      if(svc.headers) fetchHeaders=svc.headers(apikey);
+
+      // For GitHub, adjust path based on metric
+      if(service==='github'){
+        svc.path=metric==='repos'?'public_repos':'followers';
+      }
+
+      const r=await fetch(fetchUrl,{headers:fetchHeaders});
+      const d=await r.json();
+
+      // Navigate JSON path
+      let nv=d;
+      svc.path.split('.').forEach(k=>{if(nv!==null&&nv!==undefined)nv=nv[k];});
+      nv=parseFloat(nv);
+
+      if(!isNaN(nv)&&nv!==lastValue){
+        const old=lastValue;
+        lastValue=nv;val=nv;
+        countUp(old,nv,1);
+        numEl.classList.add('bump');
+        setTimeout(()=>numEl.classList.remove('bump'),300);
+
+        // Update trend indicator
+        if(trend&&trendEl){
+          trendEl.textContent=nv>old?'↑':'↓';
+          trendEl.style.color=nv>old?trendcolor:'#ef4444';
+        }
+      }
+    }else if(poll){
+      // Custom polling endpoint
+      const r=await fetch(poll);
+      const d=await r.json();
+      let nv=d;
+      pollKey.split('.').forEach(k=>{if(nv)nv=nv[k];});
+      nv=parseFloat(nv);
+
+      if(!isNaN(nv)&&nv!==lastValue){
+        const old=lastValue;
+        lastValue=nv;val=nv;
+        countUp(old,nv,1);
+        numEl.classList.add('bump');
+        setTimeout(()=>numEl.classList.remove('bump'),300);
+
+        // Update trend indicator
+        if(trend&&trendEl){
+          trendEl.textContent=nv>old?'↑':'↓';
+          trendEl.style.color=nv>old?trendcolor:'#ef4444';
+        }
+      }
+    }
+  }catch(e){
+    console.warn(`Poll failed for ${service||'custom'}:`,e);
+  }
+}
+
+// Start polling if service or poll URL is provided
+if((service && service!=='custom' && userid) || poll){
+  setInterval(pollData,pollRate*1000);
 }
 </script>
 </body>

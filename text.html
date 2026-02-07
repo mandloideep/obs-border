@@ -33,12 +33,32 @@
   *{margin:0;padding:0;box-sizing:border-box}
   body{background:transparent;overflow:hidden;width:100vw;height:100vh;display:flex;font-family:var(--ff)}
   
-  .container{padding:var(--pad);max-width:var(--mw);opacity:0;transition:all var(--es) ease-out}
+  .container{
+    padding:var(--pady) var(--padx);
+    margin:var(--my) var(--mx);
+    max-width:var(--mw);
+    opacity:0;
+    transition:all var(--es) ease-out;
+    position:relative;
+    transform:translate(var(--ox), var(--oy));
+  }
   .container.bg-panel{background:var(--pbg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:14px;border:1px solid var(--pbr)}
-  .container.visible{opacity:1;transform:none}
+  .container.visible{opacity:1}
   .container.hidden{opacity:0}
-  
-  .main-text{color:var(--tc);font-size:var(--fs);font-weight:var(--fw);line-height:1.25;letter-spacing:-0.02em}
+
+  .main-text{
+    color:var(--tc);
+    font-size:var(--fs);
+    font-weight:var(--fw);
+    line-height:1.25;
+    letter-spacing:-0.02em;
+  }
+  .main-text.gradient{
+    background:linear-gradient(90deg, var(--gc));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
   .sub-text{color:var(--tm);font-size:var(--ss);font-weight:400;margin-top:6px;letter-spacing:0.01em}
   .emoji{font-size:calc(var(--fs) * 1.2);margin-right:8px}
   
@@ -51,13 +71,34 @@
   .sig-inner.style-dashed{background:repeating-linear-gradient(90deg,var(--ac) 0px,var(--ac) 12px,transparent 12px,transparent 20px)}
   .sig-inner.style-dotted{background:repeating-linear-gradient(90deg,var(--ac) 0px,var(--ac) 4px,transparent 4px,transparent 12px)}
   .sig-inner.style-gradient{background:linear-gradient(90deg,var(--gc))}
-  
+  .sig-inner.style-slant{
+    background:var(--ac);
+    transform:translateX(-101%) skewY(-3deg);
+    transform-origin:left;
+  }
+  .sig-inner.style-wave{
+    background:none;
+    overflow:visible;
+  }
+  .sig-inner.style-swirl{
+    background:none;
+    overflow:visible;
+  }
+  .sig-inner.style-bracket{
+    background:none;
+    border-left:var(--lw) solid var(--ac);
+    border-right:var(--lw) solid var(--ac);
+    transform:none;
+  }
+
   .sig-inner.anim-slide{animation:lSlide var(--ls) ease-out forwards}
+  .sig-inner.anim-slide.style-slant{animation:lSlideSlant var(--ls) ease-out forwards}
   .sig-inner.anim-grow{animation:lGrow var(--ls) ease-out forwards;transform:scaleX(0);transform-origin:left}
-  .sig-inner.anim-pulse{animation:lPulse calc(var(--ls)*1.5) ease-in-out infinite;transform:none}
+  .sig-inner.anim-pulse{animation:lPulse calc(--ls)*1.5) ease-in-out infinite;transform:none}
   .sig-inner.anim-none{transform:none}
-  
+
   @keyframes lSlide{to{transform:translateX(0)}}
+  @keyframes lSlideSlant{to{transform:translateX(0) skewY(-3deg)}}
   @keyframes lGrow{to{transform:scaleX(1)}}
   @keyframes lPulse{0%,100%{opacity:.4}50%{opacity:1}}
   
@@ -66,15 +107,23 @@
   .exit-slideDown{animation:eDown var(--xs) ease-in forwards!important}
   .exit-slideUp{animation:eUp var(--xs) ease-in forwards!important}
   .exit-scale{animation:eScale var(--xs) ease-in forwards!important}
+  .exit-fadeLeft{animation:eFadeLeft var(--xs) ease-in forwards!important}
+  .exit-zoomOut{animation:eZoomOut var(--xs) ease-in forwards!important}
+  .exit-rotateOut{animation:eRotateOut var(--xs) ease-in forwards!important}
+
   @keyframes eFade{to{opacity:0}}
   @keyframes eDown{to{opacity:0;transform:translateY(20px)}}
   @keyframes eUp{to{opacity:0;transform:translateY(-20px)}}
   @keyframes eScale{to{opacity:0;transform:scale(0.8)}}
+  @keyframes eFadeLeft{to{opacity:0;transform:translateX(-30px)}}
+  @keyframes eZoomOut{to{opacity:0;transform:scale(0.5)}}
+  @keyframes eRotateOut{to{opacity:0;transform:rotate(180deg) scale(0.8)}}
 </style>
 </head>
 <body>
 <script src="brand.js"></script>
 <script src="brand-helpers.js"></script>
+<script src="preview-wrapper.js"></script>
 <script>
 // ===== PRESETS =====
 const PRESETS = {
@@ -157,17 +206,42 @@ const cfg = {
   exitSpeed: getN('exitspeed', P.exitspeed, 0.6),
   showBg:    getB('bg', P.bg, false),
   pad:       getN('pad', P.pad, 28),
+  padx:      getN('padx', P.padx, 0),     // Horizontal padding (0=use pad)
+  pady:      getN('pady', P.pady, 0),     // Vertical padding (0=use pad)
+  marginx:   getN('marginx', P.marginx, 0),  // Horizontal margin
+  marginy:   getN('marginy', P.marginy, 0),  // Vertical margin
+  offsetx:   getN('offsetx', P.offsetx, 0),  // Fine-tune X position
+  offsety:   getN('offsety', P.offsety, 0),  // Fine-tune Y position
   maxwidth:  get('maxwidth', P.maxwidth, 'auto'),
   loop:      getB('loop', P.loop, false),
   hold:      getN('hold', P.hold, 4),
   pause:     getN('pause', P.pause, 2),
+  textcolor: get('textcolor', P.textcolor, ''),  // Override text color
+  subcolor:  get('subcolor', P.subcolor, ''),    // Subtitle color
+  textgradient: getB('textgradient', P.textgradient, false), // Gradient text
 };
 
 // CSS vars
-$.css('--ff', B.fonts[cfg.font] || B.fonts.display);
+$.css('--ff', $.font(cfg.font));  // Use new font helper
 $.css('--fs', cfg.size+'px'); $.css('--ss', cfg.subsize+'px'); $.css('--fw', cfg.weight);
-$.css('--pad', cfg.pad+'px'); $.css('--mw', cfg.maxwidth==='auto' ? 'none' : cfg.maxwidth+'px');
-$.css('--tc', t.text); $.css('--tm', t.textMuted); $.css('--ac', ac.primary);
+
+// Padding: use padx/pady if set, otherwise fall back to pad
+const finalPadX = cfg.padx || cfg.pad;
+const finalPadY = cfg.pady || cfg.pad;
+$.css('--pad', cfg.pad+'px');  // Keep for backward compatibility
+$.css('--padx', finalPadX+'px');
+$.css('--pady', finalPadY+'px');
+$.css('--mx', cfg.marginx+'px');
+$.css('--my', cfg.marginy+'px');
+$.css('--ox', cfg.offsetx+'px');
+$.css('--oy', cfg.offsety+'px');
+$.css('--mw', cfg.maxwidth==='auto' ? 'none' : cfg.maxwidth+'px');
+
+// Colors: use custom colors if set, otherwise use theme
+$.css('--tc', cfg.textcolor || t.text);
+$.css('--tm', cfg.subcolor || t.textMuted);
+$.css('--ac', ac.primary);
+
 $.css('--ls', cfg.lineSpeed+'s'); $.css('--lw', cfg.lineWidth+'px');
 $.css('--ll', cfg.lineLen+'%'); $.css('--es', cfg.eSpeed+'s'); $.css('--xs', cfg.exitSpeed+'s');
 $.css('--gc', g.join(',')); $.css('--pbg', t.bg+'cc'); $.css('--pbr', t.border);
@@ -186,7 +260,12 @@ el.style.textAlign = cfg.align;
 // Initial transform based on entrance
 const entrTransform = {
   slideUp:'translateY(20px)', slideDown:'translateY(-20px)', slideLeft:'translateX(-30px)',
-  scale:'scale(0.85)', fade:'none', typewriter:'none', none:'none'
+  slideRight:'translateX(30px)',
+  scale:'scale(0.85)',
+  flipIn:'rotateY(-90deg)',
+  zoomBounce:'scale(0.3)',
+  rotateIn:'rotate(-180deg) scale(0.8)',
+  fade:'none', typewriter:'none', none:'none'
 };
 el.style.transform = entrTransform[cfg.entrance] || 'none';
 
@@ -197,6 +276,40 @@ function makeLine(pos) {
   line.className = 'sig-line ' + pos;
   const inner = document.createElement('div');
   inner.className = `sig-inner style-${cfg.lineStyle} anim-${cfg.lineAnim}`;
+
+  // Create SVG for wave and swirl styles
+  if (cfg.lineStyle === 'wave') {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', cfg.lineWidth * 3);
+    svg.setAttribute('viewBox', '0 0 100 6');
+    svg.setAttribute('preserveAspectRatio', 'none');
+    svg.style.cssText = 'position:absolute;top:50%;transform:translateY(-50%)';
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M0,3 Q2,0 4,3 T8,3 T12,3 T16,3 T20,3 T24,3 T28,3 T32,3 T36,3 T40,3 T44,3 T48,3 T52,3 T56,3 T60,3 T64,3 T68,3 T72,3 T76,3 T80,3 T84,3 T88,3 T92,3 T96,3 T100,3');
+    path.setAttribute('stroke', cfg.textcolor || ac.primary);
+    path.setAttribute('stroke-width', '1.5');
+    path.setAttribute('fill', 'none');
+    svg.appendChild(path);
+    inner.appendChild(svg);
+  } else if (cfg.lineStyle === 'swirl') {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '80');
+    svg.setAttribute('height', cfg.lineWidth * 4);
+    svg.setAttribute('viewBox', '0 0 80 16');
+    svg.style.cssText = 'position:absolute;top:50%;transform:translateY(-50%)';
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M2,8 Q10,2 20,8 T40,8 Q50,14 60,8 Q65,5 70,8 Q72,10 75,8');
+    path.setAttribute('stroke', cfg.textcolor || ac.primary);
+    path.setAttribute('stroke-width', '2');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(path);
+    inner.appendChild(svg);
+  }
+
   line.appendChild(inner);
   return line;
 }
@@ -205,7 +318,7 @@ const topLine = makeLine('top');
 if (topLine) el.appendChild(topLine);
 
 const mainEl = document.createElement('div');
-mainEl.className = 'main-text';
+mainEl.className = 'main-text' + (cfg.textgradient ? ' gradient' : '');
 mainEl.textContent = cfg.text;
 el.appendChild(mainEl);
 
@@ -225,10 +338,10 @@ document.body.appendChild(el);
 function show() {
   el.style.transition = `all ${cfg.eSpeed}s ease-out`;
   el.classList.add('visible');
-  el.classList.remove('exit-fade','exit-slideDown','exit-slideUp','exit-scale');
+  el.classList.remove('exit-fade','exit-slideDown','exit-slideUp','exit-scale','exit-fadeLeft','exit-zoomOut','exit-rotateOut');
   el.style.transform = 'none';
   el.style.opacity = '1';
-  
+
   // Reset line animations
   el.querySelectorAll('.sig-inner').forEach(l => {
     l.style.animation = 'none';
@@ -248,7 +361,7 @@ function hide(cb) {
 }
 
 function reset() {
-  el.classList.remove('visible','exit-fade','exit-slideDown','exit-slideUp','exit-scale');
+  el.classList.remove('visible','exit-fade','exit-slideDown','exit-slideUp','exit-scale','exit-fadeLeft','exit-zoomOut','exit-rotateOut');
   el.style.opacity = '0';
   el.style.transform = entrTransform[cfg.entrance] || 'none';
 }

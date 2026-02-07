@@ -44,24 +44,26 @@
   *{margin:0;padding:0;box-sizing:border-box}
   body{background:transparent;overflow:hidden;width:100vw;height:100vh;display:flex;align-items:flex-end;justify-content:flex-start;font-family:var(--ff)}
   
-  .wrap{display:flex;gap:var(--gap);padding:var(--pad);opacity:0;transition:all 0.4s ease-out}
+  .wrap{display:flex;gap:var(--gap);padding:var(--pad);opacity:0;transition:all 0.4s ease-out;border-radius:var(--br)}
   .wrap.vertical{flex-direction:column}
   .wrap.horizontal{flex-direction:row;align-items:center}
-  .wrap.has-bg{background:var(--pbg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:12px;border:1px solid var(--pbr)}
+  .wrap.has-bg{background:var(--pbg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--pbr)}
   .wrap.visible{opacity:1}
-  
+
   .item{display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(8px);transition:all 0.4s ease-out}
   .item.visible{opacity:1;transform:translateY(0)}
   .item.exiting{opacity:0;transform:translateY(-8px)}
-  
+
   .icon{display:flex;align-items:center;justify-content:center;flex-shrink:0}
   .icon svg{width:var(--isz);height:var(--isz)}
-  .handle{color:var(--tc);font-size:var(--hsz);font-weight:500;white-space:nowrap}
+  .handle{color:var(--tc);font-size:var(--hsz);font-weight:var(--fw);letter-spacing:var(--ls);white-space:nowrap}
 </style>
 </head>
 <body>
 <script src="brand.js"></script>
 <script src="brand-helpers.js"></script>
+<script src="preview-wrapper.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script>
 const ICONS = {
   github:{icon:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>`,color:'#ffffff',pre:''},
@@ -78,33 +80,59 @@ const ICONS = {
 const t = $.theme(), g = $.gradient(), ac = $.accents();
 
 // Config
-const layout    = $.str('layout','horizontal');
-const size      = $.str('size','md');
-const showText  = $.bool('showtext',true);
-const showBg    = $.bool('bg',true);
-const iconColor = $.str('iconcolor','brand');
-const entrance  = $.str('entrance','stagger');
-const speed     = $.num('speed',0.5);
-const delay     = $.num('delay',0.3);
-const gap       = $.num('gap',16);
-const exit      = $.str('exit','none');
-const exitAfter = $.num('exitafter',0);
-const exitSpeed = $.num('exitspeed',0.5);
-const loop      = $.bool('loop',false);
-const hold      = $.num('hold',5);
-const pause     = $.num('pause',3);
-const oneByOne  = $.bool('onebyone',false);
-const each      = $.num('each',3);
-const eachPause = $.num('eachpause',0.5);
+const layout       = $.str('layout','horizontal');
+const size         = $.str('size','md');
+const showText     = $.bool('showtext',true);
+const showBg       = $.bool('bg',true);
+const iconColor    = $.str('iconcolor','brand');
+const entrance     = $.str('entrance','stagger');
+const speed        = $.num('speed',0.5);
+const delay        = $.num('delay',0.3);
+const gap          = $.num('gap',16);
+const exit         = $.str('exit','none');
+const exitAfter    = $.num('exitafter',0);
+const exitSpeed    = $.num('exitspeed',0.5);
+const loop         = $.bool('loop',false);
+const hold         = $.num('hold',5);
+const pause        = $.num('pause',3);
+const oneByOne     = $.bool('onebyone',false);
+const each         = $.num('each',3);
+const eachPause    = $.num('eachpause',0.5);
+
+// Enhanced layout controls
+const iconSize     = $.num('iconsize',0);           // Override icon size in pixels (0=use preset)
+const spacing      = $.num('spacing',0);            // Override gap (0=use gap param)
+const iconPadding  = $.num('iconpadding',0);        // Padding within icons
+const borderRadius = $.num('borderradius',8);       // Round corners
+const fontsize     = $.num('fontsize',0);           // Handle text size (0=use preset)
+const fontweight   = $.num('fontweight',500);       // Handle text weight
+const letterspacing= $.num('letterspacing',0);      // Letter spacing
+
+// Platform ordering
+const order        = $.str('order','default');      // 'default' or 'priority'
+const priority     = $.str('priority','');          // 'youtube:1,twitch:2,github:3'
+
+// Icon customization per platform
+const iconsOverride = $.str('icons','');            // 'github:github,youtube:video,twitch:zap'
 
 const sizeMap   = {sm:20,md:24,lg:32,xl:40};
 const hszMap    = {sm:13,md:15,lg:18,xl:22};
 
 // CSS
-$.css('--ff', B.fonts.body);
-$.css('--gap', gap+'px'); $.css('--pad','16px');
-$.css('--isz', (sizeMap[size]||24)+'px'); $.css('--hsz', (hszMap[size]||15)+'px');
-$.css('--tc', t.text); $.css('--pbg', t.bg+'cc'); $.css('--pbr', t.border);
+$.css('--ff', $.font('body'));
+const finalGap = spacing || gap;
+const finalIconSize = iconSize || sizeMap[size] || 24;
+const finalHandleSize = fontsize || hszMap[size] || 15;
+$.css('--gap', finalGap+'px');
+$.css('--pad', iconPadding ? iconPadding+'px' : '16px');
+$.css('--isz', finalIconSize+'px');
+$.css('--hsz', finalHandleSize+'px');
+$.css('--fw', fontweight);
+$.css('--ls', letterspacing+'px');
+$.css('--br', borderRadius+'px');
+$.css('--tc', t.text);
+$.css('--pbg', t.bg+'cc');
+$.css('--pbr', t.border);
 
 // Determine platforms
 let socials = {...(B.socials||{})};
@@ -122,6 +150,34 @@ if (showP) {
   platforms = Object.keys(socials).filter(k=>socials[k]&&ICONS[k]);
 }
 
+// Platform ordering
+if (order === 'priority' && priority) {
+  const priorityMap = {};
+  priority.split(',').forEach(item => {
+    const [platform, rank] = item.split(':');
+    if (platform && rank) {
+      priorityMap[platform.trim()] = parseInt(rank);
+    }
+  });
+
+  platforms.sort((a, b) => {
+    const rankA = priorityMap[a] || 999;
+    const rankB = priorityMap[b] || 999;
+    return rankA - rankB;
+  });
+}
+
+// Parse icon overrides
+const iconOverrideMap = {};
+if (iconsOverride) {
+  iconsOverride.split(',').forEach(item => {
+    const [platform, iconName] = item.split(':');
+    if (platform && iconName) {
+      iconOverrideMap[platform.trim()] = iconName.trim();
+    }
+  });
+}
+
 // Build DOM
 const wrap = document.createElement('div');
 wrap.className = `wrap ${layout}` + (showBg ? ' has-bg' : '');
@@ -134,14 +190,29 @@ platforms.forEach((plat, i) => {
   const item = document.createElement('div');
   item.className = 'item';
   
+  // Determine which icon to use
+  const iconOverride = iconOverrideMap[plat];
   const iconEl = document.createElement('div');
   iconEl.className = 'icon';
-  iconEl.innerHTML = pd.icon;
-  const svg = iconEl.querySelector('svg');
-  if (iconColor==='platform') svg.style.color = pd.color;
-  else if (iconColor==='white') svg.style.color = '#fff';
-  else if (iconColor==='gradient') svg.style.color = g[i%g.length];
-  else svg.style.color = ac.primary;
+
+  // Determine icon color
+  let iconColorValue;
+  if (iconColor==='platform') iconColorValue = pd.color;
+  else if (iconColor==='white') iconColorValue = '#fff';
+  else if (iconColor==='gradient') iconColorValue = g[i%g.length];
+  else iconColorValue = ac.primary;
+
+  if (iconOverride) {
+    // Use Lucide icon if override specified
+    const lucideIcon = $.icon(iconOverride, finalIconSize, iconColorValue, pd.icon);
+    iconEl.appendChild(lucideIcon);
+  } else {
+    // Use embedded SVG
+    iconEl.innerHTML = pd.icon;
+    const svg = iconEl.querySelector('svg');
+    if (svg) svg.style.color = iconColorValue;
+  }
+
   item.appendChild(iconEl);
   
   if (showText) {
