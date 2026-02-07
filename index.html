@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OBS Animated Border Overlay</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: transparent;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .border-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* SVG animated border */
+  .border-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .border-svg rect,
+  .border-svg circle {
+    fill: none;
+    stroke-width: var(--thickness, 3);
+    stroke-linecap: round;
+  }
+
+  /* Glow layer */
+  .glow {
+    filter: blur(6px);
+    opacity: 0.5;
+  }
+
+  .sharp {
+    opacity: 0.9;
+  }
+</style>
+</head>
+<body>
+
+<div class="border-wrap" id="borderWrap">
+  <!-- SVG borders will be injected here -->
+</div>
+
+<script>
+  // Parse URL parameters for configuration
+  const params = new URLSearchParams(window.location.search);
+
+  const config = {
+    // Shape: 'rect' or 'circle'
+    shape: params.get('shape') || 'rect',
+    // Width/height as percentage of viewport
+    width: parseFloat(params.get('w')) || 90,
+    height: parseFloat(params.get('h')) || 85,
+    // Border radius (for rect)
+    radius: parseFloat(params.get('r')) || 16,
+    // Border thickness
+    thickness: parseFloat(params.get('thickness')) || 3,
+    // Animation speed in seconds
+    speed: parseFloat(params.get('speed')) || 3,
+    // Colors (comma-separated hex without #)
+    colors: (params.get('colors') || '6366f1,8b5cf6,a78bfa,c4b5fd,818cf8').split(',').map(c => '#' + c),
+    // Animation type: 'rotate' | 'pulse' | 'dash'
+    animation: params.get('animation') || 'dash',
+    // Glow: true/false
+    glow: params.get('glow') !== 'false',
+    // Opacity
+    opacity: parseFloat(params.get('opacity')) || 0.85,
+  };
+
+  const wrap = document.getElementById('borderWrap');
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  const w = (config.width / 100) * vw;
+  const h = (config.height / 100) * vh;
+
+  wrap.style.width = w + 'px';
+  wrap.style.height = h + 'px';
+  wrap.style.setProperty('--thickness', config.thickness);
+
+  function createSVG(className) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', `border-svg ${className}`);
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    svg.style.opacity = config.opacity;
+
+    // Create gradient
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+
+    const gradId = `grad-${className}`;
+    const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+    grad.setAttribute('id', gradId);
+    grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+
+    config.colors.forEach((color, i) => {
+      const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      stop.setAttribute('offset', `${(i / (config.colors.length - 1)) * 100}%`);
+      stop.setAttribute('stop-color', color);
+      grad.appendChild(stop);
+    });
+
+    defs.appendChild(grad);
+    svg.appendChild(defs);
+
+    let shapeEl;
+
+    if (config.shape === 'circle') {
+      shapeEl = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      const r = Math.min(w, h) / 2 - config.thickness;
+      shapeEl.setAttribute('cx', w / 2);
+      shapeEl.setAttribute('cy', h / 2);
+      shapeEl.setAttribute('r', r);
+    } else {
+      shapeEl = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      const pad = config.thickness;
+      shapeEl.setAttribute('x', pad);
+      shapeEl.setAttribute('y', pad);
+      shapeEl.setAttribute('width', w - pad * 2);
+      shapeEl.setAttribute('height', h - pad * 2);
+      shapeEl.setAttribute('rx', config.radius);
+      shapeEl.setAttribute('ry', config.radius);
+    }
+
+    shapeEl.setAttribute('stroke', `url(#${gradId})`);
+    shapeEl.setAttribute('stroke-width', config.thickness);
+
+    // Calculate perimeter for dash animation
+    let perimeter;
+    if (config.shape === 'circle') {
+      const r = Math.min(w, h) / 2 - config.thickness;
+      perimeter = 2 * Math.PI * r;
+    } else {
+      perimeter = 2 * ((w - config.thickness * 2) + (h - config.thickness * 2));
+    }
+
+    shapeEl.style.strokeDasharray = perimeter;
+
+    svg.appendChild(shapeEl);
+    return { svg, shapeEl, gradEl: grad, perimeter };
+  }
+
+  // Create glow layer
+  if (config.glow) {
+    const { svg: glowSvg } = createSVG('glow');
+    wrap.appendChild(glowSvg);
+  }
+
+  // Create sharp layer
+  const { svg: sharpSvg, shapeEl, gradEl, perimeter } = createSVG('sharp');
+  wrap.appendChild(sharpSvg);
+
+  // Animate based on type
+  const speed = config.speed * 1000;
+
+  if (config.animation === 'dash') {
+    // Animated dash that travels around the border
+    let start = null;
+    const dashLength = perimeter * 0.3; // visible portion
+    const gapLength = perimeter - dashLength;
+
+    shapeEl.style.strokeDasharray = `${dashLength} ${gapLength}`;
+
+    // Also apply to glow layer
+    if (config.glow) {
+      const glowShape = wrap.querySelector('.glow rect, .glow circle');
+      if (glowShape) {
+        glowShape.style.strokeDasharray = `${dashLength} ${gapLength}`;
+      }
+    }
+
+    function animateDash(timestamp) {
+      if (!start) start = timestamp;
+      const progress = ((timestamp - start) % speed) / speed;
+      const offset = -perimeter * progress;
+
+      shapeEl.style.strokeDashoffset = offset;
+
+      if (config.glow) {
+        const glowShape = wrap.querySelector('.glow rect, .glow circle');
+        if (glowShape) glowShape.style.strokeDashoffset = offset;
+      }
+
+      requestAnimationFrame(animateDash);
+    }
+    requestAnimationFrame(animateDash);
+
+  } else if (config.animation === 'rotate') {
+    // Rotate the gradient
+    let start = null;
+
+    function animateRotate(timestamp) {
+      if (!start) start = timestamp;
+      const progress = ((timestamp - start) % speed) / speed;
+      const angle = progress * 360;
+
+      // Rotate gradient
+      const rad = (angle * Math.PI) / 180;
+      const cx = w / 2, cy = h / 2;
+      const len = Math.max(w, h);
+
+      gradEl.setAttribute('x1', cx + Math.cos(rad) * len);
+      gradEl.setAttribute('y1', cy + Math.sin(rad) * len);
+      gradEl.setAttribute('x2', cx - Math.cos(rad) * len);
+      gradEl.setAttribute('y2', cy - Math.sin(rad) * len);
+
+      // Sync glow gradient
+      if (config.glow) {
+        const glowGrad = wrap.querySelector('.glow defs linearGradient');
+        if (glowGrad) {
+          glowGrad.setAttribute('x1', gradEl.getAttribute('x1'));
+          glowGrad.setAttribute('y1', gradEl.getAttribute('y1'));
+          glowGrad.setAttribute('x2', gradEl.getAttribute('x2'));
+          glowGrad.setAttribute('y2', gradEl.getAttribute('y2'));
+        }
+      }
+
+      requestAnimationFrame(animateRotate);
+    }
+    requestAnimationFrame(animateRotate);
+
+  } else if (config.animation === 'pulse') {
+    // Pulse opacity
+    let start = null;
+
+    function animatePulse(timestamp) {
+      if (!start) start = timestamp;
+      const progress = ((timestamp - start) % speed) / speed;
+      const opacity = 0.4 + 0.6 * Math.sin(progress * Math.PI * 2) ** 2;
+
+      sharpSvg.style.opacity = opacity * config.opacity;
+      if (config.glow) {
+        const glowSvg = wrap.querySelector('.glow');
+        if (glowSvg) glowSvg.style.opacity = opacity * 0.5;
+      }
+
+      requestAnimationFrame(animatePulse);
+    }
+    requestAnimationFrame(animatePulse);
+  }
+</script>
+</body>
+</html>
