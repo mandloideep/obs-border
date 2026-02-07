@@ -10,7 +10,7 @@
     shape      = rect | circle                          (default: rect)
     style      = solid | dashed | dotted | double | neon  (default: solid)
     animation  = dash | rotate | pulse | breathe | none   (default: dash)
-    gradient   = indigo|cyan|sunset|emerald|neon|frost|fire|ocean|purple|mono|rainbow
+    gradient   = indigo|cyan|sunset|emerald|neon|frost|fire|ocean|purple|mono|rainbow|lavender|crimson|mint|amber|navy|coral|slate|gold|teal|magenta
     colors     = custom hex comma-sep (overrides gradient)
     random     = true to randomize gradient
     r          = corner radius px (rect only)            (default: 16)
@@ -21,6 +21,9 @@
     glowsize   = glow blur px                            (default: 8)
     opacity    = 0-1                                     (default: 0.85)
     theme      = dark | light
+    multicolor = true|false - cycle through gradients    (default: false)
+    colorshift = true|false - smooth color transitions   (default: false)
+    shiftspeed = seconds per color cycle                 (default: 10)
 
   Style+Animation combos:
     solid+dash     = traveling gradient segment
@@ -49,17 +52,20 @@
 <script src="preview-wrapper.js"></script>
 <script>
 const C = {
-  shape:     $.str('shape','rect'),
-  style:     $.str('style','solid'),
-  animation: $.str('animation','dash'),
-  gradient:  $.gradient(),
-  r:         $.num('r',16),
-  t:         $.num('thickness',2),
-  speed:     $.num('speed',4),
-  dashRatio: $.num('dash',0.3),
-  glow:      $.bool('glow',true),
-  glowSize:  $.num('glowsize',8),
-  opacity:   $.num('opacity',0.85),
+  shape:      $.str('shape','rect'),
+  style:      $.str('style','solid'),
+  animation:  $.str('animation','dash'),
+  gradient:   $.gradient(),
+  r:          $.num('r',16),
+  t:          $.num('thickness',2),
+  speed:      $.num('speed',4),
+  dashRatio:  $.num('dash',0.3),
+  glow:       $.bool('glow',true),
+  glowSize:   $.num('glowsize',8),
+  opacity:    $.num('opacity',0.85),
+  multicolor: $.bool('multicolor',false),
+  colorshift: $.bool('colorshift',false),
+  shiftspeed: $.num('shiftspeed',10),
 };
 
 const w = window.innerWidth, h = window.innerHeight;
@@ -245,6 +251,96 @@ if (C.animation === 'dash') {
         s.style.opacity = intensity * (C.style === 'neon' ? 0.8 : 0.5);
       }
     });
+    requestAnimationFrame(tick);
+  })(performance.now());
+}
+
+// ===== COLOR ANIMATION =====
+
+// Helper: Update gradient colors dynamically
+function updateGradientColors(colors) {
+  wrap.querySelectorAll('linearGradient').forEach(grad => {
+    const stops = grad.querySelectorAll('stop');
+    colors.forEach((c, i) => {
+      if (stops[i]) {
+        stops[i].setAttribute('stop-color', c);
+      }
+    });
+  });
+}
+
+// Helper: Interpolate between two hex colors
+function interpolateColor(color1, color2, factor) {
+  const c1 = color1.replace('#', '');
+  const c2 = color2.replace('#', '');
+  const r1 = parseInt(c1.substr(0, 2), 16);
+  const g1 = parseInt(c1.substr(2, 2), 16);
+  const b1 = parseInt(c1.substr(4, 2), 16);
+  const r2 = parseInt(c2.substr(0, 2), 16);
+  const g2 = parseInt(c2.substr(2, 2), 16);
+  const b2 = parseInt(c2.substr(4, 2), 16);
+  const r = Math.round(r1 + (r2 - r1) * factor);
+  const g = Math.round(g1 + (g2 - g1) * factor);
+  const b = Math.round(b1 + (b2 - b1) * factor);
+  return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+// Helper: Interpolate between two gradient arrays
+function interpolateGradient(grad1, grad2, factor) {
+  const result = [];
+  for (let i = 0; i < Math.min(grad1.length, grad2.length); i++) {
+    result.push(interpolateColor(grad1[i], grad2[i], factor));
+  }
+  return result;
+}
+
+// MULTICOLOR: Cycle through all available gradients
+if (C.multicolor && typeof B !== 'undefined' && B.gradients) {
+  const allGradients = Object.values(B.gradients);
+  let gradientIndex = 0;
+  let t0 = null;
+  const colorSpeed = C.shiftspeed * 1000;
+
+  (function tick(ts) {
+    if (!t0) t0 = ts;
+    const elapsed = ts - t0;
+    const cycleProg = (elapsed % colorSpeed) / colorSpeed;
+
+    // Smooth transition between gradients
+    const currentGrad = allGradients[gradientIndex];
+    const nextGrad = allGradients[(gradientIndex + 1) % allGradients.length];
+    const interpolated = interpolateGradient(currentGrad, nextGrad, cycleProg);
+
+    updateGradientColors(interpolated);
+
+    // Move to next gradient when cycle completes
+    if (elapsed > 0 && elapsed % colorSpeed < 16) {
+      gradientIndex = (gradientIndex + 1) % allGradients.length;
+    }
+
+    requestAnimationFrame(tick);
+  })(performance.now());
+
+} else if (C.colorshift) {
+  // COLORSHIFT: Smooth color transitions within current gradient
+  const baseColors = C.gradient;
+  let t0 = null;
+  const colorSpeed = C.shiftspeed * 1000;
+
+  (function tick(ts) {
+    if (!t0) t0 = ts;
+    const p = ((ts - t0) % colorSpeed) / colorSpeed;
+
+    // Rotate colors through the gradient stops
+    const shiftedColors = baseColors.map((_, i) => {
+      const sourceIndex = (i + p * baseColors.length) % baseColors.length;
+      const idx1 = Math.floor(sourceIndex);
+      const idx2 = (idx1 + 1) % baseColors.length;
+      const factor = sourceIndex - idx1;
+      return interpolateColor(baseColors[idx1], baseColors[idx2], factor);
+    });
+
+    updateGradientColors(shiftedColors);
     requestAnimationFrame(tick);
   })(performance.now());
 }
