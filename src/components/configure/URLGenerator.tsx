@@ -4,7 +4,7 @@
  * Shows only non-default parameters for clean URLs
  */
 
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useCallback } from 'react'
 import { Copy, Check, ExternalLink } from 'lucide-react'
 import type { CSSProperties } from 'react'
 
@@ -13,18 +13,25 @@ interface URLGeneratorProps {
   params: Record<string, any>
   defaults: Record<string, any>
   baseUrl?: string
+  sensitiveParams?: string[] // Parameters to exclude from displayed URL (e.g., ['apikey'])
 }
 
-export function URLGenerator({ overlayPath, params, defaults, baseUrl }: URLGeneratorProps) {
+export function URLGenerator({ overlayPath, params, defaults, baseUrl, sensitiveParams = [] }: URLGeneratorProps) {
   const [copied, setCopied] = useState(false)
+  const [copiedWithKey, setCopiedWithKey] = useState(false)
 
-  // Generate URL with only non-default parameters
-  const url = useMemo(() => {
+  // Helper function to generate URL with optional param exclusions
+  const generateUrl = useCallback((excludeParams: string[] = []) => {
     const base = baseUrl || window.location.origin
     const searchParams = new URLSearchParams()
 
     // Only add parameters that differ from defaults
     Object.keys(params).forEach((key) => {
+      // Skip if this param should be excluded
+      if (excludeParams.includes(key)) {
+        return
+      }
+
       const value = params[key]
       const defaultValue = defaults[key]
 
@@ -58,9 +65,15 @@ export function URLGenerator({ overlayPath, params, defaults, baseUrl }: URLGene
     return `${base}${overlayPath}${queryString ? `?${queryString}` : ''}`
   }, [overlayPath, params, defaults, baseUrl])
 
+  // Display URL: Excludes sensitive params (for security)
+  const displayUrl = useMemo(() => generateUrl(sensitiveParams), [generateUrl, sensitiveParams])
+
+  // Full URL: Includes all params (for OBS usage)
+  const fullUrl = useMemo(() => generateUrl([]), [generateUrl])
+
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(url)
+      await navigator.clipboard.writeText(displayUrl)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
@@ -68,8 +81,18 @@ export function URLGenerator({ overlayPath, params, defaults, baseUrl }: URLGene
     }
   }
 
+  const copyFullUrlToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(fullUrl)
+      setCopiedWithKey(true)
+      setTimeout(() => setCopiedWithKey(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
+
   const openPreview = () => {
-    window.open(url, '_blank', 'width=1920,height=1080')
+    window.open(displayUrl, '_blank', 'width=1920,height=1080')
   }
 
   const containerStyle: CSSProperties = {
@@ -126,12 +149,20 @@ export function URLGenerator({ overlayPath, params, defaults, baseUrl }: URLGene
     color: '#6ee7b7',
   }
 
+  const helpTextStyle: CSSProperties = {
+    fontSize: '0.75rem',
+    color: '#6b7280',
+    marginTop: '0.75rem',
+    lineHeight: '1.5',
+  }
+
   return (
     <div style={containerStyle}>
       <label style={labelStyle}>OBS Browser Source URL</label>
-      <div style={urlBoxStyle}>{url}</div>
+      <div style={urlBoxStyle}>{displayUrl}</div>
 
       <div style={buttonGroupStyle}>
+        {/* Copy URL (without sensitive params) */}
         <button
           onClick={copyToClipboard}
           style={copied ? successButtonStyle : buttonStyle}
@@ -159,6 +190,37 @@ export function URLGenerator({ overlayPath, params, defaults, baseUrl }: URLGene
           )}
         </button>
 
+        {/* Copy with API Key (includes sensitive params) - only show if there are sensitive params */}
+        {sensitiveParams.length > 0 && (
+          <button
+            onClick={copyFullUrlToClipboard}
+            style={copiedWithKey ? successButtonStyle : buttonStyle}
+            onMouseEnter={(e) => {
+              if (!copiedWithKey) {
+                e.currentTarget.style.background = 'rgba(99, 102, 241, 0.2)'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!copiedWithKey) {
+                e.currentTarget.style.background = 'rgba(99, 102, 241, 0.1)'
+              }
+            }}
+          >
+            {copiedWithKey ? (
+              <>
+                <Check size={16} />
+                <span>Copied with Key!</span>
+              </>
+            ) : (
+              <>
+                <Copy size={16} />
+                <span>Copy with API Key</span>
+              </>
+            )}
+          </button>
+        )}
+
+        {/* Preview (without sensitive params) */}
         <button
           onClick={openPreview}
           style={buttonStyle}
@@ -173,6 +235,13 @@ export function URLGenerator({ overlayPath, params, defaults, baseUrl }: URLGene
           <span>Preview</span>
         </button>
       </div>
+
+      {/* Helper text */}
+      {sensitiveParams.length > 0 && (
+        <p style={helpTextStyle}>
+          💡 Use <strong>Copy with API Key</strong> for OBS. Regular URL is for sharing configs.
+        </p>
+      )}
     </div>
   )
 }

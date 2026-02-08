@@ -8,6 +8,7 @@ import { useState } from 'react'
 interface ConfigLayoutProps {
   configContent: React.ReactNode
   previewUrl: string
+  fullscreenUrl?: string // Optional URL for fullscreen (defaults to previewUrl for backward compatibility)
   overlayTitle: string
   urlGeneratorComponent: React.ReactNode
 }
@@ -24,6 +25,7 @@ const PREVIEW_SIZES: Record<PreviewSize, { width: number; height: number }> = {
 export function ConfigLayout({
   configContent,
   previewUrl,
+  fullscreenUrl,
   overlayTitle,
   urlGeneratorComponent,
 }: ConfigLayoutProps) {
@@ -51,7 +53,7 @@ export function ConfigLayout({
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-semibold">Live Preview</h3>
               <button
-                onClick={() => window.open(previewUrl, '_blank')}
+                onClick={() => window.open(fullscreenUrl || previewUrl, '_blank')}
                 className="text-sm text-brand-indigo hover:text-brand-indigo/80 transition-colors"
                 title="Open in new window"
               >
