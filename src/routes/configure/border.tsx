@@ -20,6 +20,7 @@ import type { BorderOverlayParams } from '../../types/border.types'
 import { useHistory } from '../../hooks/useHistory'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { usePresets } from '../../hooks/usePresets'
+import { BorderOverlayHelp } from '../../components/configure/help/BorderOverlayHelp'
 
 export const Route = createFileRoute('/configure/border')({
   component: BorderConfigurator,
@@ -285,6 +286,15 @@ function BorderConfigurator() {
           unit="%"
           help="Border opacity (0-100%)"
         />
+      </CollapsibleSection>
+
+      {/* Help & Guides */}
+      <CollapsibleSection
+        title="Help & Guides"
+        defaultOpen={false}
+        storageKey="border-help"
+      >
+        <BorderOverlayHelp />
       </CollapsibleSection>
     </>
   )

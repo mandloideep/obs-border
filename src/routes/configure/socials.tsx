@@ -22,6 +22,7 @@ import type { SocialsOverlayParams } from '../../types/socials.types'
 import { useHistory } from '../../hooks/useHistory'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { usePresets } from '../../hooks/usePresets'
+import { SocialsOverlayHelp } from '../../components/configure/help/SocialsOverlayHelp'
 
 export const Route = createFileRoute('/configure/socials')({
   component: SocialsConfigurator,
@@ -772,6 +773,15 @@ function SocialsConfigurator() {
           onChange={(colors) => updateParam('colors', colors)}
           maxColors={5}
         />
+      </CollapsibleSection>
+
+      {/* Help & Guides */}
+      <CollapsibleSection
+        title="Help & Guides"
+        defaultOpen={false}
+        storageKey="socials-help"
+      >
+        <SocialsOverlayHelp />
       </CollapsibleSection>
     </>
   )

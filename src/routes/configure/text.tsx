@@ -22,6 +22,7 @@ import type { TextOverlayParams } from '../../types/text.types'
 import { useHistory } from '../../hooks/useHistory'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { usePresets } from '../../hooks/usePresets'
+import { TextOverlayHelp } from '../../components/configure/help/TextOverlayHelp'
 
 export const Route = createFileRoute('/configure/text')({
   component: TextConfigurator,
@@ -589,6 +590,15 @@ function TextConfigurator() {
               onChange={(colors) => updateParam('colors', colors)}
               maxColors={5}
             />
+        </CollapsibleSection>
+
+        {/* Help & Guides */}
+        <CollapsibleSection
+          title="Help & Guides"
+          defaultOpen={false}
+          storageKey="text-help"
+        >
+          <TextOverlayHelp />
         </CollapsibleSection>
     </>
   )

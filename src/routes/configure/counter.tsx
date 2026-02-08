@@ -23,6 +23,7 @@ import type { CounterOverlayParams } from '../../types/counter.types'
 import { useHistory } from '../../hooks/useHistory'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { usePresets } from '../../hooks/usePresets'
+import { CounterOverlayHelp } from '../../components/configure/help/CounterOverlayHelp'
 
 export const Route = createFileRoute('/configure/counter')({
   component: CounterConfigurator,
@@ -621,151 +622,13 @@ function CounterConfigurator() {
         )}
       </CollapsibleSection>
 
-      {/* Section 8: API Key Setup Guides */}
-      <CollapsibleSection title="How to Get API Keys" defaultOpen={false} storageKey="counter-api-guides">
-        <p className="text-sm text-dark-muted mb-4">
-          Step-by-step instructions for obtaining API keys from each service:
-        </p>
-
-        {/* YouTube Guide */}
-        <div className="bg-dark-surface/30 border border-dark-border rounded-lg p-4 mb-4">
-          <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-            <span className="text-red-400">▶</span> YouTube Data API
-          </h4>
-          <ol className="text-xs text-dark-muted space-y-2 ml-5 list-decimal">
-            <li>
-              Go to{' '}
-              <a
-                href="https://console.cloud.google.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-indigo-400 hover:text-indigo-300 underline"
-              >
-                Google Cloud Console
-              </a>
-            </li>
-            <li>Create a new project (name it "OBS Stream Counter" or similar)</li>
-            <li>
-              Enable the <strong>YouTube Data API v3</strong> in the API Library
-            </li>
-            <li>
-              Go to <strong>Credentials</strong> → Create Credentials → <strong>API Key</strong>
-            </li>
-            <li>
-              Restrict the key: Application restrictions → <strong>None</strong>, API restrictions →{' '}
-              <strong>YouTube Data API v3</strong>
-            </li>
-            <li>
-              Find your Channel ID: YouTube Studio → Settings → Channel → Advanced Settings
-            </li>
-            <li>
-              Metric to use: <code className="bg-dark-bg px-1.5 py-0.5 rounded">subscriberCount</code>
-            </li>
-          </ol>
-        </div>
-
-        {/* Twitch Guide */}
-        <div className="bg-dark-surface/30 border border-dark-border rounded-lg p-4 mb-4">
-          <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-            <span className="text-purple-400">◆</span> Twitch API
-          </h4>
-          <ol className="text-xs text-dark-muted space-y-2 ml-5 list-decimal">
-            <li>
-              Go to{' '}
-              <a
-                href="https://dev.twitch.tv/console/apps"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-indigo-400 hover:text-indigo-300 underline"
-              >
-                Twitch Developer Console
-              </a>
-            </li>
-            <li>Register a new application (name it "OBS Counter")</li>
-            <li>
-              OAuth Redirect URL: <code className="bg-dark-bg px-1.5 py-0.5 rounded">http://localhost</code>
-            </li>
-            <li>Category: Broadcasting Suite</li>
-            <li>
-              Copy the <strong>Client ID</strong> (this is your API key)
-            </li>
-            <li>
-              Get your User ID from{' '}
-              <a
-                href="https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-indigo-400 hover:text-indigo-300 underline"
-              >
-                this tool
-              </a>
-            </li>
-            <li>
-              Metric to use: <code className="bg-dark-bg px-1.5 py-0.5 rounded">followers</code> or{' '}
-              <code className="bg-dark-bg px-1.5 py-0.5 rounded">views</code>
-            </li>
-          </ol>
-        </div>
-
-        {/* GitHub Guide */}
-        <div className="bg-dark-surface/30 border border-dark-border rounded-lg p-4 mb-4">
-          <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-            <span className="text-gray-400">◉</span> GitHub API
-          </h4>
-          <p className="text-xs text-green-400 mb-3 italic">
-            ✓ API key is optional for GitHub (works without, but has lower rate limits)
-          </p>
-          <ol className="text-xs text-dark-muted space-y-2 ml-5 list-decimal">
-            <li>
-              (Optional) Go to{' '}
-              <a
-                href="https://github.com/settings/tokens"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-indigo-400 hover:text-indigo-300 underline"
-              >
-                GitHub Personal Access Tokens
-              </a>
-            </li>
-            <li>Generate new token (classic)</li>
-            <li>
-              <strong>No scopes needed</strong> for public data
-            </li>
-            <li>Your username is your GitHub handle (e.g., "octocat")</li>
-            <li>
-              Metrics: <code className="bg-dark-bg px-1.5 py-0.5 rounded">followers</code>,{' '}
-              <code className="bg-dark-bg px-1.5 py-0.5 rounded">public_repos</code>
-            </li>
-          </ol>
-        </div>
-
-        {/* Custom API Guide */}
-        <div className="bg-dark-surface/30 border border-dark-border rounded-lg p-4">
-          <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-            <span className="text-cyan-400">⚙</span> Custom API (Polling)
-          </h4>
-          <p className="text-xs text-dark-muted mb-3">
-            For custom endpoints that return JSON data:
-          </p>
-          <ol className="text-xs text-dark-muted space-y-2 ml-5 list-decimal">
-            <li>
-              Your API must return JSON (e.g.,{' '}
-              <code className="bg-dark-bg px-1.5 py-0.5 rounded">{`{"followers": 1234}`}</code>)
-            </li>
-            <li>
-              Enable CORS headers if calling from OBS browser:{' '}
-              <code className="bg-dark-bg px-1.5 py-0.5 rounded">Access-Control-Allow-Origin: *</code>
-            </li>
-            <li>
-              Enter the full URL in <strong>Custom API URL</strong>
-            </li>
-            <li>
-              Set <strong>JSON Path</strong> to extract the value (e.g.,{' '}
-              <code className="bg-dark-bg px-1.5 py-0.5 rounded">data.count</code> for nested objects)
-            </li>
-            <li>Adjust Poll Rate based on your API's rate limits</li>
-          </ol>
-        </div>
+      {/* Help & Guides */}
+      <CollapsibleSection
+        title="Help & Guides"
+        defaultOpen={false}
+        storageKey="counter-help"
+      >
+        <CounterOverlayHelp />
       </CollapsibleSection>
 
       {/* Section 9: Theme & Colors */}

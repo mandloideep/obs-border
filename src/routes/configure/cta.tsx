@@ -22,6 +22,7 @@ import type { CTAOverlayParams } from '../../types/cta.types'
 import { useHistory } from '../../hooks/useHistory'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { usePresets } from '../../hooks/usePresets'
+import { CTAOverlayHelp } from '../../components/configure/help/CTAOverlayHelp'
 
 export const Route = createFileRoute('/configure/cta')({
   component: CTAConfigurator,
@@ -488,6 +489,15 @@ function CTAConfigurator() {
           onChange={(colors) => updateParam('colors', colors)}
           maxColors={5}
         />
+      </CollapsibleSection>
+
+      {/* Help & Guides */}
+      <CollapsibleSection
+        title="Help & Guides"
+        defaultOpen={false}
+        storageKey="cta-help"
+      >
+        <CTAOverlayHelp />
       </CollapsibleSection>
     </>
   )
