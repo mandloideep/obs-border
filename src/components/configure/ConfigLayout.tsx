@@ -12,7 +12,6 @@ interface ConfigLayoutProps {
   fullscreenUrl?: string // Optional URL for fullscreen (defaults to previewUrl for backward compatibility)
   overlayTitle: string
   urlGeneratorComponent: React.ReactNode
-  onReset?: () => void // Optional callback to reset params to defaults
 }
 
 type PreviewSize = '640x360' | '1280x720' | '1920x1080'
@@ -30,7 +29,6 @@ export function ConfigLayout({
   fullscreenUrl,
   overlayTitle,
   urlGeneratorComponent,
-  onReset,
 }: ConfigLayoutProps) {
   const [previewSize, setPreviewSize] = useState<PreviewSize>('1280x720')
   const [previewBg, setPreviewBg] = useState<PreviewBackground>('black')
@@ -45,24 +43,7 @@ export function ConfigLayout({
     <div className="flex flex-col lg:flex-row h-screen overflow-hidden">
       {/* Left Column: Scrollable Configuration */}
       <div className="flex-1 overflow-y-auto p-8 lg:h-screen">
-        <div className="max-w-3xl space-y-6">
-          {/* Header with Reset Button */}
-          {onReset && (
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-2xl font-semibold">Configuration</h2>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onReset}
-                className="text-dark-muted hover:text-dark-text"
-              >
-                Reset to Defaults
-              </Button>
-            </div>
-          )}
-
-          {configContent}
-        </div>
+        <div className="max-w-3xl space-y-6">{configContent}</div>
       </div>
 
       {/* Right Column: Fixed Preview & URL Generator */}

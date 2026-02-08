@@ -11,7 +11,7 @@ import { CollapsibleSection } from '../../components/configure/form/CollapsibleS
 import { NumberSlider } from '../../components/configure/form/NumberSlider'
 import { ColorArrayInput } from '../../components/configure/form/ColorArrayInput'
 import { FormSelect } from '../../components/configure/form/FormSelect'
-import { GradientSelect } from '../../components/configure/form/GradientSelect'
+import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { Switch } from '../../components/ui/switch'
 import { Label } from '../../components/ui/label'
 import { BORDER_DEFAULTS } from '../../types/border.types'
@@ -31,8 +31,17 @@ function BorderConfigurator() {
     setParams((prev) => ({ ...prev, [key]: value }))
   }
 
-  const handleReset = () => {
-    setParams(BORDER_DEFAULTS)
+  // Section-specific reset handlers
+  const resetColorsGradient = () => {
+    setParams((prev) => ({
+      ...prev,
+      gradient: BORDER_DEFAULTS.gradient,
+      colors: BORDER_DEFAULTS.colors,
+      random: BORDER_DEFAULTS.random,
+      multicolor: BORDER_DEFAULTS.multicolor,
+      colorshift: BORDER_DEFAULTS.colorshift,
+      shiftspeed: BORDER_DEFAULTS.shiftspeed,
+    }))
   }
 
   // Generate preview URL
@@ -138,13 +147,17 @@ function BorderConfigurator() {
       </CollapsibleSection>
 
       {/* Section 2: Colors & Gradient */}
-      <CollapsibleSection title="Colors & Gradient" defaultOpen={true} storageKey="border-colors">
+      <CollapsibleSection
+        title="Colors & Gradient"
+        defaultOpen={true}
+        storageKey="border-colors"
+        onReset={resetColorsGradient}
+      >
         <div>
           <label className="config-label">Gradient Preset</label>
-          <GradientSelect
+          <GradientGrid
             value={params.gradient}
             onValueChange={(value) => updateParam('gradient', value as any)}
-            showAll={true}
           />
         </div>
 
@@ -239,7 +252,6 @@ function BorderConfigurator() {
       configContent={configSections}
       previewUrl={previewUrl}
       overlayTitle="Border Overlay"
-      onReset={handleReset}
       urlGeneratorComponent={
         <URLGenerator
           overlayPath="/overlays/border"

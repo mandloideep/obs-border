@@ -12,7 +12,7 @@ import { NumberSlider } from '../../components/configure/form/NumberSlider'
 import { ColorArrayInput } from '../../components/configure/form/ColorArrayInput'
 import { FormInput } from '../../components/configure/form/FormInput'
 import { FormSelect } from '../../components/configure/form/FormSelect'
-import { GradientSelect } from '../../components/configure/form/GradientSelect'
+import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { Switch } from '../../components/ui/switch'
 import { Label } from '../../components/ui/label'
 import { TEXT_DEFAULTS } from '../../types/text.types'
@@ -32,8 +32,17 @@ function TextConfigurator() {
     setParams((prev) => ({ ...prev, [key]: value }))
   }
 
-  const handleReset = () => {
-    setParams(TEXT_DEFAULTS)
+  // Section-specific reset handlers
+  const resetThemeColors = () => {
+    setParams((prev) => ({
+      ...prev,
+      textcolor: TEXT_DEFAULTS.textcolor,
+      subcolor: TEXT_DEFAULTS.subcolor,
+      textgradient: TEXT_DEFAULTS.textgradient,
+      theme: TEXT_DEFAULTS.theme,
+      gradient: TEXT_DEFAULTS.gradient,
+      colors: TEXT_DEFAULTS.colors,
+    }))
   }
 
   const previewUrl = `${window.location.origin}/overlays/text?${new URLSearchParams(
@@ -507,13 +516,17 @@ function TextConfigurator() {
         </CollapsibleSection>
 
         {/* Section 9: Theme & Colors */}
-        <CollapsibleSection title="Theme & Colors" defaultOpen={true} storageKey="text-theme">
+        <CollapsibleSection
+          title="Theme & Colors"
+          defaultOpen={true}
+          storageKey="text-theme"
+          onReset={resetThemeColors}
+        >
             <div>
               <label className="config-label">Gradient Preset</label>
-              <GradientSelect
+              <GradientGrid
                 value={params.gradient}
                 onValueChange={(value) => updateParam('gradient', value as any)}
-                showAll={true}
               />
             </div>
             <div className="flex items-center gap-3">
@@ -542,7 +555,6 @@ function TextConfigurator() {
       configContent={configSections}
       previewUrl={previewUrl}
       overlayTitle="Text Overlay"
-      onReset={handleReset}
       urlGeneratorComponent={
         <URLGenerator
           overlayPath="/overlays/text"

@@ -12,7 +12,7 @@ import { NumberSlider } from '../../components/configure/form/NumberSlider'
 import { ColorArrayInput } from '../../components/configure/form/ColorArrayInput'
 import { FormInput } from '../../components/configure/form/FormInput'
 import { FormSelect } from '../../components/configure/form/FormSelect'
-import { GradientSelect } from '../../components/configure/form/GradientSelect'
+import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { Switch } from '../../components/ui/switch'
 import { Label } from '../../components/ui/label'
 import { CTA_DEFAULTS } from '../../types/cta.types'
@@ -32,8 +32,14 @@ function CTAConfigurator() {
     setParams((prev) => ({ ...prev, [key]: value }))
   }
 
-  const handleReset = () => {
-    setParams(CTA_DEFAULTS)
+  // Section-specific reset handlers
+  const resetThemeColors = () => {
+    setParams((prev) => ({
+      ...prev,
+      theme: CTA_DEFAULTS.theme,
+      gradient: CTA_DEFAULTS.gradient,
+      colors: CTA_DEFAULTS.colors,
+    }))
   }
 
   const previewUrl = `${window.location.origin}/overlays/cta?${new URLSearchParams(
@@ -419,13 +425,17 @@ function CTAConfigurator() {
       </CollapsibleSection>
 
       {/* Section 9: Theme & Colors */}
-      <CollapsibleSection title="Theme & Colors" defaultOpen={false} storageKey="cta-theme">
+      <CollapsibleSection
+        title="Theme & Colors"
+        defaultOpen={false}
+        storageKey="cta-theme"
+        onReset={resetThemeColors}
+      >
         <div>
           <label className="config-label">Gradient Preset</label>
-          <GradientSelect
+          <GradientGrid
             value={params.gradient}
             onValueChange={(value) => updateParam('gradient', value as any)}
-            showAll={true}
           />
         </div>
 
@@ -444,7 +454,6 @@ function CTAConfigurator() {
       configContent={configSections}
       previewUrl={previewUrl}
       overlayTitle="CTA Overlay"
-      onReset={handleReset}
       urlGeneratorComponent={
         <URLGenerator
           overlayPath="/overlays/cta"

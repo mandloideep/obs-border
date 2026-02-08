@@ -12,7 +12,7 @@ import { NumberSlider } from '../../components/configure/form/NumberSlider'
 import { ColorArrayInput } from '../../components/configure/form/ColorArrayInput'
 import { FormInput } from '../../components/configure/form/FormInput'
 import { FormSelect } from '../../components/configure/form/FormSelect'
-import { GradientSelect } from '../../components/configure/form/GradientSelect'
+import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { Switch } from '../../components/ui/switch'
 import { Label } from '../../components/ui/label'
 import { COUNTER_DEFAULTS } from '../../types/counter.types'
@@ -32,10 +32,14 @@ function CounterConfigurator() {
     setParams((prev) => ({ ...prev, [key]: value }))
   }
 
-  const handleReset = () => {
-    setParams(COUNTER_DEFAULTS)
-    // Note: persistApiKeys state and localStorage are NOT cleared
-    // API keys are user preference, independent of overlay config
+  // Section-specific reset handlers
+  const resetTheme = () => {
+    setParams((prev) => ({
+      ...prev,
+      theme: COUNTER_DEFAULTS.theme,
+      gradient: COUNTER_DEFAULTS.gradient,
+      colors: COUNTER_DEFAULTS.colors,
+    }))
   }
 
   // API key persistence state
@@ -713,7 +717,12 @@ function CounterConfigurator() {
       </CollapsibleSection>
 
       {/* Section 9: Theme & Colors */}
-      <CollapsibleSection title="Theme & Colors" defaultOpen={false} storageKey="counter-theme">
+      <CollapsibleSection
+        title="Theme & Colors"
+        defaultOpen={false}
+        storageKey="counter-theme"
+        onReset={resetTheme}
+      >
         <div>
           <label className="config-label">Theme</label>
           <FormSelect
@@ -728,10 +737,9 @@ function CounterConfigurator() {
 
         <div>
           <label className="config-label">Gradient Preset</label>
-          <GradientSelect
+          <GradientGrid
             value={params.gradient}
             onValueChange={(value) => updateParam('gradient', value as any)}
-            showAll={true}
           />
         </div>
 
@@ -751,7 +759,6 @@ function CounterConfigurator() {
       previewUrl={previewUrl}
       fullscreenUrl={fullscreenUrl}
       overlayTitle="Counter Overlay"
-      onReset={handleReset}
       urlGeneratorComponent={
         <URLGenerator
           overlayPath="/overlays/counter"
