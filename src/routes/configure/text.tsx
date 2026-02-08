@@ -11,6 +11,8 @@ import { NumberSlider } from '../../components/configure/form/NumberSlider'
 import { ColorArrayInput } from '../../components/configure/form/ColorArrayInput'
 import { FormInput } from '../../components/configure/form/FormInput'
 import { FormSelect } from '../../components/configure/form/FormSelect'
+import { FontSelect } from '../../components/configure/form/FontSelect'
+import { AnimationSelect } from '../../components/configure/form/AnimationSelect'
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { PresetManager } from '../../components/configure/PresetManager'
 import { Switch } from '../../components/ui/switch'
@@ -165,18 +167,18 @@ function TextConfigurator() {
         <CollapsibleSection title="Typography" defaultOpen={false} storageKey="text-typography">
           <div>
             <label className="config-label">Font Family</label>
-            <FormSelect
+            <FontSelect
               value={params.font}
               onValueChange={(value) => updateParam('font', value as any)}
               options={[
-                { value: 'display', label: 'Display' },
-                { value: 'body', label: 'Body' },
-                { value: 'mono', label: 'Mono' },
-                { value: 'custom1', label: 'Custom 1' },
-                { value: 'custom2', label: 'Custom 2' },
-                { value: 'custom3', label: 'Custom 3' },
-                { value: 'custom4', label: 'Custom 4' },
-                { value: 'custom5', label: 'Custom 5' },
+                { value: 'display', label: 'Display', fontFamily: 'Orbitron, sans-serif' },
+                { value: 'body', label: 'Body', fontFamily: 'Inter, sans-serif' },
+                { value: 'mono', label: 'Mono', fontFamily: 'JetBrains Mono, monospace' },
+                { value: 'custom1', label: 'Custom 1', fontFamily: 'system-ui, sans-serif' },
+                { value: 'custom2', label: 'Custom 2', fontFamily: 'system-ui, sans-serif' },
+                { value: 'custom3', label: 'Custom 3', fontFamily: 'system-ui, sans-serif' },
+                { value: 'custom4', label: 'Custom 4', fontFamily: 'system-ui, sans-serif' },
+                { value: 'custom5', label: 'Custom 5', fontFamily: 'system-ui, sans-serif' },
               ]}
             />
           </div>
@@ -427,7 +429,7 @@ function TextConfigurator() {
         <CollapsibleSection title="Animations" defaultOpen={true} storageKey="text-animations">
             <div>
               <label className="config-label">Entrance Animation</label>
-              <FormSelect
+              <AnimationSelect
                 value={params.entrance}
                 onValueChange={(value) => updateParam('entrance', value as any)}
                 options={[
@@ -474,7 +476,7 @@ function TextConfigurator() {
 
             <div>
               <label className="config-label">Exit Animation</label>
-              <FormSelect
+              <AnimationSelect
                 value={params.exit}
                 onValueChange={(value) => updateParam('exit', value as any)}
                 options={[

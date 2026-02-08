@@ -11,6 +11,8 @@ import { NumberSlider } from '../../components/configure/form/NumberSlider'
 import { ColorArrayInput } from '../../components/configure/form/ColorArrayInput'
 import { FormInput } from '../../components/configure/form/FormInput'
 import { FormSelect } from '../../components/configure/form/FormSelect'
+import { IconSelect } from '../../components/configure/form/IconSelect'
+import { AnimationSelect } from '../../components/configure/form/AnimationSelect'
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { PresetManager } from '../../components/configure/PresetManager'
 import { Switch } from '../../components/ui/switch'
@@ -151,7 +153,7 @@ function CTAConfigurator() {
       <CollapsibleSection title="Icon Customization" defaultOpen={true} storageKey="cta-icon">
         <div>
           <label className="config-label">Icon Type</label>
-          <FormSelect
+          <IconSelect
             value={params.icon}
             onValueChange={(value) => updateParam('icon', value as any)}
             options={[
@@ -198,7 +200,7 @@ function CTAConfigurator() {
 
             <div>
               <label className="config-label">Icon Animation</label>
-              <FormSelect
+              <AnimationSelect
                 value={params.iconanim}
                 onValueChange={(value) => updateParam('iconanim', value as any)}
                 options={[

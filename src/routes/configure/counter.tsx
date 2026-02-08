@@ -12,6 +12,8 @@ import { NumberSlider } from '../../components/configure/form/NumberSlider'
 import { ColorArrayInput } from '../../components/configure/form/ColorArrayInput'
 import { FormInput } from '../../components/configure/form/FormInput'
 import { FormSelect } from '../../components/configure/form/FormSelect'
+import { IconSelect } from '../../components/configure/form/IconSelect'
+import { FontSelect } from '../../components/configure/form/FontSelect'
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { PresetManager } from '../../components/configure/PresetManager'
 import { Switch } from '../../components/ui/switch'
@@ -237,7 +239,7 @@ function CounterConfigurator() {
       <CollapsibleSection title="Icon Customization" defaultOpen={true} storageKey="counter-icon">
         <div>
           <label className="config-label">Icon Type</label>
-          <FormSelect
+          <IconSelect
             value={params.icon}
             onValueChange={(value) => updateParam('icon', value as any)}
             options={[
@@ -359,18 +361,18 @@ function CounterConfigurator() {
       <CollapsibleSection title="Typography" defaultOpen={false} storageKey="counter-typography">
         <div>
           <label className="config-label">Font Family</label>
-          <FormSelect
+          <FontSelect
             value={params.font}
             onValueChange={(value) => updateParam('font', value as any)}
             options={[
-              { value: 'display', label: 'Display (Orbitron)' },
-              { value: 'body', label: 'Body (Inter)' },
-              { value: 'mono', label: 'Mono (JetBrains Mono)' },
-              { value: 'custom1', label: 'Custom Font 1' },
-              { value: 'custom2', label: 'Custom Font 2' },
-              { value: 'custom3', label: 'Custom Font 3' },
-              { value: 'custom4', label: 'Custom Font 4' },
-              { value: 'custom5', label: 'Custom Font 5' },
+              { value: 'display', label: 'Display (Orbitron)', fontFamily: 'Orbitron, sans-serif' },
+              { value: 'body', label: 'Body (Inter)', fontFamily: 'Inter, sans-serif' },
+              { value: 'mono', label: 'Mono (JetBrains Mono)', fontFamily: 'JetBrains Mono, monospace' },
+              { value: 'custom1', label: 'Custom Font 1', fontFamily: 'system-ui, sans-serif' },
+              { value: 'custom2', label: 'Custom Font 2', fontFamily: 'system-ui, sans-serif' },
+              { value: 'custom3', label: 'Custom Font 3', fontFamily: 'system-ui, sans-serif' },
+              { value: 'custom4', label: 'Custom Font 4', fontFamily: 'system-ui, sans-serif' },
+              { value: 'custom5', label: 'Custom Font 5', fontFamily: 'system-ui, sans-serif' },
             ]}
           />
         </div>

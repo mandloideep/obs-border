@@ -10,6 +10,7 @@ import { CollapsibleSection } from '../../components/configure/form/CollapsibleS
 import { NumberSlider } from '../../components/configure/form/NumberSlider'
 import { ColorArrayInput } from '../../components/configure/form/ColorArrayInput'
 import { FormSelect } from '../../components/configure/form/FormSelect'
+import { AnimationSelect } from '../../components/configure/form/AnimationSelect'
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { PresetManager } from '../../components/configure/PresetManager'
 import { Switch } from '../../components/ui/switch'
@@ -128,7 +129,7 @@ function BorderConfigurator() {
 
         <div>
           <label className="config-label">Animation</label>
-          <FormSelect
+          <AnimationSelect
             value={params.animation}
             onValueChange={(value) => updateParam('animation', value as any)}
             options={[

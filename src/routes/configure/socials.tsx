@@ -12,6 +12,7 @@ import { NumberSlider } from '../../components/configure/form/NumberSlider'
 import { ColorArrayInput } from '../../components/configure/form/ColorArrayInput'
 import { FormInput } from '../../components/configure/form/FormInput'
 import { FormSelect } from '../../components/configure/form/FormSelect'
+import { AnimationSelect } from '../../components/configure/form/AnimationSelect'
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { PresetManager } from '../../components/configure/PresetManager'
 import { Switch } from '../../components/ui/switch'
@@ -595,7 +596,7 @@ function SocialsConfigurator() {
       <CollapsibleSection title="Entrance Animation" defaultOpen={false} storageKey="socials-entrance">
         <div>
           <label className="config-label">Animation Type</label>
-          <FormSelect
+          <AnimationSelect
             value={params.entrance}
             onValueChange={(value) => updateParam('entrance', value as any)}
             options={[
@@ -639,7 +640,7 @@ function SocialsConfigurator() {
       <CollapsibleSection title="Exit Animation" defaultOpen={false} storageKey="socials-exit">
         <div>
           <label className="config-label">Exit Animation</label>
-          <FormSelect
+          <AnimationSelect
             value={params.exit}
             onValueChange={(value) => updateParam('exit', value as any)}
             options={[
