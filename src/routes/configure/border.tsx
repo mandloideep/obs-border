@@ -7,6 +7,11 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { ConfigLayout } from '../../components/configure/ConfigLayout'
 import { URLGenerator } from '../../components/configure/URLGenerator'
+import { CollapsibleSection } from '../../components/configure/form/CollapsibleSection'
+import { NumberSlider } from '../../components/configure/form/NumberSlider'
+import { ColorArrayInput } from '../../components/configure/form/ColorArrayInput'
+import { Switch } from '../../components/ui/switch'
+import { Label } from '../../components/ui/label'
 import { BORDER_DEFAULTS } from '../../types/border.types'
 import type { BorderOverlayParams } from '../../types/border.types'
 
@@ -36,108 +41,199 @@ function BorderConfigurator() {
 
   const configSections = (
     <>
-      <div className="config-section">
-          <h2 className="text-2xl font-semibold mb-6">Border Configuration</h2>
-
-          <div className="space-y-5">
-            <div>
-              <label className="config-label">Shape</label>
-              <select
-                className="config-select"
-                value={params.shape}
-                onChange={(e) => updateParam('shape', e.target.value as any)}
-              >
-                <option value="rect">Rectangle</option>
-                <option value="circle">Circle</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="config-label">Style</label>
-              <select
-                className="config-select"
-                value={params.style}
-                onChange={(e) => updateParam('style', e.target.value as any)}
-              >
-                <option value="solid">Solid</option>
-                <option value="dashed">Dashed</option>
-                <option value="dotted">Dotted</option>
-                <option value="double">Double</option>
-                <option value="neon">Neon</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="config-label">Animation</label>
-              <select
-                className="config-select"
-                value={params.animation}
-                onChange={(e) => updateParam('animation', e.target.value as any)}
-              >
-                <option value="none">None</option>
-                <option value="dash">Dash</option>
-                <option value="rotate">Rotate</option>
-                <option value="pulse">Pulse</option>
-                <option value="breathe">Breathe</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="config-label">Gradient</label>
-              <select
-                className="config-select"
-                value={params.gradient}
-                onChange={(e) => updateParam('gradient', e.target.value as any)}
-              >
-                <option value="indigo">Indigo</option>
-                <option value="cyan">Cyan</option>
-                <option value="sunset">Sunset</option>
-                <option value="emerald">Emerald</option>
-                <option value="neon">Neon</option>
-                <option value="fire">Fire</option>
-                <option value="ocean">Ocean</option>
-                <option value="purple">Purple</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="config-label">Thickness (px)</label>
-              <input
-                className="config-input"
-                type="number"
-                value={params.thickness}
-                onChange={(e) => updateParam('thickness', Number(e.target.value))}
-                min="1"
-                max="50"
-              />
-            </div>
-
-            <div>
-              <label className="config-label">Speed</label>
-              <input
-                className="config-input"
-                type="number"
-                value={params.speed}
-                onChange={(e) => updateParam('speed', Number(e.target.value))}
-                min="0.1"
-                max="10"
-                step="0.1"
-              />
-            </div>
-
-            <div>
-              <label className="config-label">Corner Radius (0-50)</label>
-              <input
-                className="config-input"
-                type="number"
-                value={params.r}
-                onChange={(e) => updateParam('r', Number(e.target.value))}
-                min="0"
-                max="50"
-              />
-            </div>
-          </div>
+      {/* Section 1: Basic Configuration */}
+      <CollapsibleSection title="Basic Configuration" defaultOpen={true} storageKey="border-basic">
+        <div>
+          <label className="config-label">Shape</label>
+          <select
+            className="config-select"
+            value={params.shape}
+            onChange={(e) => updateParam('shape', e.target.value as any)}
+          >
+            <option value="rect">Rectangle</option>
+            <option value="circle">Circle</option>
+          </select>
         </div>
+
+        <div>
+          <label className="config-label">Style</label>
+          <select
+            className="config-select"
+            value={params.style}
+            onChange={(e) => updateParam('style', e.target.value as any)}
+          >
+            <option value="solid">Solid</option>
+            <option value="dashed">Dashed</option>
+            <option value="dotted">Dotted</option>
+            <option value="double">Double</option>
+            <option value="neon">Neon</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="config-label">Animation</label>
+          <select
+            className="config-select"
+            value={params.animation}
+            onChange={(e) => updateParam('animation', e.target.value as any)}
+          >
+            <option value="none">None</option>
+            <option value="dash">Dash</option>
+            <option value="rotate">Rotate</option>
+            <option value="pulse">Pulse</option>
+            <option value="breathe">Breathe</option>
+          </select>
+        </div>
+
+        <NumberSlider
+          label="Thickness"
+          value={params.thickness}
+          onChange={(val) => updateParam('thickness', val)}
+          min={1}
+          max={50}
+          unit="px"
+          help="Border thickness in pixels"
+        />
+
+        <NumberSlider
+          label="Animation Speed"
+          value={params.speed}
+          onChange={(val) => updateParam('speed', val)}
+          min={0.1}
+          max={10}
+          step={0.1}
+          unit="s"
+          help="Animation cycle duration"
+        />
+
+        {params.shape === 'rect' && (
+          <NumberSlider
+            label="Corner Radius"
+            value={params.r}
+            onChange={(val) => updateParam('r', val)}
+            min={0}
+            max={50}
+            unit="px"
+            help="Rounded corners for rectangles"
+          />
+        )}
+
+        {params.style === 'dashed' && (
+          <NumberSlider
+            label="Dash Ratio"
+            value={params.dash}
+            onChange={(val) => updateParam('dash', val)}
+            min={0}
+            max={1}
+            step={0.1}
+            help="Visible portion of dash (0-1)"
+          />
+        )}
+      </CollapsibleSection>
+
+      {/* Section 2: Colors & Gradient */}
+      <CollapsibleSection title="Colors & Gradient" defaultOpen={true} storageKey="border-colors">
+        <div>
+          <label className="config-label">Gradient Preset</label>
+          <select
+            className="config-select"
+            value={params.gradient}
+            onChange={(e) => updateParam('gradient', e.target.value as any)}
+          >
+            <option value="indigo">Indigo</option>
+            <option value="cyan">Cyan</option>
+            <option value="sunset">Sunset</option>
+            <option value="emerald">Emerald</option>
+            <option value="neon">Neon</option>
+            <option value="fire">Fire</option>
+            <option value="ocean">Ocean</option>
+            <option value="purple">Purple</option>
+          </select>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <Label htmlFor="multicolor">Multi-color Mode</Label>
+          <Switch
+            id="multicolor"
+            checked={params.multicolor}
+            onCheckedChange={(checked) => updateParam('multicolor', checked)}
+          />
+        </div>
+        <p className="text-xs text-dark-muted -mt-2">Cycle through all gradients</p>
+
+        <div className="flex items-center justify-between">
+          <Label htmlFor="colorshift">Color Shift</Label>
+          <Switch
+            id="colorshift"
+            checked={params.colorshift}
+            onCheckedChange={(checked) => updateParam('colorshift', checked)}
+          />
+        </div>
+        <p className="text-xs text-dark-muted -mt-2">Smooth color transitions</p>
+
+        {(params.multicolor || params.colorshift) && (
+          <NumberSlider
+            label="Shift Speed"
+            value={params.shiftspeed}
+            onChange={(val) => updateParam('shiftspeed', val)}
+            min={1}
+            max={30}
+            unit="s"
+            help="Color cycle duration"
+          />
+        )}
+
+        <ColorArrayInput
+          label="Custom Colors"
+          colors={params.colors}
+          onChange={(colors) => updateParam('colors', colors)}
+          maxColors={5}
+        />
+
+        <div className="flex items-center justify-between">
+          <Label htmlFor="random">Random Gradient</Label>
+          <Switch
+            id="random"
+            checked={params.random}
+            onCheckedChange={(checked) => updateParam('random', checked)}
+          />
+        </div>
+        <p className="text-xs text-dark-muted -mt-2">Randomize gradient on load</p>
+      </CollapsibleSection>
+
+      {/* Section 3: Visual Effects */}
+      <CollapsibleSection title="Visual Effects" defaultOpen={false} storageKey="border-effects">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="glow">Glow Effect</Label>
+          <Switch
+            id="glow"
+            checked={params.glow}
+            onCheckedChange={(checked) => updateParam('glow', checked)}
+          />
+        </div>
+
+        {params.glow && (
+          <NumberSlider
+            label="Glow Size"
+            value={params.glowsize}
+            onChange={(val) => updateParam('glowsize', val)}
+            min={0}
+            max={20}
+            unit="px"
+            help="Glow blur radius"
+          />
+        )}
+
+        <NumberSlider
+          label="Opacity"
+          value={params.opacity * 100}
+          onChange={(val) => updateParam('opacity', val / 100)}
+          min={0}
+          max={100}
+          unit="%"
+          help="Border opacity (0-100%)"
+        />
+      </CollapsibleSection>
     </>
   )
 

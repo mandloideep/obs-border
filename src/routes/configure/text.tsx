@@ -306,8 +306,27 @@ function TextConfigurator() {
                     <option value="dashed">Dashed</option>
                     <option value="dotted">Dotted</option>
                     <option value="gradient">Gradient</option>
+                    <option value="slant">Slant</option>
+                    <option value="wave">Wave</option>
+                    <option value="swirl">Swirl</option>
+                    <option value="bracket">Bracket</option>
                   </select>
                 </div>
+
+                <div>
+                  <label className="config-label">Line Animation</label>
+                  <select
+                    className="config-select"
+                    value={params.lineanim}
+                    onChange={(e) => updateParam('lineanim', e.target.value as any)}
+                  >
+                    <option value="none">None</option>
+                    <option value="slide">Slide</option>
+                    <option value="grow">Grow</option>
+                    <option value="pulse">Pulse</option>
+                  </select>
+                </div>
+
                 <div>
                   <label className="config-label">Line Position</label>
                   <select
@@ -320,6 +339,38 @@ function TextConfigurator() {
                     <option value="both">Both</option>
                   </select>
                 </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <NumberSlider
+                    label="Line Length"
+                    value={params.linelength}
+                    onChange={(val) => updateParam('linelength', val)}
+                    min={0}
+                    max={100}
+                    unit="%"
+                    help="Line length as percentage of container width"
+                  />
+                  <NumberSlider
+                    label="Line Width"
+                    value={params.linewidth}
+                    onChange={(val) => updateParam('linewidth', val)}
+                    min={1}
+                    max={10}
+                    unit="px"
+                    help="Line stroke thickness"
+                  />
+                </div>
+
+                <NumberSlider
+                  label="Line Speed"
+                  value={params.linespeed}
+                  onChange={(val) => updateParam('linespeed', val)}
+                  min={0.5}
+                  max={5}
+                  step={0.1}
+                  unit="s"
+                  help="Animation speed in seconds"
+                />
               </>
             )}
         </CollapsibleSection>
@@ -342,8 +393,37 @@ function TextConfigurator() {
                 <option value="scale">Scale</option>
                 <option value="bounce">Bounce</option>
                 <option value="typewriter">Typewriter</option>
+                <option value="flipIn">Flip In</option>
+                <option value="zoomBounce">Zoom Bounce</option>
+                <option value="rotateIn">Rotate In</option>
+                <option value="zoomIn">Zoom In</option>
+                <option value="stagger">Stagger</option>
               </select>
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <NumberSlider
+                label="Entrance Speed"
+                value={params.entrancespeed}
+                onChange={(val) => updateParam('entrancespeed', val)}
+                min={0.1}
+                max={5}
+                step={0.1}
+                unit="s"
+                help="Duration of entrance animation"
+              />
+              <NumberSlider
+                label="Entrance Delay"
+                value={params.delay}
+                onChange={(val) => updateParam('delay', val)}
+                min={0}
+                max={10}
+                step={0.1}
+                unit="s"
+                help="Delay before animation starts"
+              />
+            </div>
+
             <div>
               <label className="config-label">Exit Animation</label>
               <select
@@ -355,19 +435,36 @@ function TextConfigurator() {
                 <option value="fade">Fade</option>
                 <option value="slideDown">Slide Down</option>
                 <option value="slideUp">Slide Up</option>
+                <option value="slideLeft">Slide Left</option>
+                <option value="slideRight">Slide Right</option>
                 <option value="scale">Scale</option>
+                <option value="fadeLeft">Fade Left</option>
+                <option value="zoomOut">Zoom Out</option>
+                <option value="rotateOut">Rotate Out</option>
+                <option value="flipOut">Flip Out</option>
               </select>
             </div>
+
             {params.exit !== 'none' && (
-              <div>
-                <label className="config-label">Exit After (seconds)</label>
-                <input
-                  className="config-input"
-                  type="number"
+              <div className="grid grid-cols-2 gap-4">
+                <NumberSlider
+                  label="Exit Speed"
+                  value={params.exitspeed}
+                  onChange={(val) => updateParam('exitspeed', val)}
+                  min={0.1}
+                  max={5}
+                  step={0.1}
+                  unit="s"
+                  help="Duration of exit animation"
+                />
+                <NumberSlider
+                  label="Exit After"
                   value={params.exitafter}
-                  onChange={(e) => updateParam('exitafter', Number(e.target.value))}
-                  min="0"
-                  max="300"
+                  onChange={(val) => updateParam('exitafter', val)}
+                  min={0}
+                  max={300}
+                  unit="s"
+                  help="Auto-exit after N seconds (0 = manual)"
                 />
               </div>
             )}
@@ -446,6 +543,13 @@ function TextConfigurator() {
                 Apply gradient to text
               </label>
             </div>
+
+            <ColorArrayInput
+              label="Custom Colors"
+              colors={params.colors}
+              onChange={(colors) => updateParam('colors', colors)}
+              maxColors={5}
+            />
         </CollapsibleSection>
     </>
   )
