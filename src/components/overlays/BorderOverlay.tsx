@@ -8,6 +8,7 @@ import React, { useRef, useState, useEffect } from 'react'
 import { useOverlayParams } from '../../hooks/useOverlayParams'
 import { useGradient, useBrand } from '../../hooks/useBrand'
 import { useRAFAnimation } from '../../hooks/useRAFAnimation'
+import { useWindowDimensions } from '../../hooks/useWindowDimensions'
 import { interpolateColor } from '../../utils/css.utils'
 import { GradientDef } from '../svg/GradientDef'
 import type { BorderOverlayParams } from '../../types/border.types'
@@ -28,19 +29,34 @@ export function BorderOverlay() {
   // State for dynamic gradient colors (for multicolor/colorshift)
   const [currentGradient, setCurrentGradient] = useState(baseGradient)
 
+  // Track window dimensions for accurate perimeter calculations
+  const { width, height } = useWindowDimensions()
+
   // SVG element ref for animations
   const svgRef = useRef<SVGSVGElement>(null)
   const shapeRef = useRef<SVGRectElement | SVGCircleElement>(null)
 
-  // Calculate perimeter for dash animations
+  // Calculate perimeter for dash animations based on actual dimensions
   const getPerimeter = (): number => {
     if (params.shape === 'circle') {
-      const radius = 50 - params.thickness / 2
+      const minDim = Math.min(width, height)
+      const radius = (minDim / 2) - params.thickness - 2
       return 2 * Math.PI * radius
     } else {
-      const width = 100 - params.thickness
-      const height = 100 - params.thickness
-      return 2 * (width + height)
+      const w = width - params.thickness - 4
+      const h = height - params.thickness - 4
+
+      // Account for corner radius in perimeter calculation
+      if (params.r > 0) {
+        // Rounded rectangle: straight edges + arc length
+        // Each corner is a quarter-circle arc, 4 corners = full circle
+        const straightEdgeLength = 2 * ((w - 2 * params.r) + (h - 2 * params.r))
+        const arcLength = 2 * Math.PI * params.r
+        return straightEdgeLength + arcLength
+      }
+
+      // Sharp corners
+      return 2 * (w + h)
     }
   }
 
@@ -55,7 +71,7 @@ export function BorderOverlay() {
 
       shapeRef.current.style.strokeDashoffset = `${offset}`
     },
-    [params.animation, params.speed, params.shape, params.thickness]
+    [params.animation, params.speed, params.shape, params.thickness, width, height]
   )
 
   // Rotate Animation (rotates gradient direction)
@@ -174,63 +190,57 @@ export function BorderOverlay() {
     }
   }
 
-  // Get filter for glow effect
-  const getFilter = (): string => {
-    const glowAmount = params.animation === 'breathe' ? breatheGlow : params.glowsize
-    const neonMultiplier = params.style === 'neon' ? 2 : 1
-
-    if (params.glow) {
-      return `drop-shadow(0 0 ${glowAmount * neonMultiplier}px currentColor)`
-    }
-    return 'none'
-  }
-
-  // Get opacity
+  // Get opacity for main layer
   const getOpacity = (): number => {
     return params.animation === 'pulse' ? pulseOpacity : params.opacity
   }
 
-  // Render the shape
-  const renderShape = () => {
+  // Render the shape with optional stroke width override and gradient ID
+  const renderShape = (strokeWidthOverride?: number, isGlowLayer: boolean = false, gradientId: string = 'borderGradient') => {
+    const strokeWidth = strokeWidthOverride ?? params.thickness
     const commonProps = {
-      ref: shapeRef as any,
+      ref: isGlowLayer ? undefined : (shapeRef as any),
       fill: 'none',
-      stroke: 'url(#borderGradient)',
-      strokeWidth: params.thickness,
+      stroke: `url(#${gradientId})`,
+      strokeWidth: strokeWidth,
       strokeDasharray: getStrokeDasharray(),
       strokeLinecap: (params.style === 'dotted' ? 'round' : 'butt') as any,
     }
 
     if (params.shape === 'circle') {
-      const radius = 50 - params.thickness / 2
-      return <circle cx="50" cy="50" r={radius} {...commonProps} />
+      const minDim = Math.min(width, height)
+      const radius = (minDim / 2) - params.thickness - 2
+      return <circle cx={width / 2} cy={height / 2} r={radius} {...commonProps} />
     }
 
-    // Rectangle
-    const offset = params.thickness / 2
-    const size = 100 - params.thickness
+    // Rectangle - use actual dimensions
+    const offset = params.thickness / 2 + 2
+    const rectWidth = width - params.thickness - 4
+    const rectHeight = height - params.thickness - 4
 
     // Handle double border style
     if (params.style === 'double') {
-      const innerOffset = offset + params.thickness * 1.5
-      const innerSize = 100 - params.thickness * 4
+      const gap = params.thickness * 3
+      const innerOffset = offset + gap
+      const innerWidth = rectWidth - gap * 2
+      const innerHeight = rectHeight - gap * 2
 
       return (
         <>
           <rect
             x={offset}
             y={offset}
-            width={size}
-            height={size}
+            width={rectWidth}
+            height={rectHeight}
             rx={params.r}
             {...commonProps}
           />
           <rect
             x={innerOffset}
             y={innerOffset}
-            width={innerSize}
-            height={innerSize}
-            rx={Math.max(0, params.r - params.thickness * 1.5)}
+            width={innerWidth}
+            height={innerHeight}
+            rx={Math.max(0, params.r - gap)}
             {...commonProps}
           />
         </>
@@ -241,8 +251,8 @@ export function BorderOverlay() {
       <rect
         x={offset}
         y={offset}
-        width={size}
-        height={size}
+        width={rectWidth}
+        height={rectHeight}
         rx={params.r}
         {...commonProps}
       />
@@ -260,16 +270,64 @@ export function BorderOverlay() {
         pointerEvents: 'none',
       }}
     >
+      {/* Glow Layers - rendered first (behind main layer) */}
+      {params.glow && (
+        <>
+          {/* Primary glow layer */}
+          <svg
+            viewBox={`0 0 ${width} ${height}`}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              opacity: params.style === 'neon' ? 0.7 : 0.4,
+              filter: `blur(${params.style === 'neon' ? params.glowsize * 2 : params.glowsize}px)`,
+            }}
+          >
+            <GradientDef
+              id="glowGradient"
+              colors={currentGradient}
+              direction={params.animation === 'rotate' ? gradientRotation : 90}
+            />
+            {renderShape(params.style === 'neon' ? params.thickness * 3 : params.thickness, true, 'glowGradient')}
+          </svg>
+
+          {/* Extra glow layer for neon style */}
+          {params.style === 'neon' && (
+            <svg
+              viewBox={`0 0 ${width} ${height}`}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                opacity: 0.3,
+                filter: `blur(${params.glowsize * 4}px)`,
+              }}
+            >
+              <GradientDef
+                id="glowGradient2"
+                colors={currentGradient}
+                direction={params.animation === 'rotate' ? gradientRotation : 90}
+              />
+              {renderShape(params.thickness * 5, true, 'glowGradient2')}
+            </svg>
+          )}
+        </>
+      )}
+
+      {/* Main border layer - rendered last (on top) */}
       <svg
         ref={svgRef}
-        viewBox="0 0 100 100"
+        viewBox={`0 0 ${width} ${height}`}
         style={{
+          position: 'absolute',
+          inset: 0,
           width: '100%',
           height: '100%',
           opacity: getOpacity(),
-          filter: getFilter(),
         }}
-        preserveAspectRatio="none"
       >
         <GradientDef
           id="borderGradient"
