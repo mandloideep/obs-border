@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OverlaysTextRouteImport } from './routes/overlays/text'
+import { Route as OverlaysCounterRouteImport } from './routes/overlays/counter'
 import { Route as OverlaysBorderRouteImport } from './routes/overlays/border'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +24,11 @@ const OverlaysTextRoute = OverlaysTextRouteImport.update({
   path: '/overlays/text',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OverlaysCounterRoute = OverlaysCounterRouteImport.update({
+  id: '/overlays/counter',
+  path: '/overlays/counter',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OverlaysBorderRoute = OverlaysBorderRouteImport.update({
   id: '/overlays/border',
   path: '/overlays/border',
@@ -32,30 +38,39 @@ const OverlaysBorderRoute = OverlaysBorderRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/overlays/border': typeof OverlaysBorderRoute
+  '/overlays/counter': typeof OverlaysCounterRoute
   '/overlays/text': typeof OverlaysTextRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/overlays/border': typeof OverlaysBorderRoute
+  '/overlays/counter': typeof OverlaysCounterRoute
   '/overlays/text': typeof OverlaysTextRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/overlays/border': typeof OverlaysBorderRoute
+  '/overlays/counter': typeof OverlaysCounterRoute
   '/overlays/text': typeof OverlaysTextRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/overlays/border' | '/overlays/text'
+  fullPaths: '/' | '/overlays/border' | '/overlays/counter' | '/overlays/text'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/overlays/border' | '/overlays/text'
-  id: '__root__' | '/' | '/overlays/border' | '/overlays/text'
+  to: '/' | '/overlays/border' | '/overlays/counter' | '/overlays/text'
+  id:
+    | '__root__'
+    | '/'
+    | '/overlays/border'
+    | '/overlays/counter'
+    | '/overlays/text'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   OverlaysBorderRoute: typeof OverlaysBorderRoute
+  OverlaysCounterRoute: typeof OverlaysCounterRoute
   OverlaysTextRoute: typeof OverlaysTextRoute
 }
 
@@ -75,6 +90,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OverlaysTextRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/overlays/counter': {
+      id: '/overlays/counter'
+      path: '/overlays/counter'
+      fullPath: '/overlays/counter'
+      preLoaderRoute: typeof OverlaysCounterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/overlays/border': {
       id: '/overlays/border'
       path: '/overlays/border'
@@ -88,6 +110,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   OverlaysBorderRoute: OverlaysBorderRoute,
+  OverlaysCounterRoute: OverlaysCounterRoute,
   OverlaysTextRoute: OverlaysTextRoute,
 }
 export const routeTree = rootRouteImport
