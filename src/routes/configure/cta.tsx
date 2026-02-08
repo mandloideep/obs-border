@@ -1,43 +1,46 @@
 /**
  * CTA Overlay Configurator
  * Visual configuration UI for call-to-action overlay parameters
+ * Now with TanStack Form + Zod validation + ShadCN UI components
  */
 
 import { createFileRoute } from '@tanstack/react-router'
 import { ConfigLayout } from '../../components/configure/ConfigLayout'
 import { URLGenerator } from '../../components/configure/URLGenerator'
 import { CollapsibleSection } from '../../components/configure/form/CollapsibleSection'
-import { NumberSlider } from '../../components/configure/form/NumberSlider'
-import { ColorArrayInput } from '../../components/configure/form/ColorArrayInput'
-import { FormInput } from '../../components/configure/form/FormInput'
-import { FormSelect } from '../../components/configure/form/FormSelect'
+import { FormNumberSlider } from '../../components/configure/form/FormNumberSlider'
+import { FormColorArray } from '../../components/configure/form/FormColorArray'
+import { FormTextInput } from '../../components/configure/form/FormTextInput'
+import { FormSelectInput } from '../../components/configure/form/FormSelectInput'
+import { FormSwitch } from '../../components/configure/form/FormSwitch'
 import { IconSelect } from '../../components/configure/form/IconSelect'
 import { FontSelect } from '../../components/configure/form/FontSelect'
 import { AnimationSelect } from '../../components/configure/form/AnimationSelect'
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { PresetManager } from '../../components/configure/PresetManager'
-import { Switch } from '../../components/ui/switch'
-import { Label } from '../../components/ui/label'
 import { CTA_DEFAULTS } from '../../types/cta.types'
 import type { CTAOverlayParams } from '../../types/cta.types'
 import { useHistory } from '../../hooks/useHistory'
+import { useFormWithHistory } from '../../hooks/useFormWithHistory'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { usePresets } from '../../hooks/usePresets'
 import { CTAOverlayHelp } from '../../components/configure/help/CTAOverlayHelp'
+import { ctaOverlaySchema } from '../../lib/validation/schemas'
 
 export const Route = createFileRoute('/configure/cta')({
   component: CTAConfigurator,
 })
 
 function CTAConfigurator() {
-  const { state: params, setState: setParams, updateState, undo, redo, canUndo, canRedo } = useHistory<CTAOverlayParams>(CTA_DEFAULTS)
+  // History management (undo/redo + debouncing)
+  const history = useHistory<CTAOverlayParams>(CTA_DEFAULTS)
+  const { state: params, updateState, undo, redo, canUndo, canRedo } = history
 
-  const updateParam = <K extends keyof CTAOverlayParams>(
-    key: K,
-    value: CTAOverlayParams[K]
-  ) => {
-    setParams((prev) => ({ ...prev, [key]: value }))
-  }
+  // TanStack Form with Zod validation
+  const form = useFormWithHistory({
+    history,
+    schema: ctaOverlaySchema,
+  })
 
   // Keyboard shortcuts
   useKeyboardShortcuts([
@@ -57,10 +60,19 @@ function CTAConfigurator() {
     importPreset,
   } = usePresets<CTAOverlayParams>('cta', CTA_DEFAULTS)
 
+  // Load preset with validation
   const handleLoadPreset = (name: string) => {
     const presetParams = loadPreset(name)
     if (presetParams) {
-      updateState(presetParams)
+      // Validate preset before loading
+      const result = ctaOverlaySchema.safeParse(presetParams)
+      if (result.success) {
+        updateState(result.data)
+      } else {
+        console.error('Invalid preset:', result.error)
+        // Still load it but show warning
+        updateState(presetParams)
+      }
     }
   }
 
@@ -88,21 +100,24 @@ function CTAConfigurator() {
       {/* Section 1: Quick Presets */}
       <div className="config-section">
         <h2 className="text-2xl font-semibold mb-6">Quick Presets</h2>
-        <div>
-          <label className="config-label">Preset</label>
-          <FormSelect
-            value={params.preset}
-            onValueChange={(value) => updateParam('preset', value as any)}
-            options={[
-              { value: 'custom', label: 'Custom' },
-              { value: 'subscribe', label: 'Subscribe' },
-              { value: 'like', label: 'Like & Subscribe' },
-              { value: 'follow', label: 'Follow' },
-              { value: 'share', label: 'Share' },
-              { value: 'notify', label: 'Turn on Notifications' },
-            ]}
-          />
-        </div>
+        <form.Field name="preset">
+          {(field) => (
+            <FormSelectInput
+              label="Preset"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val as any)}
+              options={[
+                { value: 'custom', label: 'Custom' },
+                { value: 'subscribe', label: 'Subscribe' },
+                { value: 'like', label: 'Like & Subscribe' },
+                { value: 'follow', label: 'Follow' },
+                { value: 'share', label: 'Share' },
+                { value: 'notify', label: 'Turn on Notifications' },
+              ]}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
       </div>
 
       {/* Custom Presets Manager */}
@@ -120,360 +135,472 @@ function CTAConfigurator() {
 
       {/* Section 2: Content */}
       <CollapsibleSection title="Content" defaultOpen={true} storageKey="cta-content">
-        <div>
-          <label className="config-label">Main Text</label>
-          <FormInput
-            type="text"
-            value={params.text}
-            onChange={(e) => updateParam('text', e.target.value)}
-            placeholder="e.g., Subscribe"
-          />
-        </div>
+        <form.Field name="text">
+          {(field) => (
+            <FormTextInput
+              label="Main Text"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val)}
+              onBlur={field.handleBlur}
+              placeholder="e.g., Subscribe"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
-        <div>
-          <label className="config-label">Subtitle</label>
-          <FormInput
-            type="text"
-            value={params.sub}
-            onChange={(e) => updateParam('sub', e.target.value)}
-            placeholder="e.g., for more content!"
-          />
-        </div>
+        <form.Field name="sub">
+          {(field) => (
+            <FormTextInput
+              label="Subtitle"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val)}
+              onBlur={field.handleBlur}
+              placeholder="e.g., for more content!"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
-        <NumberSlider
-          label="Text Size"
-          value={params.size}
-          onChange={(val) => updateParam('size', val)}
-          min={12}
-          max={100}
-          unit="px"
-          help="Font size for main text"
-        />
+        <form.Field name="size">
+          {(field) => (
+            <FormNumberSlider
+              label="Text Size"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val)}
+              onBlur={field.handleBlur}
+              min={12}
+              max={100}
+              unit="px"
+              help="Font size for main text"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
       </CollapsibleSection>
 
       {/* Section 3: Icon Customization */}
       <CollapsibleSection title="Icon Customization" defaultOpen={true} storageKey="cta-icon">
         <div>
           <label className="config-label">Icon Type</label>
-          <IconSelect
-            value={params.icon}
-            onValueChange={(value) => updateParam('icon', value as any)}
-            options={[
-              { value: 'none', label: 'None' },
-              { value: 'like', label: 'Thumbs Up (Like)' },
-              { value: 'sub', label: 'YouTube Subscribe' },
-              { value: 'bell', label: 'Bell (Notifications)' },
-              { value: 'share', label: 'Share' },
-              { value: 'heart', label: 'Heart' },
-              { value: 'star', label: 'Star' },
-              { value: 'follow', label: 'Follow' },
-            ]}
-          />
+          <form.Field name="icon">
+            {(field) => (
+              <IconSelect
+                value={field.state.value}
+                onValueChange={(value) => field.handleChange(value as any)}
+                options={[
+                  { value: 'none', label: 'None' },
+                  { value: 'like', label: 'Thumbs Up (Like)' },
+                  { value: 'sub', label: 'YouTube Subscribe' },
+                  { value: 'bell', label: 'Bell (Notifications)' },
+                  { value: 'share', label: 'Share' },
+                  { value: 'heart', label: 'Heart' },
+                  { value: 'star', label: 'Star' },
+                  { value: 'follow', label: 'Follow' },
+                ]}
+              />
+            )}
+          </form.Field>
         </div>
 
         {params.icon !== 'none' && (
           <>
-            <div>
-              <label className="config-label">Custom Icon (Lucide name)</label>
-              <FormInput
-                type="text"
-                value={params.customicon}
-                onChange={(e) => updateParam('customicon', e.target.value)}
-                placeholder="Leave empty to use preset icon"
-              />
-              <p className="text-xs text-dark-muted mt-1">
-                Override with any Lucide icon name (e.g., 'heart', 'star', 'bell')
-              </p>
-            </div>
+            <form.Field name="customicon">
+              {(field) => (
+                <FormTextInput
+                  label="Custom Icon (Lucide name)"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  placeholder="Leave empty to use preset icon"
+                  help="Override with any Lucide icon name (e.g., 'heart', 'star', 'bell')"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
 
-            <div>
-              <label className="config-label">Icon Position</label>
-              <FormSelect
-                value={params.iconpos}
-                onValueChange={(value) => updateParam('iconpos', value as any)}
-                options={[
-                  { value: 'left', label: 'Left' },
-                  { value: 'right', label: 'Right' },
-                  { value: 'top', label: 'Top' },
-                  { value: 'bottom', label: 'Bottom' },
-                ]}
-              />
-            </div>
+            <form.Field name="iconpos">
+              {(field) => (
+                <FormSelectInput
+                  label="Icon Position"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val as any)}
+                  options={[
+                    { value: 'left', label: 'Left' },
+                    { value: 'right', label: 'Right' },
+                    { value: 'top', label: 'Top' },
+                    { value: 'bottom', label: 'Bottom' },
+                  ]}
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
 
             <div>
               <label className="config-label">Icon Animation</label>
-              <AnimationSelect
-                value={params.iconanim}
-                onValueChange={(value) => updateParam('iconanim', value as any)}
-                options={[
-                  { value: 'none', label: 'None' },
-                  { value: 'bounce', label: 'Bounce' },
-                  { value: 'shake', label: 'Shake' },
-                  { value: 'pulse', label: 'Pulse' },
-                  { value: 'spin', label: 'Spin' },
-                  { value: 'wiggle', label: 'Wiggle' },
-                  { value: 'flip', label: 'Flip' },
-                  { value: 'heartbeat', label: 'Heartbeat' },
-                ]}
-              />
+              <form.Field name="iconanim">
+                {(field) => (
+                  <AnimationSelect
+                    value={field.state.value}
+                    onValueChange={(value) => field.handleChange(value as any)}
+                    options={[
+                      { value: 'none', label: 'None' },
+                      { value: 'bounce', label: 'Bounce' },
+                      { value: 'shake', label: 'Shake' },
+                      { value: 'pulse', label: 'Pulse' },
+                      { value: 'spin', label: 'Spin' },
+                      { value: 'wiggle', label: 'Wiggle' },
+                      { value: 'flip', label: 'Flip' },
+                      { value: 'heartbeat', label: 'Heartbeat' },
+                    ]}
+                  />
+                )}
+              </form.Field>
             </div>
 
-            <NumberSlider
-              label="Icon Size Override"
-              value={params.iconsize}
-              onChange={(val) => updateParam('iconsize', val)}
-              min={0}
-              max={100}
-              unit="px"
-              help="0 = auto size, otherwise custom size"
-            />
+            <form.Field name="iconsize">
+              {(field) => (
+                <FormNumberSlider
+                  label="Icon Size Override"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  min={0}
+                  max={100}
+                  unit="px"
+                  help="0 = auto size, otherwise custom size"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
 
-            <div>
-              <label className="config-label">Icon Color</label>
-              <FormInput
-                type="text"
-                value={params.iconcolor}
-                onChange={(e) => updateParam('iconcolor', e.target.value)}
-                placeholder="Leave empty for auto color"
-              />
-              <p className="text-xs text-dark-muted mt-1">
-                Hex color (e.g., FF0000) or leave empty for gradient color
-              </p>
-            </div>
+            <form.Field name="iconcolor">
+              {(field) => (
+                <FormTextInput
+                  label="Icon Color"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  placeholder="Leave empty for auto color"
+                  help="Hex color (e.g., FF0000) or leave empty for gradient color"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
           </>
         )}
       </CollapsibleSection>
 
-      {/* Section 4: Text Styling (Hidden Parameters) */}
+      {/* Section 4: Text Styling */}
       <CollapsibleSection title="Text Styling" defaultOpen={false} storageKey="cta-text">
         <div>
           <label className="config-label">Font Family</label>
-          <FontSelect
-            value={params.font}
-            onValueChange={(value) => updateParam('font', value as any)}
-            showGoogleFonts={true}
-          />
+          <form.Field name="font">
+            {(field) => (
+              <FontSelect
+                value={field.state.value}
+                onValueChange={(value) => field.handleChange(value as any)}
+                showGoogleFonts={true}
+              />
+            )}
+          </form.Field>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <NumberSlider
-            label="Text Padding X"
-            value={params.textpadx}
-            onChange={(val) => updateParam('textpadx', val)}
-            min={0}
-            max={100}
-            unit="px"
-            help="Horizontal padding around text"
-          />
-          <NumberSlider
-            label="Text Padding Y"
-            value={params.textpady}
-            onChange={(val) => updateParam('textpady', val)}
-            min={0}
-            max={100}
-            unit="px"
-            help="Vertical padding around text"
-          />
+          <form.Field name="textpadx">
+            {(field) => (
+              <FormNumberSlider
+                label="Text Padding X"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                min={0}
+                max={100}
+                unit="px"
+                help="Horizontal padding around text"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
+
+          <form.Field name="textpady">
+            {(field) => (
+              <FormNumberSlider
+                label="Text Padding Y"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                min={0}
+                max={100}
+                unit="px"
+                help="Vertical padding around text"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
         </div>
 
-        <NumberSlider
-          label="Letter Spacing"
-          value={params.letterspacing}
-          onChange={(val) => updateParam('letterspacing', val)}
-          min={-2}
-          max={4}
-          step={0.1}
-          unit="px"
-          help="Space between letters"
-        />
+        <form.Field name="letterspacing">
+          {(field) => (
+            <FormNumberSlider
+              label="Letter Spacing"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val)}
+              onBlur={field.handleBlur}
+              min={-2}
+              max={4}
+              step={0.1}
+              unit="px"
+              help="Space between letters"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
-        <NumberSlider
-          label="Line Height"
-          value={params.lineheight}
-          onChange={(val) => updateParam('lineheight', val)}
-          min={0.8}
-          max={2}
-          step={0.1}
-          help="Line height multiplier (1.2 = 120%)"
-        />
+        <form.Field name="lineheight">
+          {(field) => (
+            <FormNumberSlider
+              label="Line Height"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val)}
+              onBlur={field.handleBlur}
+              min={0.8}
+              max={2}
+              step={0.1}
+              help="Line height multiplier (1.2 = 120%)"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
       </CollapsibleSection>
 
       {/* Section 5: Decoration */}
       <CollapsibleSection title="Decoration" defaultOpen={false} storageKey="cta-decoration">
-        <div>
-          <label className="config-label">Decoration Style</label>
-          <FormSelect
-            value={params.decoration}
-            onValueChange={(value) => updateParam('decoration', value as any)}
-            options={[
-              { value: 'none', label: 'None' },
-              { value: 'line', label: 'Line' },
-              { value: 'slant', label: 'Slant' },
-              { value: 'swirl', label: 'Swirl' },
-            ]}
-          />
-        </div>
+        <form.Field name="decoration">
+          {(field) => (
+            <FormSelectInput
+              label="Decoration Style"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val as any)}
+              options={[
+                { value: 'none', label: 'None' },
+                { value: 'line', label: 'Line' },
+                { value: 'slant', label: 'Slant' },
+                { value: 'swirl', label: 'Swirl' },
+              ]}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
         {params.decoration !== 'none' && (
-          <div>
-            <label className="config-label">Decoration Color</label>
-            <FormInput
-              type="text"
-              value={params.decorationcolor}
-              onChange={(e) => updateParam('decorationcolor', e.target.value)}
-              placeholder="Leave empty for auto color"
-            />
-            <p className="text-xs text-dark-muted mt-1">
-              Hex color or leave empty for gradient color
-            </p>
-          </div>
+          <form.Field name="decorationcolor">
+            {(field) => (
+              <FormTextInput
+                label="Decoration Color"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                placeholder="Leave empty for auto color"
+                help="Hex color or leave empty for gradient color"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
         )}
       </CollapsibleSection>
 
       {/* Section 6: Layout */}
       <CollapsibleSection title="Layout" defaultOpen={false} storageKey="cta-layout">
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="config-label">Horizontal Align</label>
-            <FormSelect
-              value={params.align}
-              onValueChange={(value) => updateParam('align', value as any)}
-              options={[
-                { value: 'left', label: 'Left' },
-                { value: 'center', label: 'Center' },
-                { value: 'right', label: 'Right' },
-              ]}
-            />
-          </div>
+          <form.Field name="align">
+            {(field) => (
+              <FormSelectInput
+                label="Horizontal Align"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val as any)}
+                options={[
+                  { value: 'left', label: 'Left' },
+                  { value: 'center', label: 'Center' },
+                  { value: 'right', label: 'Right' },
+                ]}
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
 
-          <div>
-            <label className="config-label">Vertical Align</label>
-            <FormSelect
-              value={params.valign}
-              onValueChange={(value) => updateParam('valign', value as any)}
-              options={[
-                { value: 'top', label: 'Top' },
-                { value: 'center', label: 'Center' },
-                { value: 'bottom', label: 'Bottom' },
-              ]}
-            />
-          </div>
+          <form.Field name="valign">
+            {(field) => (
+              <FormSelectInput
+                label="Vertical Align"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val as any)}
+                options={[
+                  { value: 'top', label: 'Top' },
+                  { value: 'center', label: 'Center' },
+                  { value: 'bottom', label: 'Bottom' },
+                ]}
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
         </div>
 
-        <div className="flex items-center justify-between">
-          <Label htmlFor="bg">Show Background Panel</Label>
-          <Switch
-            id="bg"
-            checked={params.bg}
-            onCheckedChange={(checked) => updateParam('bg', checked)}
-          />
-        </div>
+        <form.Field name="bg">
+          {(field) => (
+            <FormSwitch
+              label="Show Background Panel"
+              checked={field.state.value}
+              onCheckedChange={(checked) => field.handleChange(checked)}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
       </CollapsibleSection>
 
       {/* Section 7: Animations */}
       <CollapsibleSection title="Animations" defaultOpen={false} storageKey="cta-animations">
-        <div>
-          <label className="config-label">Entrance Animation</label>
-          <FormSelect
-            value={params.entrance}
-            onValueChange={(value) => updateParam('entrance', value as any)}
-            options={[
-              { value: 'none', label: 'None' },
-              { value: 'fade', label: 'Fade' },
-              { value: 'slideUp', label: 'Slide Up' },
-              { value: 'slideDown', label: 'Slide Down' },
-              { value: 'slideLeft', label: 'Slide Left' },
-              { value: 'slideRight', label: 'Slide Right' },
-              { value: 'scale', label: 'Scale' },
-              { value: 'bounce', label: 'Bounce' },
-            ]}
-          />
-        </div>
+        <form.Field name="entrance">
+          {(field) => (
+            <FormSelectInput
+              label="Entrance Animation"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val as any)}
+              options={[
+                { value: 'none', label: 'None' },
+                { value: 'fade', label: 'Fade' },
+                { value: 'slideUp', label: 'Slide Up' },
+                { value: 'slideDown', label: 'Slide Down' },
+                { value: 'slideLeft', label: 'Slide Left' },
+                { value: 'slideRight', label: 'Slide Right' },
+                { value: 'scale', label: 'Scale' },
+                { value: 'bounce', label: 'Bounce' },
+              ]}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
         <div className="grid grid-cols-2 gap-4">
-          <NumberSlider
-            label="Entrance Speed"
-            value={params.entrancespeed}
-            onChange={(val) => updateParam('entrancespeed', val)}
-            min={0.1}
-            max={5}
-            step={0.1}
-            unit="s"
-            help="Duration of entrance animation"
-          />
-          <NumberSlider
-            label="Entrance Delay"
-            value={params.delay}
-            onChange={(val) => updateParam('delay', val)}
-            min={0}
-            max={10}
-            step={0.1}
-            unit="s"
-            help="Delay before animation starts"
-          />
+          <form.Field name="entrancespeed">
+            {(field) => (
+              <FormNumberSlider
+                label="Entrance Speed"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                min={0.1}
+                max={5}
+                step={0.1}
+                unit="s"
+                help="Duration of entrance animation"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
+
+          <form.Field name="delay">
+            {(field) => (
+              <FormNumberSlider
+                label="Entrance Delay"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                min={0}
+                max={10}
+                step={0.1}
+                unit="s"
+                help="Delay before animation starts"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
         </div>
 
-        <div>
-          <label className="config-label">Exit Animation</label>
-          <FormSelect
-            value={params.exit}
-            onValueChange={(value) => updateParam('exit', value as any)}
-            options={[
-              { value: 'none', label: 'None' },
-              { value: 'fade', label: 'Fade' },
-              { value: 'slideDown', label: 'Slide Down' },
-              { value: 'slideUp', label: 'Slide Up' },
-              { value: 'scale', label: 'Scale' },
-            ]}
-          />
-        </div>
+        <form.Field name="exit">
+          {(field) => (
+            <FormSelectInput
+              label="Exit Animation"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val as any)}
+              options={[
+                { value: 'none', label: 'None' },
+                { value: 'fade', label: 'Fade' },
+                { value: 'slideDown', label: 'Slide Down' },
+                { value: 'slideUp', label: 'Slide Up' },
+                { value: 'scale', label: 'Scale' },
+              ]}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
         {params.exit !== 'none' && (
-          <NumberSlider
-            label="Exit Speed"
-            value={params.exitspeed}
-            onChange={(val) => updateParam('exitspeed', val)}
-            min={0.1}
-            max={5}
-            step={0.1}
-            unit="s"
-            help="Duration of exit animation"
-          />
+          <form.Field name="exitspeed">
+            {(field) => (
+              <FormNumberSlider
+                label="Exit Speed"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                min={0.1}
+                max={5}
+                step={0.1}
+                unit="s"
+                help="Duration of exit animation"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
         )}
       </CollapsibleSection>
 
       {/* Section 8: Loop Mode */}
       <CollapsibleSection title="Loop Mode" defaultOpen={false} storageKey="cta-loop">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="loop">Enable Loop Mode</Label>
-          <Switch
-            id="loop"
-            checked={params.loop}
-            onCheckedChange={(checked) => updateParam('loop', checked)}
-          />
-        </div>
-        <p className="text-xs text-dark-muted -mt-2">Appear → hold → disappear → pause → repeat</p>
+        <form.Field name="loop">
+          {(field) => (
+            <FormSwitch
+              label="Enable Loop Mode"
+              checked={field.state.value}
+              onCheckedChange={(checked) => field.handleChange(checked)}
+              help="Appear → hold → disappear → pause → repeat"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
         {params.loop && (
           <div className="grid grid-cols-2 gap-4">
-            <NumberSlider
-              label="Hold Visible"
-              value={params.hold}
-              onChange={(val) => updateParam('hold', val)}
-              min={1}
-              max={60}
-              unit="s"
-              help="How long to stay visible"
-            />
-            <NumberSlider
-              label="Pause Hidden"
-              value={params.pause}
-              onChange={(val) => updateParam('pause', val)}
-              min={0}
-              max={60}
-              unit="s"
-              help="How long to stay hidden"
-            />
+            <form.Field name="hold">
+              {(field) => (
+                <FormNumberSlider
+                  label="Hold Visible"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  min={1}
+                  max={60}
+                  unit="s"
+                  help="How long to stay visible"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
+
+            <form.Field name="pause">
+              {(field) => (
+                <FormNumberSlider
+                  label="Pause Hidden"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  min={0}
+                  max={60}
+                  unit="s"
+                  help="How long to stay hidden"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
           </div>
         )}
       </CollapsibleSection>
@@ -487,18 +614,27 @@ function CTAConfigurator() {
       >
         <div>
           <label className="config-label">Gradient Preset</label>
-          <GradientGrid
-            value={params.gradient}
-            onValueChange={(value) => updateParam('gradient', value as any)}
-          />
+          <form.Field name="gradient">
+            {(field) => (
+              <GradientGrid
+                value={field.state.value}
+                onValueChange={(value) => field.handleChange(value as any)}
+              />
+            )}
+          </form.Field>
         </div>
 
-        <ColorArrayInput
-          label="Custom Colors"
-          colors={params.colors}
-          onChange={(colors) => updateParam('colors', colors)}
-          maxColors={5}
-        />
+        <form.Field name="colors">
+          {(field) => (
+            <FormColorArray
+              label="Custom Colors"
+              colors={field.state.value}
+              onChange={(colors) => field.handleChange(colors)}
+              maxColors={5}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
       </CollapsibleSection>
 
       {/* Help & Guides */}

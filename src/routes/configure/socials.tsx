@@ -1,6 +1,7 @@
 /**
  * Socials Overlay Configurator
  * Visual configuration UI for social media overlay parameters
+ * Now with TanStack Form + Zod validation + ShadCN UI components
  */
 
 import { createFileRoute } from '@tanstack/react-router'
@@ -8,22 +9,26 @@ import { useState, useEffect } from 'react'
 import { ConfigLayout } from '../../components/configure/ConfigLayout'
 import { URLGenerator } from '../../components/configure/URLGenerator'
 import { CollapsibleSection } from '../../components/configure/form/CollapsibleSection'
-import { NumberSlider } from '../../components/configure/form/NumberSlider'
-import { ColorArrayInput } from '../../components/configure/form/ColorArrayInput'
-import { FormInput } from '../../components/configure/form/FormInput'
-import { FormSelect } from '../../components/configure/form/FormSelect'
+import { FormNumberSlider } from '../../components/configure/form/FormNumberSlider'
+import { FormColorArray } from '../../components/configure/form/FormColorArray'
+import { FormTextInput } from '../../components/configure/form/FormTextInput'
+import { FormSelectInput } from '../../components/configure/form/FormSelectInput'
+import { FormSwitch } from '../../components/configure/form/FormSwitch'
 import { FontSelect } from '../../components/configure/form/FontSelect'
 import { AnimationSelect } from '../../components/configure/form/AnimationSelect'
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { PresetManager } from '../../components/configure/PresetManager'
 import { Switch } from '../../components/ui/switch'
 import { Label } from '../../components/ui/label'
+import { Input } from '../../components/ui/input'
 import { SOCIALS_DEFAULTS } from '../../types/socials.types'
 import type { SocialsOverlayParams } from '../../types/socials.types'
 import { useHistory } from '../../hooks/useHistory'
+import { useFormWithHistory } from '../../hooks/useFormWithHistory'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { usePresets } from '../../hooks/usePresets'
 import { SocialsOverlayHelp } from '../../components/configure/help/SocialsOverlayHelp'
+import { socialsOverlaySchema } from '../../lib/validation/schemas'
 
 export const Route = createFileRoute('/configure/socials')({
   component: SocialsConfigurator,
@@ -47,7 +52,15 @@ type AllPlatforms = {
 }
 
 function SocialsConfigurator() {
-  const { state: params, setState: setParams, updateState, undo, redo, canUndo, canRedo } = useHistory<SocialsOverlayParams>(SOCIALS_DEFAULTS)
+  // History management (undo/redo + debouncing)
+  const history = useHistory<SocialsOverlayParams>(SOCIALS_DEFAULTS)
+  const { state: params, setState: setParams, updateState, undo, redo, canUndo, canRedo } = history
+
+  // TanStack Form with Zod validation
+  const form = useFormWithHistory({
+    history,
+    schema: socialsOverlaySchema,
+  })
 
   // Parse show and handles into individual platform states
   const [platforms, setPlatforms] = useState<AllPlatforms>(() => {
@@ -111,12 +124,20 @@ function SocialsConfigurator() {
     importPreset,
   } = usePresets<SocialsOverlayParams>('socials', SOCIALS_DEFAULTS)
 
+  // Load preset with validation
   const handleLoadPreset = (name: string) => {
     const presetParams = loadPreset(name)
     if (presetParams) {
-      // Use updateState for immediate history entry
+      // Validate preset before loading
+      const result = socialsOverlaySchema.safeParse(presetParams)
+      if (result.success) {
+        updateState(result.data)
+      } else {
+        console.error('Invalid preset:', result.error)
+        // Still load it but show warning
+        updateState(presetParams)
+      }
       // Platforms will sync via useEffect
-      updateState(presetParams)
     }
   }
 
@@ -151,13 +172,6 @@ function SocialsConfigurator() {
       ...platforms,
       [platform]: { ...platforms[platform], handle },
     })
-  }
-
-  const updateParam = <K extends keyof SocialsOverlayParams>(
-    key: K,
-    value: SocialsOverlayParams[K]
-  ) => {
-    setParams((prev) => ({ ...prev, [key]: value }))
   }
 
   // Section-specific reset handlers (use updateState for immediate history entry)
@@ -213,7 +227,7 @@ function SocialsConfigurator() {
                 GitHub
               </Label>
               {platforms.github.enabled && (
-                <FormInput
+                <Input
                   className="h-8 text-sm"
                   type="text"
                   value={platforms.github.handle}
@@ -236,7 +250,7 @@ function SocialsConfigurator() {
                 Twitter / X
               </Label>
               {platforms.twitter.enabled && (
-                <FormInput
+                <Input
                   className="h-8 text-sm"
                   type="text"
                   value={platforms.twitter.handle}
@@ -259,7 +273,7 @@ function SocialsConfigurator() {
                 LinkedIn
               </Label>
               {platforms.linkedin.enabled && (
-                <FormInput
+                <Input
                   className="h-8 text-sm"
                   type="text"
                   value={platforms.linkedin.handle}
@@ -282,7 +296,7 @@ function SocialsConfigurator() {
                 YouTube
               </Label>
               {platforms.youtube.enabled && (
-                <FormInput
+                <Input
                   className="h-8 text-sm"
                   type="text"
                   value={platforms.youtube.handle}
@@ -305,7 +319,7 @@ function SocialsConfigurator() {
                 Instagram
               </Label>
               {platforms.instagram.enabled && (
-                <FormInput
+                <Input
                   className="h-8 text-sm"
                   type="text"
                   value={platforms.instagram.handle}
@@ -328,7 +342,7 @@ function SocialsConfigurator() {
                 Twitch
               </Label>
               {platforms.twitch.enabled && (
-                <FormInput
+                <Input
                   className="h-8 text-sm"
                   type="text"
                   value={platforms.twitch.handle}
@@ -351,7 +365,7 @@ function SocialsConfigurator() {
                 Kick
               </Label>
               {platforms.kick.enabled && (
-                <FormInput
+                <Input
                   className="h-8 text-sm"
                   type="text"
                   value={platforms.kick.handle}
@@ -374,7 +388,7 @@ function SocialsConfigurator() {
                 Discord
               </Label>
               {platforms.discord.enabled && (
-                <FormInput
+                <Input
                   className="h-8 text-sm"
                   type="text"
                   value={platforms.discord.handle}
@@ -397,7 +411,7 @@ function SocialsConfigurator() {
                 Website
               </Label>
               {platforms.website.enabled && (
-                <FormInput
+                <Input
                   className="h-8 text-sm"
                   type="text"
                   value={platforms.website.handle}
@@ -410,240 +424,321 @@ function SocialsConfigurator() {
         </div>
       </CollapsibleSection>
 
-      {/* Section 2: Platform Ordering (Hidden Parameters) */}
+      {/* Section 2: Platform Ordering */}
       <CollapsibleSection title="Platform Ordering" defaultOpen={false} storageKey="socials-ordering">
-        <div>
-          <label className="config-label">Order Mode</label>
-          <FormSelect
-            value={params.order}
-            onValueChange={(value) => updateParam('order', value as any)}
-            options={[
-              { value: 'default', label: 'Default Order' },
-              { value: 'priority', label: 'Priority Order' },
-            ]}
-          />
-        </div>
+        <form.Field name="order">
+          {(field) => (
+            <FormSelectInput
+              label="Order Mode"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val as any)}
+              options={[
+                { value: 'default', label: 'Default Order' },
+                { value: 'priority', label: 'Priority Order' },
+              ]}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
         {params.order === 'priority' && (
-          <div>
-            <label className="config-label">Platform Priority</label>
-            <FormInput
-              type="text"
-              value={params.priority}
-              onChange={(e) => updateParam('priority', e.target.value)}
-              placeholder="e.g., youtube:1,github:2,twitter:3"
-            />
-            <p className="text-xs text-dark-muted mt-1">
-              Set priority: platform:rank,platform:rank (lower rank appears first)
-            </p>
-          </div>
+          <form.Field name="priority">
+            {(field) => (
+              <FormTextInput
+                label="Platform Priority"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                placeholder="e.g., youtube:1,github:2,twitter:3"
+                help="Set priority: platform:rank,platform:rank (lower rank appears first)"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
         )}
       </CollapsibleSection>
 
       {/* Section 3: Layout */}
       <CollapsibleSection title="Layout" defaultOpen={true} storageKey="socials-layout">
-        <div>
-          <label className="config-label">Layout Direction</label>
-          <FormSelect
-            value={params.layout}
-            onValueChange={(value) => updateParam('layout', value as any)}
-            options={[
-              { value: 'horizontal', label: 'Horizontal' },
-              { value: 'vertical', label: 'Vertical' },
-              { value: 'grid', label: 'Grid' },
-            ]}
-          />
-        </div>
+        <form.Field name="layout">
+          {(field) => (
+            <FormSelectInput
+              label="Layout Direction"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val as any)}
+              options={[
+                { value: 'horizontal', label: 'Horizontal' },
+                { value: 'vertical', label: 'Vertical' },
+                { value: 'grid', label: 'Grid' },
+              ]}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
-        <div>
-          <label className="config-label">Size Preset</label>
-          <FormSelect
-            value={params.size}
-            onValueChange={(value) => updateParam('size', value as any)}
-            options={[
-              { value: 'sm', label: 'Small (icon: 20px, text: 13px)' },
-              { value: 'md', label: 'Medium (icon: 24px, text: 15px)' },
-              { value: 'lg', label: 'Large (icon: 32px, text: 18px)' },
-              { value: 'xl', label: 'Extra Large (icon: 40px, text: 22px)' },
-            ]}
-          />
-        </div>
+        <form.Field name="size">
+          {(field) => (
+            <FormSelectInput
+              label="Size Preset"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val as any)}
+              options={[
+                { value: 'sm', label: 'Small (icon: 20px, text: 13px)' },
+                { value: 'md', label: 'Medium (icon: 24px, text: 15px)' },
+                { value: 'lg', label: 'Large (icon: 32px, text: 18px)' },
+                { value: 'xl', label: 'Extra Large (icon: 40px, text: 22px)' },
+              ]}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
-        <NumberSlider
-          label="Gap Between Items"
-          value={params.gap}
-          onChange={(val) => updateParam('gap', val)}
-          min={0}
-          max={100}
-          unit="px"
-          help="Spacing between platform items"
-        />
+        <form.Field name="gap">
+          {(field) => (
+            <FormNumberSlider
+              label="Gap Between Items"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val)}
+              onBlur={field.handleBlur}
+              min={0}
+              max={100}
+              unit="px"
+              help="Spacing between platform items"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
-        <div className="flex items-center justify-between">
-          <Label htmlFor="showtext">Show Platform Handles</Label>
-          <Switch
-            id="showtext"
-            checked={params.showtext}
-            onCheckedChange={(checked) => updateParam('showtext', checked)}
-          />
-        </div>
+        <form.Field name="showtext">
+          {(field) => (
+            <FormSwitch
+              label="Show Platform Handles"
+              checked={field.state.value}
+              onCheckedChange={(checked) => field.handleChange(checked)}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
-        <div className="flex items-center justify-between">
-          <Label htmlFor="bg">Show Background Panels</Label>
-          <Switch
-            id="bg"
-            checked={params.bg}
-            onCheckedChange={(checked) => updateParam('bg', checked)}
-          />
-        </div>
+        <form.Field name="bg">
+          {(field) => (
+            <FormSwitch
+              label="Show Background Panels"
+              checked={field.state.value}
+              onCheckedChange={(checked) => field.handleChange(checked)}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
         {params.bg && (
-          <NumberSlider
-            label="Border Radius"
-            value={params.borderradius}
-            onChange={(val) => updateParam('borderradius', val)}
-            min={0}
-            max={32}
-            unit="px"
-            help="Corner radius for background panels"
-          />
+          <form.Field name="borderradius">
+            {(field) => (
+              <FormNumberSlider
+                label="Border Radius"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                min={0}
+                max={32}
+                unit="px"
+                help="Corner radius for background panels"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
         )}
       </CollapsibleSection>
 
-      {/* Section 4: Icon Customization (Hidden Parameters) */}
+      {/* Section 4: Icon Customization */}
       <CollapsibleSection title="Icon Customization" defaultOpen={false} storageKey="socials-icons">
-        <div>
-          <label className="config-label">Icon Color Mode</label>
-          <FormSelect
-            value={params.iconcolor}
-            onValueChange={(value) => updateParam('iconcolor', value as any)}
-            options={[
-              { value: 'brand', label: "Brand Colors (each platform's color)" },
-              { value: 'platform', label: 'Platform Colors' },
-              { value: 'gradient', label: 'Gradient' },
-              { value: 'white', label: 'White' },
-            ]}
-          />
-        </div>
+        <form.Field name="iconcolor">
+          {(field) => (
+            <FormSelectInput
+              label="Icon Color Mode"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val as any)}
+              options={[
+                { value: 'brand', label: "Brand Colors (each platform's color)" },
+                { value: 'platform', label: 'Platform Colors' },
+                { value: 'gradient', label: 'Gradient' },
+                { value: 'white', label: 'White' },
+              ]}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
-        <NumberSlider
-          label="Icon Size Override"
-          value={params.iconsize}
-          onChange={(val) => updateParam('iconsize', val)}
-          min={0}
-          max={64}
-          unit="px"
-          help="0 = use size preset, otherwise custom size"
-        />
+        <form.Field name="iconsize">
+          {(field) => (
+            <FormNumberSlider
+              label="Icon Size Override"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val)}
+              onBlur={field.handleBlur}
+              min={0}
+              max={64}
+              unit="px"
+              help="0 = use size preset, otherwise custom size"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
-        <NumberSlider
-          label="Icon Padding"
-          value={params.iconpadding}
-          onChange={(val) => updateParam('iconpadding', val)}
-          min={0}
-          max={32}
-          unit="px"
-          help="Padding around icons"
-        />
+        <form.Field name="iconpadding">
+          {(field) => (
+            <FormNumberSlider
+              label="Icon Padding"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val)}
+              onBlur={field.handleBlur}
+              min={0}
+              max={32}
+              unit="px"
+              help="Padding around icons"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
-        <div>
-          <label className="config-label">Custom Icons</label>
-          <FormInput
-            type="text"
-            value={params.icons}
-            onChange={(e) => updateParam('icons', e.target.value)}
-            placeholder="e.g., github:star,twitter:bird"
-          />
-          <p className="text-xs text-dark-muted mt-1">
-            Override icons: platform:iconname,platform:iconname (Lucide icon names)
-          </p>
-        </div>
+        <form.Field name="icons">
+          {(field) => (
+            <FormTextInput
+              label="Custom Icons"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val)}
+              onBlur={field.handleBlur}
+              placeholder="e.g., github:star,twitter:bird"
+              help="Override icons: platform:iconname,platform:iconname (Lucide icon names)"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
       </CollapsibleSection>
 
-      {/* Section 5: Text Styling (Hidden Parameters) */}
+      {/* Section 5: Text Styling */}
       <CollapsibleSection title="Text Styling" defaultOpen={false} storageKey="socials-text">
         <div>
           <label className="config-label">Font Family</label>
-          <FontSelect
-            value={params.font}
-            onValueChange={(value) => updateParam('font', value as any)}
-            showGoogleFonts={true}
-          />
+          <form.Field name="font">
+            {(field) => (
+              <FontSelect
+                value={field.state.value}
+                onValueChange={(value) => field.handleChange(value as any)}
+                showGoogleFonts={true}
+              />
+            )}
+          </form.Field>
         </div>
 
-        <NumberSlider
-          label="Font Size Override"
-          value={params.fontsize}
-          onChange={(val) => updateParam('fontsize', val)}
-          min={0}
-          max={32}
-          unit="px"
-          help="0 = use size preset, otherwise custom size"
-        />
+        <form.Field name="fontsize">
+          {(field) => (
+            <FormNumberSlider
+              label="Font Size Override"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val)}
+              onBlur={field.handleBlur}
+              min={0}
+              max={32}
+              unit="px"
+              help="0 = use size preset, otherwise custom size"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
-        <NumberSlider
-          label="Font Weight"
-          value={params.fontweight}
-          onChange={(val) => updateParam('fontweight', val)}
-          min={100}
-          max={900}
-          step={100}
-          help="Boldness of text (400 = normal, 700 = bold)"
-        />
+        <form.Field name="fontweight">
+          {(field) => (
+            <FormNumberSlider
+              label="Font Weight"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val)}
+              onBlur={field.handleBlur}
+              min={100}
+              max={900}
+              step={100}
+              help="Boldness of text (400 = normal, 700 = bold)"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
-        <NumberSlider
-          label="Letter Spacing"
-          value={params.letterspacing}
-          onChange={(val) => updateParam('letterspacing', val)}
-          min={-2}
-          max={4}
-          step={0.1}
-          unit="px"
-          help="Space between letters"
-        />
+        <form.Field name="letterspacing">
+          {(field) => (
+            <FormNumberSlider
+              label="Letter Spacing"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val)}
+              onBlur={field.handleBlur}
+              min={-2}
+              max={4}
+              step={0.1}
+              unit="px"
+              help="Space between letters"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
       </CollapsibleSection>
 
       {/* Section 6: Entrance Animation */}
       <CollapsibleSection title="Entrance Animation" defaultOpen={false} storageKey="socials-entrance">
         <div>
           <label className="config-label">Animation Type</label>
-          <AnimationSelect
-            value={params.entrance}
-            onValueChange={(value) => updateParam('entrance', value as any)}
-            options={[
-              { value: 'none', label: 'None' },
-              { value: 'fade', label: 'Fade' },
-              { value: 'slideUp', label: 'Slide Up' },
-              { value: 'slideDown', label: 'Slide Down' },
-              { value: 'slideLeft', label: 'Slide Left' },
-              { value: 'slideRight', label: 'Slide Right' },
-              { value: 'scale', label: 'Scale' },
-              { value: 'stagger', label: 'Stagger (one by one)' },
-            ]}
-          />
+          <form.Field name="entrance">
+            {(field) => (
+              <AnimationSelect
+                value={field.state.value}
+                onValueChange={(value) => field.handleChange(value as any)}
+                options={[
+                  { value: 'none', label: 'None' },
+                  { value: 'fade', label: 'Fade' },
+                  { value: 'slideUp', label: 'Slide Up' },
+                  { value: 'slideDown', label: 'Slide Down' },
+                  { value: 'slideLeft', label: 'Slide Left' },
+                  { value: 'slideRight', label: 'Slide Right' },
+                  { value: 'scale', label: 'Scale' },
+                  { value: 'stagger', label: 'Stagger (one by one)' },
+                ]}
+              />
+            )}
+          </form.Field>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <NumberSlider
-            label="Speed"
-            value={params.speed}
-            onChange={(val) => updateParam('speed', val)}
-            min={0.1}
-            max={5}
-            step={0.1}
-            unit="s"
-            help="Animation duration"
-          />
-          <NumberSlider
-            label="Delay"
-            value={params.delay}
-            onChange={(val) => updateParam('delay', val)}
-            min={0}
-            max={10}
-            step={0.1}
-            unit="s"
-            help="Delay before animation starts"
-          />
+          <form.Field name="speed">
+            {(field) => (
+              <FormNumberSlider
+                label="Speed"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                min={0.1}
+                max={5}
+                step={0.1}
+                unit="s"
+                help="Animation duration"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
+
+          <form.Field name="delay">
+            {(field) => (
+              <FormNumberSlider
+                label="Delay"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                min={0}
+                max={10}
+                step={0.1}
+                unit="s"
+                help="Delay before animation starts"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
         </div>
       </CollapsibleSection>
 
@@ -651,113 +746,160 @@ function SocialsConfigurator() {
       <CollapsibleSection title="Exit Animation" defaultOpen={false} storageKey="socials-exit">
         <div>
           <label className="config-label">Exit Animation</label>
-          <AnimationSelect
-            value={params.exit}
-            onValueChange={(value) => updateParam('exit', value as any)}
-            options={[
-              { value: 'none', label: 'None' },
-              { value: 'fade', label: 'Fade' },
-              { value: 'slideDown', label: 'Slide Down' },
-              { value: 'slideUp', label: 'Slide Up' },
-              { value: 'scale', label: 'Scale' },
-            ]}
-          />
+          <form.Field name="exit">
+            {(field) => (
+              <AnimationSelect
+                value={field.state.value}
+                onValueChange={(value) => field.handleChange(value as any)}
+                options={[
+                  { value: 'none', label: 'None' },
+                  { value: 'fade', label: 'Fade' },
+                  { value: 'slideDown', label: 'Slide Down' },
+                  { value: 'slideUp', label: 'Slide Up' },
+                  { value: 'scale', label: 'Scale' },
+                ]}
+              />
+            )}
+          </form.Field>
         </div>
 
         {params.exit !== 'none' && (
           <div className="grid grid-cols-2 gap-4">
-            <NumberSlider
-              label="Exit Speed"
-              value={params.exitspeed}
-              onChange={(val) => updateParam('exitspeed', val)}
-              min={0.1}
-              max={5}
-              step={0.1}
-              unit="s"
-              help="Duration of exit animation"
-            />
-            <NumberSlider
-              label="Exit After"
-              value={params.exitafter}
-              onChange={(val) => updateParam('exitafter', val)}
-              min={0}
-              max={300}
-              unit="s"
-              help="Auto-exit after N seconds (0 = manual)"
-            />
+            <form.Field name="exitspeed">
+              {(field) => (
+                <FormNumberSlider
+                  label="Exit Speed"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  min={0.1}
+                  max={5}
+                  step={0.1}
+                  unit="s"
+                  help="Duration of exit animation"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
+
+            <form.Field name="exitafter">
+              {(field) => (
+                <FormNumberSlider
+                  label="Exit After"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  min={0}
+                  max={300}
+                  unit="s"
+                  help="Auto-exit after N seconds (0 = manual)"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
           </div>
         )}
       </CollapsibleSection>
 
       {/* Section 8: Loop Mode */}
       <CollapsibleSection title="Loop Mode" defaultOpen={false} storageKey="socials-loop">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="loop">Enable Loop Mode</Label>
-          <Switch
-            id="loop"
-            checked={params.loop}
-            onCheckedChange={(checked) => updateParam('loop', checked)}
-          />
-        </div>
-        <p className="text-xs text-dark-muted -mt-2">All appear → hold → all disappear → pause → repeat</p>
+        <form.Field name="loop">
+          {(field) => (
+            <FormSwitch
+              label="Enable Loop Mode"
+              checked={field.state.value}
+              onCheckedChange={(checked) => field.handleChange(checked)}
+              help="All appear → hold → all disappear → pause → repeat"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
         {params.loop && (
           <div className="grid grid-cols-2 gap-4">
-            <NumberSlider
-              label="Hold Visible"
-              value={params.hold}
-              onChange={(val) => updateParam('hold', val)}
-              min={1}
-              max={60}
-              unit="s"
-              help="How long to stay visible"
-            />
-            <NumberSlider
-              label="Pause Hidden"
-              value={params.pause}
-              onChange={(val) => updateParam('pause', val)}
-              min={0}
-              max={60}
-              unit="s"
-              help="How long to stay hidden"
-            />
+            <form.Field name="hold">
+              {(field) => (
+                <FormNumberSlider
+                  label="Hold Visible"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  min={1}
+                  max={60}
+                  unit="s"
+                  help="How long to stay visible"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
+
+            <form.Field name="pause">
+              {(field) => (
+                <FormNumberSlider
+                  label="Pause Hidden"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  min={0}
+                  max={60}
+                  unit="s"
+                  help="How long to stay hidden"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
           </div>
         )}
       </CollapsibleSection>
 
       {/* Section 9: One-by-One Mode */}
       <CollapsibleSection title="One-by-One Mode" defaultOpen={false} storageKey="socials-onebyone">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="onebyone">Enable One-by-One Mode</Label>
-          <Switch
-            id="onebyone"
-            checked={params.onebyone}
-            onCheckedChange={(checked) => updateParam('onebyone', checked)}
-          />
-        </div>
-        <p className="text-xs text-dark-muted -mt-2">Show one platform at a time (cycle through all)</p>
+        <form.Field name="onebyone">
+          {(field) => (
+            <FormSwitch
+              label="Enable One-by-One Mode"
+              checked={field.state.value}
+              onCheckedChange={(checked) => field.handleChange(checked)}
+              help="Show one platform at a time (cycle through all)"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
         {params.onebyone && (
           <div className="grid grid-cols-2 gap-4">
-            <NumberSlider
-              label="Show Each"
-              value={params.each}
-              onChange={(val) => updateParam('each', val)}
-              min={1}
-              max={30}
-              unit="s"
-              help="Display duration for each platform"
-            />
-            <NumberSlider
-              label="Pause Between"
-              value={params.eachpause}
-              onChange={(val) => updateParam('eachpause', val)}
-              min={0}
-              max={10}
-              step={0.1}
-              unit="s"
-              help="Pause between platforms"
-            />
+            <form.Field name="each">
+              {(field) => (
+                <FormNumberSlider
+                  label="Show Each"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  min={1}
+                  max={30}
+                  unit="s"
+                  help="Display duration for each platform"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
+
+            <form.Field name="eachpause">
+              {(field) => (
+                <FormNumberSlider
+                  label="Pause Between"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  min={0}
+                  max={10}
+                  step={0.1}
+                  unit="s"
+                  help="Pause between platforms"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
           </div>
         )}
       </CollapsibleSection>
@@ -771,18 +913,27 @@ function SocialsConfigurator() {
       >
         <div>
           <label className="config-label">Gradient Preset</label>
-          <GradientGrid
-            value={params.gradient}
-            onValueChange={(value) => updateParam('gradient', value as any)}
-          />
+          <form.Field name="gradient">
+            {(field) => (
+              <GradientGrid
+                value={field.state.value}
+                onValueChange={(value) => field.handleChange(value as any)}
+              />
+            )}
+          </form.Field>
         </div>
 
-        <ColorArrayInput
-          label="Custom Colors"
-          colors={params.colors}
-          onChange={(colors) => updateParam('colors', colors)}
-          maxColors={5}
-        />
+        <form.Field name="colors">
+          {(field) => (
+            <FormColorArray
+              label="Custom Colors"
+              colors={field.state.value}
+              onChange={(colors) => field.handleChange(colors)}
+              maxColors={5}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
       </CollapsibleSection>
 
       {/* Help & Guides */}

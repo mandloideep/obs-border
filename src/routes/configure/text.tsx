@@ -1,42 +1,45 @@
 /**
  * Text Overlay Configurator
  * Visual configuration UI for text overlay parameters
+ * Now with TanStack Form + Zod validation + ShadCN UI components
  */
 
 import { createFileRoute } from '@tanstack/react-router'
 import { ConfigLayout } from '../../components/configure/ConfigLayout'
 import { URLGenerator } from '../../components/configure/URLGenerator'
 import { CollapsibleSection } from '../../components/configure/form/CollapsibleSection'
-import { NumberSlider } from '../../components/configure/form/NumberSlider'
-import { ColorArrayInput } from '../../components/configure/form/ColorArrayInput'
-import { FormInput } from '../../components/configure/form/FormInput'
-import { FormSelect } from '../../components/configure/form/FormSelect'
+import { FormNumberSlider } from '../../components/configure/form/FormNumberSlider'
+import { FormColorArray } from '../../components/configure/form/FormColorArray'
+import { FormTextInput } from '../../components/configure/form/FormTextInput'
+import { FormSelectInput } from '../../components/configure/form/FormSelectInput'
+import { FormSwitch } from '../../components/configure/form/FormSwitch'
 import { FontSelect } from '../../components/configure/form/FontSelect'
 import { AnimationSelect } from '../../components/configure/form/AnimationSelect'
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { PresetManager } from '../../components/configure/PresetManager'
-import { Switch } from '../../components/ui/switch'
-import { Label } from '../../components/ui/label'
 import { TEXT_DEFAULTS } from '../../types/text.types'
 import type { TextOverlayParams } from '../../types/text.types'
 import { useHistory } from '../../hooks/useHistory'
+import { useFormWithHistory } from '../../hooks/useFormWithHistory'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { usePresets } from '../../hooks/usePresets'
 import { TextOverlayHelp } from '../../components/configure/help/TextOverlayHelp'
+import { textOverlaySchema } from '../../lib/validation/schemas'
 
 export const Route = createFileRoute('/configure/text')({
   component: TextConfigurator,
 })
 
 function TextConfigurator() {
-  const { state: params, setState: setParams, updateState, undo, redo, canUndo, canRedo } = useHistory<TextOverlayParams>(TEXT_DEFAULTS)
+  // History management (undo/redo + debouncing)
+  const history = useHistory<TextOverlayParams>(TEXT_DEFAULTS)
+  const { state: params, updateState, undo, redo, canUndo, canRedo } = history
 
-  const updateParam = <K extends keyof TextOverlayParams>(
-    key: K,
-    value: TextOverlayParams[K]
-  ) => {
-    setParams((prev) => ({ ...prev, [key]: value }))
-  }
+  // TanStack Form with Zod validation
+  const form = useFormWithHistory({
+    history,
+    schema: textOverlaySchema,
+  })
 
   // Keyboard shortcuts
   useKeyboardShortcuts([
@@ -56,10 +59,19 @@ function TextConfigurator() {
     importPreset,
   } = usePresets<TextOverlayParams>('text', TEXT_DEFAULTS)
 
+  // Load preset with validation
   const handleLoadPreset = (name: string) => {
     const presetParams = loadPreset(name)
     if (presetParams) {
-      updateState(presetParams)
+      // Validate preset before loading
+      const result = textOverlaySchema.safeParse(presetParams)
+      if (result.success) {
+        updateState(result.data)
+      } else {
+        console.error('Invalid preset:', result.error)
+        // Still load it but show warning
+        updateState(presetParams)
+      }
     }
   }
 
@@ -90,21 +102,24 @@ function TextConfigurator() {
         {/* Section 1: Quick Presets */}
         <div className="config-section">
           <h2 className="text-2xl font-semibold mb-6">Quick Presets</h2>
-          <div>
-            <label className="config-label">Preset</label>
-            <FormSelect
-              value={params.preset}
-              onValueChange={(value) => updateParam('preset', value as any)}
-              options={[
-                { value: 'custom', label: 'Custom' },
-                { value: 'brb', label: 'Be Right Back' },
-                { value: 'chatting', label: 'Just Chatting' },
-                { value: 'starting', label: 'Starting Soon' },
-                { value: 'ending', label: 'Thanks for Watching' },
-                { value: 'technical', label: 'Technical Difficulties' },
-              ]}
-            />
-          </div>
+          <form.Field name="preset">
+            {(field) => (
+              <FormSelectInput
+                label="Preset"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val as any)}
+                options={[
+                  { value: 'custom', label: 'Custom' },
+                  { value: 'brb', label: 'Be Right Back' },
+                  { value: 'chatting', label: 'Just Chatting' },
+                  { value: 'starting', label: 'Starting Soon' },
+                  { value: 'ending', label: 'Thanks for Watching' },
+                  { value: 'technical', label: 'Technical Difficulties' },
+                ]}
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
         </div>
 
         {/* Custom Presets Manager */}
@@ -122,297 +137,410 @@ function TextConfigurator() {
 
         {/* Section 2: Content */}
         <CollapsibleSection title="Content" defaultOpen={true} storageKey="text-content">
-            <div>
-              <label className="config-label">Main Text</label>
-              <FormInput
-                type="text"
-                value={params.text}
-                onChange={(e) => updateParam('text', e.target.value)}
-                placeholder="Enter main text"
-              />
-            </div>
-            <div>
-              <label className="config-label">Subtitle</label>
-              <FormInput
-                type="text"
-                value={params.sub}
-                onChange={(e) => updateParam('sub', e.target.value)}
-                placeholder="Enter subtitle (optional)"
-              />
-            </div>
+            <form.Field name="text">
+              {(field) => (
+                <FormTextInput
+                  label="Main Text"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  placeholder="Enter main text"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
+
+            <form.Field name="sub">
+              {(field) => (
+                <FormTextInput
+                  label="Subtitle"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  placeholder="Enter subtitle (optional)"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
+
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="config-label">Text Size (px)</label>
-                <FormInput
-                  type="number"
-                  value={params.size}
-                  onChange={(e) => updateParam('size', Number(e.target.value))}
-                  min="12"
-                  max="200"
-                />
-              </div>
-              <div>
-                <label className="config-label">Subtitle Size (px)</label>
-                <FormInput
-                  type="number"
-                  value={params.subsize}
-                  onChange={(e) => updateParam('subsize', Number(e.target.value))}
-                  min="8"
-                  max="100"
-                />
-              </div>
+              <form.Field name="size">
+                {(field) => (
+                  <FormNumberSlider
+                    label="Text Size"
+                    value={field.state.value}
+                    onChange={(val) => field.handleChange(val)}
+                    onBlur={field.handleBlur}
+                    min={12}
+                    max={200}
+                    unit="px"
+                    error={field.state.meta.errors?.[0]}
+                  />
+                )}
+              </form.Field>
+
+              <form.Field name="subsize">
+                {(field) => (
+                  <FormNumberSlider
+                    label="Subtitle Size"
+                    value={field.state.value}
+                    onChange={(val) => field.handleChange(val)}
+                    onBlur={field.handleBlur}
+                    min={8}
+                    max={100}
+                    unit="px"
+                    error={field.state.meta.errors?.[0]}
+                  />
+                )}
+              </form.Field>
             </div>
         </CollapsibleSection>
 
-        {/* Section 3: Typography (Hidden Parameters) */}
+        {/* Section 3: Typography */}
         <CollapsibleSection title="Typography" defaultOpen={false} storageKey="text-typography">
           <div>
             <label className="config-label">Font Family</label>
-            <FontSelect
-              value={params.font}
-              onValueChange={(value) => updateParam('font', value as any)}
-              showGoogleFonts={true}
-            />
+            <form.Field name="font">
+              {(field) => (
+                <FontSelect
+                  value={field.state.value}
+                  onValueChange={(value) => field.handleChange(value as any)}
+                  showGoogleFonts={true}
+                />
+              )}
+            </form.Field>
           </div>
 
-          <NumberSlider
-            label="Font Weight"
-            value={params.weight}
-            onChange={(val) => updateParam('weight', val)}
-            min={100}
-            max={900}
-            step={100}
-            help="Controls the boldness of the text (100 = thin, 900 = black)"
-          />
+          <form.Field name="weight">
+            {(field) => (
+              <FormNumberSlider
+                label="Font Weight"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                min={100}
+                max={900}
+                step={100}
+                help="Controls the boldness of the text (100 = thin, 900 = black)"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="config-label">Text Color</label>
-              <FormInput
-                type="text"
-                value={params.textcolor}
-                onChange={(e) => updateParam('textcolor', e.target.value)}
-                placeholder="Leave empty for gradient"
-              />
-            </div>
-            <div>
-              <label className="config-label">Subtitle Color</label>
-              <FormInput
-                type="text"
-                value={params.subcolor}
-                onChange={(e) => updateParam('subcolor', e.target.value)}
-                placeholder="Leave empty for gradient"
-              />
-            </div>
+            <form.Field name="textcolor">
+              {(field) => (
+                <FormTextInput
+                  label="Text Color"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  placeholder="Leave empty for gradient"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
+
+            <form.Field name="subcolor">
+              {(field) => (
+                <FormTextInput
+                  label="Subtitle Color"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  placeholder="Leave empty for gradient"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
           </div>
         </CollapsibleSection>
 
-        {/* Section 4: Spacing & Position (Hidden Parameters) */}
+        {/* Section 4: Spacing & Position */}
         <CollapsibleSection title="Spacing & Position" defaultOpen={false} storageKey="text-spacing">
           <div className="grid grid-cols-2 gap-4">
-            <NumberSlider
-              label="Padding X"
-              value={params.padx || params.pad}
-              onChange={(val) => updateParam('padx', val)}
-              min={0}
-              max={100}
-              unit="px"
-              help="Horizontal padding around text"
-            />
-            <NumberSlider
-              label="Padding Y"
-              value={params.pady || params.pad}
-              onChange={(val) => updateParam('pady', val)}
-              min={0}
-              max={100}
-              unit="px"
-              help="Vertical padding around text"
-            />
+            <form.Field name="padx">
+              {(field) => (
+                <FormNumberSlider
+                  label="Padding X"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  min={0}
+                  max={100}
+                  unit="px"
+                  help="Horizontal padding around text"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
+
+            <form.Field name="pady">
+              {(field) => (
+                <FormNumberSlider
+                  label="Padding Y"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  min={0}
+                  max={100}
+                  unit="px"
+                  help="Vertical padding around text"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <NumberSlider
-              label="Margin X"
-              value={params.marginx}
-              onChange={(val) => updateParam('marginx', val)}
-              min={0}
-              max={200}
-              unit="px"
-              help="Horizontal margin from edge"
-            />
-            <NumberSlider
-              label="Margin Y"
-              value={params.marginy}
-              onChange={(val) => updateParam('marginy', val)}
-              min={0}
-              max={200}
-              unit="px"
-              help="Vertical margin from edge"
-            />
+            <form.Field name="marginx">
+              {(field) => (
+                <FormNumberSlider
+                  label="Margin X"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  min={0}
+                  max={200}
+                  unit="px"
+                  help="Horizontal margin from edge"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
+
+            <form.Field name="marginy">
+              {(field) => (
+                <FormNumberSlider
+                  label="Margin Y"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  min={0}
+                  max={200}
+                  unit="px"
+                  help="Vertical margin from edge"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <NumberSlider
-              label="Offset X"
-              value={params.offsetx}
-              onChange={(val) => updateParam('offsetx', val)}
-              min={-500}
-              max={500}
-              unit="px"
-              help="Fine-tune horizontal position"
-            />
-            <NumberSlider
-              label="Offset Y"
-              value={params.offsety}
-              onChange={(val) => updateParam('offsety', val)}
-              min={-500}
-              max={500}
-              unit="px"
-              help="Fine-tune vertical position"
-            />
+            <form.Field name="offsetx">
+              {(field) => (
+                <FormNumberSlider
+                  label="Offset X"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  min={-500}
+                  max={500}
+                  unit="px"
+                  help="Fine-tune horizontal position"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
+
+            <form.Field name="offsety">
+              {(field) => (
+                <FormNumberSlider
+                  label="Offset Y"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  min={-500}
+                  max={500}
+                  unit="px"
+                  help="Fine-tune vertical position"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
           </div>
 
-          <div>
-            <label className="config-label">Max Width</label>
-            <FormInput
-              type="text"
-              value={params.maxwidth}
-              onChange={(e) => updateParam('maxwidth', e.target.value)}
-              placeholder="auto, 500px, 80%, etc."
-            />
-          </div>
+          <form.Field name="maxwidth">
+            {(field) => (
+              <FormTextInput
+                label="Max Width"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                placeholder="auto, 500px, 80%, etc."
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
         </CollapsibleSection>
 
         {/* Section 5: Layout */}
         <CollapsibleSection title="Layout" defaultOpen={true} storageKey="text-layout">
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="config-label">Horizontal Align</label>
-                <FormSelect
-                  value={params.align}
-                  onValueChange={(value) => updateParam('align', value as any)}
-                  options={[
-                    { value: 'left', label: 'Left' },
-                    { value: 'center', label: 'Center' },
-                    { value: 'right', label: 'Right' },
-                  ]}
-                />
-              </div>
-              <div>
-                <label className="config-label">Vertical Align</label>
-                <FormSelect
-                  value={params.valign}
-                  onValueChange={(value) => updateParam('valign', value as any)}
-                  options={[
-                    { value: 'top', label: 'Top' },
-                    { value: 'center', label: 'Center' },
-                    { value: 'bottom', label: 'Bottom' },
-                  ]}
-                />
-              </div>
+              <form.Field name="align">
+                {(field) => (
+                  <FormSelectInput
+                    label="Horizontal Align"
+                    value={field.state.value}
+                    onChange={(val) => field.handleChange(val as any)}
+                    options={[
+                      { value: 'left', label: 'Left' },
+                      { value: 'center', label: 'Center' },
+                      { value: 'right', label: 'Right' },
+                    ]}
+                    error={field.state.meta.errors?.[0]}
+                  />
+                )}
+              </form.Field>
+
+              <form.Field name="valign">
+                {(field) => (
+                  <FormSelectInput
+                    label="Vertical Align"
+                    value={field.state.value}
+                    onChange={(val) => field.handleChange(val as any)}
+                    options={[
+                      { value: 'top', label: 'Top' },
+                      { value: 'center', label: 'Center' },
+                      { value: 'bottom', label: 'Bottom' },
+                    ]}
+                    error={field.state.meta.errors?.[0]}
+                  />
+                )}
+              </form.Field>
             </div>
-            <div className="flex items-center gap-3">
-              <Switch
-                id="bg"
-                checked={params.bg}
-                onCheckedChange={(checked) => updateParam('bg', checked)}
-              />
-              <label htmlFor="bg" className="text-sm text-dark-muted cursor-pointer">
-                Show background panel
-              </label>
-            </div>
+
+            <form.Field name="bg">
+              {(field) => (
+                <FormSwitch
+                  label="Show background panel"
+                  checked={field.state.value}
+                  onCheckedChange={(checked) => field.handleChange(checked)}
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
         </CollapsibleSection>
 
         {/* Section 6: Signature Line */}
         <CollapsibleSection title="Signature Line" defaultOpen={true} storageKey="text-line">
-            <div className="flex items-center gap-3">
-              <Switch
-                id="line"
-                checked={params.line}
-                onCheckedChange={(checked) => updateParam('line', checked)}
-              />
-              <label htmlFor="line" className="text-sm text-dark-muted cursor-pointer">
-                Show signature line
-              </label>
-            </div>
+            <form.Field name="line">
+              {(field) => (
+                <FormSwitch
+                  label="Show signature line"
+                  checked={field.state.value}
+                  onCheckedChange={(checked) => field.handleChange(checked)}
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
+
             {params.line && (
               <>
-                <div>
-                  <label className="config-label">Line Style</label>
-                  <FormSelect
-                    value={params.linestyle}
-                    onValueChange={(value) => updateParam('linestyle', value as any)}
-                    options={[
-                      { value: 'solid', label: 'Solid' },
-                      { value: 'dashed', label: 'Dashed' },
-                      { value: 'dotted', label: 'Dotted' },
-                      { value: 'gradient', label: 'Gradient' },
-                      { value: 'slant', label: 'Slant' },
-                      { value: 'wave', label: 'Wave' },
-                      { value: 'swirl', label: 'Swirl' },
-                      { value: 'bracket', label: 'Bracket' },
-                    ]}
-                  />
-                </div>
+                <form.Field name="linestyle">
+                  {(field) => (
+                    <FormSelectInput
+                      label="Line Style"
+                      value={field.state.value}
+                      onChange={(val) => field.handleChange(val as any)}
+                      options={[
+                        { value: 'solid', label: 'Solid' },
+                        { value: 'dashed', label: 'Dashed' },
+                        { value: 'dotted', label: 'Dotted' },
+                        { value: 'gradient', label: 'Gradient' },
+                        { value: 'slant', label: 'Slant' },
+                        { value: 'wave', label: 'Wave' },
+                        { value: 'swirl', label: 'Swirl' },
+                        { value: 'bracket', label: 'Bracket' },
+                      ]}
+                      error={field.state.meta.errors?.[0]}
+                    />
+                  )}
+                </form.Field>
 
-                <div>
-                  <label className="config-label">Line Animation</label>
-                  <FormSelect
-                    value={params.lineanim}
-                    onValueChange={(value) => updateParam('lineanim', value as any)}
-                    options={[
-                      { value: 'none', label: 'None' },
-                      { value: 'slide', label: 'Slide' },
-                      { value: 'grow', label: 'Grow' },
-                      { value: 'pulse', label: 'Pulse' },
-                    ]}
-                  />
-                </div>
+                <form.Field name="lineanim">
+                  {(field) => (
+                    <FormSelectInput
+                      label="Line Animation"
+                      value={field.state.value}
+                      onChange={(val) => field.handleChange(val as any)}
+                      options={[
+                        { value: 'none', label: 'None' },
+                        { value: 'slide', label: 'Slide' },
+                        { value: 'grow', label: 'Grow' },
+                        { value: 'pulse', label: 'Pulse' },
+                      ]}
+                      error={field.state.meta.errors?.[0]}
+                    />
+                  )}
+                </form.Field>
 
-                <div>
-                  <label className="config-label">Line Position</label>
-                  <FormSelect
-                    value={params.linepos}
-                    onValueChange={(value) => updateParam('linepos', value as any)}
-                    options={[
-                      { value: 'top', label: 'Top' },
-                      { value: 'bottom', label: 'Bottom' },
-                      { value: 'both', label: 'Both' },
-                    ]}
-                  />
-                </div>
+                <form.Field name="linepos">
+                  {(field) => (
+                    <FormSelectInput
+                      label="Line Position"
+                      value={field.state.value}
+                      onChange={(val) => field.handleChange(val as any)}
+                      options={[
+                        { value: 'top', label: 'Top' },
+                        { value: 'bottom', label: 'Bottom' },
+                        { value: 'both', label: 'Both' },
+                      ]}
+                      error={field.state.meta.errors?.[0]}
+                    />
+                  )}
+                </form.Field>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <NumberSlider
-                    label="Line Length"
-                    value={params.linelength}
-                    onChange={(val) => updateParam('linelength', val)}
-                    min={0}
-                    max={100}
-                    unit="%"
-                    help="Line length as percentage of container width"
-                  />
-                  <NumberSlider
-                    label="Line Width"
-                    value={params.linewidth}
-                    onChange={(val) => updateParam('linewidth', val)}
-                    min={1}
-                    max={10}
-                    unit="px"
-                    help="Line stroke thickness"
-                  />
+                  <form.Field name="linelength">
+                    {(field) => (
+                      <FormNumberSlider
+                        label="Line Length"
+                        value={field.state.value}
+                        onChange={(val) => field.handleChange(val)}
+                        onBlur={field.handleBlur}
+                        min={0}
+                        max={100}
+                        unit="%"
+                        help="Line length as percentage of container width"
+                        error={field.state.meta.errors?.[0]}
+                      />
+                    )}
+                  </form.Field>
+
+                  <form.Field name="linewidth">
+                    {(field) => (
+                      <FormNumberSlider
+                        label="Line Width"
+                        value={field.state.value}
+                        onChange={(val) => field.handleChange(val)}
+                        onBlur={field.handleBlur}
+                        min={1}
+                        max={10}
+                        unit="px"
+                        help="Line stroke thickness"
+                        error={field.state.meta.errors?.[0]}
+                      />
+                    )}
+                  </form.Field>
                 </div>
 
-                <NumberSlider
-                  label="Line Speed"
-                  value={params.linespeed}
-                  onChange={(val) => updateParam('linespeed', val)}
-                  min={0.5}
-                  max={5}
-                  step={0.1}
-                  unit="s"
-                  help="Animation speed in seconds"
-                />
+                <form.Field name="linespeed">
+                  {(field) => (
+                    <FormNumberSlider
+                      label="Line Speed"
+                      value={field.state.value}
+                      onChange={(val) => field.handleChange(val)}
+                      onBlur={field.handleBlur}
+                      min={0.5}
+                      max={5}
+                      step={0.1}
+                      unit="s"
+                      help="Animation speed in seconds"
+                      error={field.state.meta.errors?.[0]}
+                    />
+                  )}
+                </form.Field>
               </>
             )}
         </CollapsibleSection>
@@ -421,131 +549,175 @@ function TextConfigurator() {
         <CollapsibleSection title="Animations" defaultOpen={true} storageKey="text-animations">
             <div>
               <label className="config-label">Entrance Animation</label>
-              <AnimationSelect
-                value={params.entrance}
-                onValueChange={(value) => updateParam('entrance', value as any)}
-                options={[
-                  { value: 'none', label: 'None' },
-                  { value: 'fade', label: 'Fade' },
-                  { value: 'slideUp', label: 'Slide Up' },
-                  { value: 'slideDown', label: 'Slide Down' },
-                  { value: 'slideLeft', label: 'Slide Left' },
-                  { value: 'slideRight', label: 'Slide Right' },
-                  { value: 'scale', label: 'Scale' },
-                  { value: 'bounce', label: 'Bounce' },
-                  { value: 'typewriter', label: 'Typewriter' },
-                  { value: 'flipIn', label: 'Flip In' },
-                  { value: 'zoomBounce', label: 'Zoom Bounce' },
-                  { value: 'rotateIn', label: 'Rotate In' },
-                  { value: 'zoomIn', label: 'Zoom In' },
-                  { value: 'stagger', label: 'Stagger' },
-                ]}
-              />
+              <form.Field name="entrance">
+                {(field) => (
+                  <AnimationSelect
+                    value={field.state.value}
+                    onValueChange={(value) => field.handleChange(value as any)}
+                    options={[
+                      { value: 'none', label: 'None' },
+                      { value: 'fade', label: 'Fade' },
+                      { value: 'slideUp', label: 'Slide Up' },
+                      { value: 'slideDown', label: 'Slide Down' },
+                      { value: 'slideLeft', label: 'Slide Left' },
+                      { value: 'slideRight', label: 'Slide Right' },
+                      { value: 'scale', label: 'Scale' },
+                      { value: 'bounce', label: 'Bounce' },
+                      { value: 'typewriter', label: 'Typewriter' },
+                      { value: 'flipIn', label: 'Flip In' },
+                      { value: 'zoomBounce', label: 'Zoom Bounce' },
+                      { value: 'rotateIn', label: 'Rotate In' },
+                      { value: 'zoomIn', label: 'Zoom In' },
+                      { value: 'stagger', label: 'Stagger' },
+                    ]}
+                  />
+                )}
+              </form.Field>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <NumberSlider
-                label="Entrance Speed"
-                value={params.entrancespeed}
-                onChange={(val) => updateParam('entrancespeed', val)}
-                min={0.1}
-                max={5}
-                step={0.1}
-                unit="s"
-                help="Duration of entrance animation"
-              />
-              <NumberSlider
-                label="Entrance Delay"
-                value={params.delay}
-                onChange={(val) => updateParam('delay', val)}
-                min={0}
-                max={10}
-                step={0.1}
-                unit="s"
-                help="Delay before animation starts"
-              />
+              <form.Field name="entrancespeed">
+                {(field) => (
+                  <FormNumberSlider
+                    label="Entrance Speed"
+                    value={field.state.value}
+                    onChange={(val) => field.handleChange(val)}
+                    onBlur={field.handleBlur}
+                    min={0.1}
+                    max={5}
+                    step={0.1}
+                    unit="s"
+                    help="Duration of entrance animation"
+                    error={field.state.meta.errors?.[0]}
+                  />
+                )}
+              </form.Field>
+
+              <form.Field name="delay">
+                {(field) => (
+                  <FormNumberSlider
+                    label="Entrance Delay"
+                    value={field.state.value}
+                    onChange={(val) => field.handleChange(val)}
+                    onBlur={field.handleBlur}
+                    min={0}
+                    max={10}
+                    step={0.1}
+                    unit="s"
+                    help="Delay before animation starts"
+                    error={field.state.meta.errors?.[0]}
+                  />
+                )}
+              </form.Field>
             </div>
 
             <div>
               <label className="config-label">Exit Animation</label>
-              <AnimationSelect
-                value={params.exit}
-                onValueChange={(value) => updateParam('exit', value as any)}
-                options={[
-                  { value: 'none', label: 'None' },
-                  { value: 'fade', label: 'Fade' },
-                  { value: 'slideDown', label: 'Slide Down' },
-                  { value: 'slideUp', label: 'Slide Up' },
-                  { value: 'slideLeft', label: 'Slide Left' },
-                  { value: 'slideRight', label: 'Slide Right' },
-                  { value: 'scale', label: 'Scale' },
-                  { value: 'fadeLeft', label: 'Fade Left' },
-                  { value: 'zoomOut', label: 'Zoom Out' },
-                  { value: 'rotateOut', label: 'Rotate Out' },
-                  { value: 'flipOut', label: 'Flip Out' },
-                ]}
-              />
+              <form.Field name="exit">
+                {(field) => (
+                  <AnimationSelect
+                    value={field.state.value}
+                    onValueChange={(value) => field.handleChange(value as any)}
+                    options={[
+                      { value: 'none', label: 'None' },
+                      { value: 'fade', label: 'Fade' },
+                      { value: 'slideDown', label: 'Slide Down' },
+                      { value: 'slideUp', label: 'Slide Up' },
+                      { value: 'slideLeft', label: 'Slide Left' },
+                      { value: 'slideRight', label: 'Slide Right' },
+                      { value: 'scale', label: 'Scale' },
+                      { value: 'fadeLeft', label: 'Fade Left' },
+                      { value: 'zoomOut', label: 'Zoom Out' },
+                      { value: 'rotateOut', label: 'Rotate Out' },
+                      { value: 'flipOut', label: 'Flip Out' },
+                    ]}
+                  />
+                )}
+              </form.Field>
             </div>
 
             {params.exit !== 'none' && (
               <div className="grid grid-cols-2 gap-4">
-                <NumberSlider
-                  label="Exit Speed"
-                  value={params.exitspeed}
-                  onChange={(val) => updateParam('exitspeed', val)}
-                  min={0.1}
-                  max={5}
-                  step={0.1}
-                  unit="s"
-                  help="Duration of exit animation"
-                />
-                <NumberSlider
-                  label="Exit After"
-                  value={params.exitafter}
-                  onChange={(val) => updateParam('exitafter', val)}
-                  min={0}
-                  max={300}
-                  unit="s"
-                  help="Auto-exit after N seconds (0 = manual)"
-                />
+                <form.Field name="exitspeed">
+                  {(field) => (
+                    <FormNumberSlider
+                      label="Exit Speed"
+                      value={field.state.value}
+                      onChange={(val) => field.handleChange(val)}
+                      onBlur={field.handleBlur}
+                      min={0.1}
+                      max={5}
+                      step={0.1}
+                      unit="s"
+                      help="Duration of exit animation"
+                      error={field.state.meta.errors?.[0]}
+                    />
+                  )}
+                </form.Field>
+
+                <form.Field name="exitafter">
+                  {(field) => (
+                    <FormNumberSlider
+                      label="Exit After"
+                      value={field.state.value}
+                      onChange={(val) => field.handleChange(val)}
+                      onBlur={field.handleBlur}
+                      min={0}
+                      max={300}
+                      unit="s"
+                      help="Auto-exit after N seconds (0 = manual)"
+                      error={field.state.meta.errors?.[0]}
+                    />
+                  )}
+                </form.Field>
               </div>
             )}
         </CollapsibleSection>
 
         {/* Section 8: Loop Mode */}
         <CollapsibleSection title="Loop Mode" defaultOpen={false} storageKey="text-loop">
-            <div className="flex items-center gap-3">
-              <Switch
-                id="loop"
-                checked={params.loop}
-                onCheckedChange={(checked) => updateParam('loop', checked)}
-              />
-              <label htmlFor="loop" className="text-sm text-dark-muted cursor-pointer">
-                Enable loop mode (appear → hold → disappear → pause → repeat)
-              </label>
-            </div>
+            <form.Field name="loop">
+              {(field) => (
+                <FormSwitch
+                  label="Enable loop mode (appear → hold → disappear → pause → repeat)"
+                  checked={field.state.value}
+                  onCheckedChange={(checked) => field.handleChange(checked)}
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
+
             {params.loop && (
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="config-label">Hold Visible (s)</label>
-                  <FormInput
-                    type="number"
-                    value={params.hold}
-                    onChange={(e) => updateParam('hold', Number(e.target.value))}
-                    min="1"
-                    max="60"
-                  />
-                </div>
-                <div>
-                  <label className="config-label">Pause Hidden (s)</label>
-                  <FormInput
-                    type="number"
-                    value={params.pause}
-                    onChange={(e) => updateParam('pause', Number(e.target.value))}
-                    min="0"
-                    max="60"
-                  />
-                </div>
+                <form.Field name="hold">
+                  {(field) => (
+                    <FormNumberSlider
+                      label="Hold Visible"
+                      value={field.state.value}
+                      onChange={(val) => field.handleChange(val)}
+                      onBlur={field.handleBlur}
+                      min={1}
+                      max={60}
+                      unit="s"
+                      error={field.state.meta.errors?.[0]}
+                    />
+                  )}
+                </form.Field>
+
+                <form.Field name="pause">
+                  {(field) => (
+                    <FormNumberSlider
+                      label="Pause Hidden"
+                      value={field.state.value}
+                      onChange={(val) => field.handleChange(val)}
+                      onBlur={field.handleBlur}
+                      min={0}
+                      max={60}
+                      unit="s"
+                      error={field.state.meta.errors?.[0]}
+                    />
+                  )}
+                </form.Field>
               </div>
             )}
         </CollapsibleSection>
@@ -559,28 +731,38 @@ function TextConfigurator() {
         >
             <div>
               <label className="config-label">Gradient Preset</label>
-              <GradientGrid
-                value={params.gradient}
-                onValueChange={(value) => updateParam('gradient', value as any)}
-              />
-            </div>
-            <div className="flex items-center gap-3">
-              <Switch
-                id="textgradient"
-                checked={params.textgradient}
-                onCheckedChange={(checked) => updateParam('textgradient', checked)}
-              />
-              <label htmlFor="textgradient" className="text-sm text-dark-muted cursor-pointer">
-                Apply gradient to text
-              </label>
+              <form.Field name="gradient">
+                {(field) => (
+                  <GradientGrid
+                    value={field.state.value}
+                    onValueChange={(value) => field.handleChange(value as any)}
+                  />
+                )}
+              </form.Field>
             </div>
 
-            <ColorArrayInput
-              label="Custom Colors"
-              colors={params.colors}
-              onChange={(colors) => updateParam('colors', colors)}
-              maxColors={5}
-            />
+            <form.Field name="textgradient">
+              {(field) => (
+                <FormSwitch
+                  label="Apply gradient to text"
+                  checked={field.state.value}
+                  onCheckedChange={(checked) => field.handleChange(checked)}
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
+
+            <form.Field name="colors">
+              {(field) => (
+                <FormColorArray
+                  label="Custom Colors"
+                  colors={field.state.value}
+                  onChange={(colors) => field.handleChange(colors)}
+                  maxColors={5}
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
         </CollapsibleSection>
 
         {/* Help & Guides */}
