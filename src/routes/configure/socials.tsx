@@ -19,8 +19,80 @@ export const Route = createFileRoute('/configure/socials')({
   component: SocialsConfigurator,
 })
 
+type PlatformData = {
+  enabled: boolean
+  handle: string
+}
+
+type AllPlatforms = {
+  github: PlatformData
+  twitter: PlatformData
+  linkedin: PlatformData
+  youtube: PlatformData
+  instagram: PlatformData
+  twitch: PlatformData
+  kick: PlatformData
+  discord: PlatformData
+  website: PlatformData
+}
+
 function SocialsConfigurator() {
   const [params, setParams] = useState<SocialsOverlayParams>(SOCIALS_DEFAULTS)
+
+  // Parse show and handles into individual platform states
+  const [platforms, setPlatforms] = useState<AllPlatforms>(() => {
+    const showList = SOCIALS_DEFAULTS.show.split(',').filter(Boolean)
+    const handlesMap = SOCIALS_DEFAULTS.handles.split(',').reduce((acc, pair) => {
+      const [platform, handle] = pair.split(':')
+      if (platform && handle) acc[platform] = handle
+      return acc
+    }, {} as Record<string, string>)
+
+    return {
+      github: { enabled: showList.includes('github'), handle: handlesMap.github || '' },
+      twitter: { enabled: showList.includes('twitter'), handle: handlesMap.twitter || '' },
+      linkedin: { enabled: showList.includes('linkedin'), handle: handlesMap.linkedin || '' },
+      youtube: { enabled: showList.includes('youtube'), handle: handlesMap.youtube || '' },
+      instagram: { enabled: showList.includes('instagram'), handle: handlesMap.instagram || '' },
+      twitch: { enabled: showList.includes('twitch'), handle: handlesMap.twitch || '' },
+      kick: { enabled: showList.includes('kick'), handle: handlesMap.kick || '' },
+      discord: { enabled: showList.includes('discord'), handle: handlesMap.discord || '' },
+      website: { enabled: showList.includes('website'), handle: handlesMap.website || '' },
+    }
+  })
+
+  // Update params when platforms change
+  const updatePlatforms = (newPlatforms: AllPlatforms) => {
+    setPlatforms(newPlatforms)
+
+    // Build show string
+    const show = Object.entries(newPlatforms)
+      .filter(([_, data]) => data.enabled)
+      .map(([platform, _]) => platform)
+      .join(',')
+
+    // Build handles string
+    const handles = Object.entries(newPlatforms)
+      .filter(([_, data]) => data.enabled && data.handle)
+      .map(([platform, data]) => `${platform}:${data.handle}`)
+      .join(',')
+
+    setParams((prev) => ({ ...prev, show, handles }))
+  }
+
+  const togglePlatform = (platform: keyof AllPlatforms) => {
+    updatePlatforms({
+      ...platforms,
+      [platform]: { ...platforms[platform], enabled: !platforms[platform].enabled },
+    })
+  }
+
+  const updateHandle = (platform: keyof AllPlatforms, handle: string) => {
+    updatePlatforms({
+      ...platforms,
+      [platform]: { ...platforms[platform], handle },
+    })
+  }
 
   const updateParam = <K extends keyof SocialsOverlayParams>(
     key: K,
@@ -42,32 +114,217 @@ function SocialsConfigurator() {
     <>
       {/* Section 1: Platforms */}
       <CollapsibleSection title="Platforms" defaultOpen={true} storageKey="socials-platforms">
-        <div>
-          <label className="config-label">Show Platforms (comma-separated)</label>
-          <input
-            className="config-input"
-            type="text"
-            value={params.show}
-            onChange={(e) => updateParam('show', e.target.value)}
-            placeholder="e.g., github,twitter,youtube"
-          />
-          <p className="text-xs text-dark-muted mt-1">
-            Available: github, twitter, linkedin, youtube, instagram, twitch, kick, discord, website
-          </p>
-        </div>
+        <p className="text-sm text-dark-muted mb-4">
+          Enable platforms and set custom handles for each social media account
+        </p>
 
-        <div>
-          <label className="config-label">Custom Handles (optional)</label>
-          <input
-            className="config-input"
-            type="text"
-            value={params.handles}
-            onChange={(e) => updateParam('handles', e.target.value)}
-            placeholder="e.g., github:user,youtube:@channel"
-          />
-          <p className="text-xs text-dark-muted mt-1">
-            Override default handles: platform:handle,platform:handle
-          </p>
+        <div className="space-y-3">
+          {/* GitHub */}
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-dark-surface/30 border border-dark-border">
+            <Switch
+              id="platform-github"
+              checked={platforms.github.enabled}
+              onCheckedChange={() => togglePlatform('github')}
+            />
+            <div className="flex-1">
+              <Label htmlFor="platform-github" className="text-sm font-medium mb-1 block">
+                GitHub
+              </Label>
+              {platforms.github.enabled && (
+                <input
+                  className="config-input h-8 text-sm"
+                  type="text"
+                  value={platforms.github.handle}
+                  onChange={(e) => updateHandle('github', e.target.value)}
+                  placeholder="username"
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Twitter/X */}
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-dark-surface/30 border border-dark-border">
+            <Switch
+              id="platform-twitter"
+              checked={platforms.twitter.enabled}
+              onCheckedChange={() => togglePlatform('twitter')}
+            />
+            <div className="flex-1">
+              <Label htmlFor="platform-twitter" className="text-sm font-medium mb-1 block">
+                Twitter / X
+              </Label>
+              {platforms.twitter.enabled && (
+                <input
+                  className="config-input h-8 text-sm"
+                  type="text"
+                  value={platforms.twitter.handle}
+                  onChange={(e) => updateHandle('twitter', e.target.value)}
+                  placeholder="@username"
+                />
+              )}
+            </div>
+          </div>
+
+          {/* LinkedIn */}
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-dark-surface/30 border border-dark-border">
+            <Switch
+              id="platform-linkedin"
+              checked={platforms.linkedin.enabled}
+              onCheckedChange={() => togglePlatform('linkedin')}
+            />
+            <div className="flex-1">
+              <Label htmlFor="platform-linkedin" className="text-sm font-medium mb-1 block">
+                LinkedIn
+              </Label>
+              {platforms.linkedin.enabled && (
+                <input
+                  className="config-input h-8 text-sm"
+                  type="text"
+                  value={platforms.linkedin.handle}
+                  onChange={(e) => updateHandle('linkedin', e.target.value)}
+                  placeholder="username"
+                />
+              )}
+            </div>
+          </div>
+
+          {/* YouTube */}
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-dark-surface/30 border border-dark-border">
+            <Switch
+              id="platform-youtube"
+              checked={platforms.youtube.enabled}
+              onCheckedChange={() => togglePlatform('youtube')}
+            />
+            <div className="flex-1">
+              <Label htmlFor="platform-youtube" className="text-sm font-medium mb-1 block">
+                YouTube
+              </Label>
+              {platforms.youtube.enabled && (
+                <input
+                  className="config-input h-8 text-sm"
+                  type="text"
+                  value={platforms.youtube.handle}
+                  onChange={(e) => updateHandle('youtube', e.target.value)}
+                  placeholder="@channelname"
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Instagram */}
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-dark-surface/30 border border-dark-border">
+            <Switch
+              id="platform-instagram"
+              checked={platforms.instagram.enabled}
+              onCheckedChange={() => togglePlatform('instagram')}
+            />
+            <div className="flex-1">
+              <Label htmlFor="platform-instagram" className="text-sm font-medium mb-1 block">
+                Instagram
+              </Label>
+              {platforms.instagram.enabled && (
+                <input
+                  className="config-input h-8 text-sm"
+                  type="text"
+                  value={platforms.instagram.handle}
+                  onChange={(e) => updateHandle('instagram', e.target.value)}
+                  placeholder="@username"
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Twitch */}
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-dark-surface/30 border border-dark-border">
+            <Switch
+              id="platform-twitch"
+              checked={platforms.twitch.enabled}
+              onCheckedChange={() => togglePlatform('twitch')}
+            />
+            <div className="flex-1">
+              <Label htmlFor="platform-twitch" className="text-sm font-medium mb-1 block">
+                Twitch
+              </Label>
+              {platforms.twitch.enabled && (
+                <input
+                  className="config-input h-8 text-sm"
+                  type="text"
+                  value={platforms.twitch.handle}
+                  onChange={(e) => updateHandle('twitch', e.target.value)}
+                  placeholder="username"
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Kick */}
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-dark-surface/30 border border-dark-border">
+            <Switch
+              id="platform-kick"
+              checked={platforms.kick.enabled}
+              onCheckedChange={() => togglePlatform('kick')}
+            />
+            <div className="flex-1">
+              <Label htmlFor="platform-kick" className="text-sm font-medium mb-1 block">
+                Kick
+              </Label>
+              {platforms.kick.enabled && (
+                <input
+                  className="config-input h-8 text-sm"
+                  type="text"
+                  value={platforms.kick.handle}
+                  onChange={(e) => updateHandle('kick', e.target.value)}
+                  placeholder="username"
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Discord */}
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-dark-surface/30 border border-dark-border">
+            <Switch
+              id="platform-discord"
+              checked={platforms.discord.enabled}
+              onCheckedChange={() => togglePlatform('discord')}
+            />
+            <div className="flex-1">
+              <Label htmlFor="platform-discord" className="text-sm font-medium mb-1 block">
+                Discord
+              </Label>
+              {platforms.discord.enabled && (
+                <input
+                  className="config-input h-8 text-sm"
+                  type="text"
+                  value={platforms.discord.handle}
+                  onChange={(e) => updateHandle('discord', e.target.value)}
+                  placeholder="server invite or username"
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Website */}
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-dark-surface/30 border border-dark-border">
+            <Switch
+              id="platform-website"
+              checked={platforms.website.enabled}
+              onCheckedChange={() => togglePlatform('website')}
+            />
+            <div className="flex-1">
+              <Label htmlFor="platform-website" className="text-sm font-medium mb-1 block">
+                Website
+              </Label>
+              {platforms.website.enabled && (
+                <input
+                  className="config-input h-8 text-sm"
+                  type="text"
+                  value={platforms.website.handle}
+                  onChange={(e) => updateHandle('website', e.target.value)}
+                  placeholder="example.com"
+                />
+              )}
+            </div>
+          </div>
         </div>
       </CollapsibleSection>
 

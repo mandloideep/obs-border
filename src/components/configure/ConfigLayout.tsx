@@ -109,13 +109,17 @@ export function ConfigLayout({
                 style={{
                   paddingBottom: `${(PREVIEW_SIZES[previewSize].height / PREVIEW_SIZES[previewSize].width) * 100}%`,
                 }}
-                className={`relative ${bgColors[previewBg]}`}
+                className="relative"
               >
+                {/* Background layer */}
+                <div className={`absolute inset-0 ${bgColors[previewBg]}`} />
+                {/* Iframe layer */}
                 <iframe
                   src={previewUrl}
                   className="absolute top-0 left-0 w-full h-full"
                   title={`${overlayTitle} Preview`}
                   allow="autoplay"
+                  style={{ backgroundColor: 'transparent' }}
                 />
               </div>
             </div>
