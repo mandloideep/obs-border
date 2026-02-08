@@ -1,6 +1,7 @@
 /**
  * Counter Overlay Configurator
  * Visual configuration UI for counter overlay parameters
+ * Now with TanStack Form + Zod validation + ShadCN UI components
  */
 
 import { createFileRoute } from '@tanstack/react-router'
@@ -8,10 +9,11 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { ConfigLayout } from '../../components/configure/ConfigLayout'
 import { URLGenerator } from '../../components/configure/URLGenerator'
 import { CollapsibleSection } from '../../components/configure/form/CollapsibleSection'
-import { NumberSlider } from '../../components/configure/form/NumberSlider'
-import { ColorArrayInput } from '../../components/configure/form/ColorArrayInput'
-import { FormInput } from '../../components/configure/form/FormInput'
-import { FormSelect } from '../../components/configure/form/FormSelect'
+import { FormNumberSlider } from '../../components/configure/form/FormNumberSlider'
+import { FormColorArray } from '../../components/configure/form/FormColorArray'
+import { FormTextInput } from '../../components/configure/form/FormTextInput'
+import { FormSelectInput } from '../../components/configure/form/FormSelectInput'
+import { FormSwitch } from '../../components/configure/form/FormSwitch'
 import { IconSelect } from '../../components/configure/form/IconSelect'
 import { FontSelect } from '../../components/configure/form/FontSelect'
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
@@ -21,29 +23,37 @@ import { Label } from '../../components/ui/label'
 import { COUNTER_DEFAULTS } from '../../types/counter.types'
 import type { CounterOverlayParams } from '../../types/counter.types'
 import { useHistory } from '../../hooks/useHistory'
+import { useFormWithHistory } from '../../hooks/useFormWithHistory'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { usePresets } from '../../hooks/usePresets'
 import { CounterOverlayHelp } from '../../components/configure/help/CounterOverlayHelp'
+import { counterOverlaySchema } from '../../lib/validation/schemas'
 
 export const Route = createFileRoute('/configure/counter')({
   component: CounterConfigurator,
 })
 
 function CounterConfigurator() {
-  const { state: params, setState: setParams, updateState, undo, redo, canUndo, canRedo } = useHistory<CounterOverlayParams>(COUNTER_DEFAULTS)
+  // History management (undo/redo + debouncing)
+  const history = useHistory<CounterOverlayParams>(COUNTER_DEFAULTS)
+  const { state: params, updateState, undo, redo, canUndo, canRedo } = history
 
-  const updateParam = <K extends keyof CounterOverlayParams>(
-    key: K,
-    value: CounterOverlayParams[K]
-  ) => {
-    setParams((prev) => ({ ...prev, [key]: value }))
-  }
+  // TanStack Form with Zod validation
+  const form = useFormWithHistory({
+    history,
+    schema: counterOverlaySchema,
+  })
 
   // Keyboard shortcuts
   useKeyboardShortcuts([
     { key: 'z', ctrlOrCmd: true, shift: false, callback: undo },
     { key: 'z', ctrlOrCmd: true, shift: true, callback: redo },
   ])
+
+  // API key persistence state (must be before presets management)
+  const [persistApiKeys, setPersistApiKeys] = useState<boolean>(() => {
+    return localStorage.getItem('obs-counter-persist-keys') === 'true'
+  })
 
   // Presets management
   const {
@@ -57,17 +67,26 @@ function CounterConfigurator() {
     importPreset,
   } = usePresets<CounterOverlayParams>('counter', COUNTER_DEFAULTS)
 
+  // Load preset with validation
   const handleLoadPreset = (name: string) => {
     const presetParams = loadPreset(name)
     if (presetParams) {
+      // Validate preset before loading
+      const result = counterOverlaySchema.safeParse(presetParams)
+      const dataToLoad = result.success ? result.data : presetParams
+
       // If persistApiKeys is enabled, preserve current API key
       if (persistApiKeys) {
         updateState({
-          ...presetParams,
+          ...dataToLoad,
           apikey: params.apikey, // Keep current API key
         })
       } else {
-        updateState(presetParams)
+        updateState(dataToLoad)
+      }
+
+      if (!result.success) {
+        console.error('Invalid preset:', result.error)
       }
     }
   }
@@ -82,11 +101,6 @@ function CounterConfigurator() {
     })
   }
 
-  // API key persistence state
-  const [persistApiKeys, setPersistApiKeys] = useState<boolean>(() => {
-    return localStorage.getItem('obs-counter-persist-keys') === 'true'
-  })
-
   // Load persisted keys on mount
   useEffect(() => {
     if (persistApiKeys) {
@@ -94,9 +108,10 @@ function CounterConfigurator() {
       const savedUserId = localStorage.getItem('obs-counter-userid')
       const savedMetric = localStorage.getItem('obs-counter-metric')
 
-      if (savedKey) updateParam('apikey', savedKey)
-      if (savedUserId) updateParam('userid', savedUserId)
-      if (savedMetric) updateParam('metric', savedMetric)
+      // Use form to update values
+      if (savedKey) form.setFieldValue('apikey', savedKey)
+      if (savedUserId) form.setFieldValue('userid', savedUserId)
+      if (savedMetric) form.setFieldValue('metric', savedMetric)
     }
   }, []) // Run once on mount
 
@@ -170,69 +185,94 @@ function CounterConfigurator() {
 
       {/* Section 1: Display */}
       <CollapsibleSection title="Display" defaultOpen={true} storageKey="counter-display">
-        <div>
-          <label className="config-label">Value</label>
-          <FormInput
-            type="number"
-            value={params.value}
-            onChange={(e) => updateParam('value', Number(e.target.value))}
-            min="0"
-          />
-          <p className="text-xs text-dark-muted mt-1">
-            Current counter value (used when service is "Custom")
-          </p>
-        </div>
+        <form.Field name="value">
+          {(field) => (
+            <FormTextInput
+              label="Value"
+              type="text"
+              value={String(field.state.value)}
+              onChange={(val) => field.handleChange(Number(val) || 0)}
+              onBlur={field.handleBlur}
+              placeholder="0"
+              help="Current counter value (used when service is 'Custom')"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
-        <div>
-          <label className="config-label">Label</label>
-          <FormInput
-            type="text"
-            value={params.label}
-            onChange={(e) => updateParam('label', e.target.value)}
-            placeholder="e.g., Subscribers"
-          />
+        <form.Field name="label">
+          {(field) => (
+            <FormTextInput
+              label="Label"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val)}
+              onBlur={field.handleBlur}
+              placeholder="e.g., Subscribers"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
+
+        <div className="grid grid-cols-2 gap-4">
+          <form.Field name="prefix">
+            {(field) => (
+              <FormTextInput
+                label="Prefix"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                placeholder="e.g., $"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
+
+          <form.Field name="suffix">
+            {(field) => (
+              <FormTextInput
+                label="Suffix"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                placeholder="e.g., K"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="config-label">Prefix</label>
-            <FormInput
-              type="text"
-              value={params.prefix}
-              onChange={(e) => updateParam('prefix', e.target.value)}
-              placeholder="e.g., $"
-            />
-          </div>
-          <div>
-            <label className="config-label">Suffix</label>
-            <FormInput
-              type="text"
-              value={params.suffix}
-              onChange={(e) => updateParam('suffix', e.target.value)}
-              placeholder="e.g., K"
-            />
-          </div>
-        </div>
+          <form.Field name="size">
+            {(field) => (
+              <FormNumberSlider
+                label="Number Size"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                min={12}
+                max={200}
+                unit="px"
+                help="Font size for the counter number"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
 
-        <div className="grid grid-cols-2 gap-4">
-          <NumberSlider
-            label="Number Size"
-            value={params.size}
-            onChange={(val) => updateParam('size', val)}
-            min={12}
-            max={200}
-            unit="px"
-            help="Font size for the counter number"
-          />
-          <NumberSlider
-            label="Label Size"
-            value={params.labelsize}
-            onChange={(val) => updateParam('labelsize', val)}
-            min={8}
-            max={100}
-            unit="px"
-            help="Font size for the label text"
-          />
+          <form.Field name="labelsize">
+            {(field) => (
+              <FormNumberSlider
+                label="Label Size"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                min={8}
+                max={100}
+                unit="px"
+                help="Font size for the label text"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
         </div>
       </CollapsibleSection>
 
@@ -240,242 +280,300 @@ function CounterConfigurator() {
       <CollapsibleSection title="Icon Customization" defaultOpen={true} storageKey="counter-icon">
         <div>
           <label className="config-label">Icon Type</label>
-          <IconSelect
-            value={params.icon}
-            onValueChange={(value) => updateParam('icon', value as any)}
-            options={[
-              { value: 'none', label: 'None' },
-              { value: 'star', label: 'Star' },
-              { value: 'heart', label: 'Heart' },
-              { value: 'fire', label: 'Fire' },
-              { value: 'trophy', label: 'Trophy' },
-              { value: 'users', label: 'Users' },
-              { value: 'eye', label: 'Eye' },
-              { value: 'trending', label: 'Trending Up' },
-              { value: 'zap', label: 'Zap / Lightning' },
-            ]}
-          />
+          <form.Field name="icon">
+            {(field) => (
+              <IconSelect
+                value={field.state.value}
+                onValueChange={(value) => field.handleChange(value as any)}
+                options={[
+                  { value: 'none', label: 'None' },
+                  { value: 'star', label: 'Star' },
+                  { value: 'heart', label: 'Heart' },
+                  { value: 'fire', label: 'Fire' },
+                  { value: 'trophy', label: 'Trophy' },
+                  { value: 'users', label: 'Users' },
+                  { value: 'eye', label: 'Eye' },
+                  { value: 'trending', label: 'Trending Up' },
+                  { value: 'zap', label: 'Zap / Lightning' },
+                ]}
+              />
+            )}
+          </form.Field>
         </div>
 
         {params.icon !== 'none' && (
-          <div>
-            <label className="config-label">Icon Color</label>
-            <FormInput
-              type="text"
-              value={params.iconcolor}
-              onChange={(e) => updateParam('iconcolor', e.target.value)}
-              placeholder="Leave empty for gradient color"
-            />
-            <p className="text-xs text-dark-muted mt-1">
-              Hex color (e.g., FF0000) or leave empty for gradient color
-            </p>
-          </div>
+          <form.Field name="iconcolor">
+            {(field) => (
+              <FormTextInput
+                label="Icon Color"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                placeholder="Leave empty for gradient color"
+                help="Hex color (e.g., FF0000) or leave empty for gradient color"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
         )}
       </CollapsibleSection>
 
       {/* Section 3: Layout */}
       <CollapsibleSection title="Layout" defaultOpen={false} storageKey="counter-layout">
-        <div>
-          <label className="config-label">Layout Style</label>
-          <FormSelect
-            value={params.layout}
-            onValueChange={(value) => updateParam('layout', value as any)}
-            options={[
-              { value: 'stack', label: 'Stack (vertical)' },
-              { value: 'inline', label: 'Inline (horizontal)' },
-            ]}
-          />
-        </div>
+        <form.Field name="layout">
+          {(field) => (
+            <FormSelectInput
+              label="Layout Style"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val as any)}
+              options={[
+                { value: 'stack', label: 'Stack (vertical)' },
+                { value: 'inline', label: 'Inline (horizontal)' },
+              ]}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
-        <div>
-          <label className="config-label">Alignment</label>
-          <FormSelect
-            value={params.align}
-            onValueChange={(value) => updateParam('align', value as any)}
-            options={[
-              { value: 'left', label: 'Left' },
-              { value: 'center', label: 'Center' },
-              { value: 'right', label: 'Right' },
-            ]}
-          />
+        <form.Field name="align">
+          {(field) => (
+            <FormSelectInput
+              label="Alignment"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val as any)}
+              options={[
+                { value: 'left', label: 'Left' },
+                { value: 'center', label: 'Center' },
+                { value: 'right', label: 'Right' },
+              ]}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
+
+        <div className="grid grid-cols-2 gap-4">
+          <form.Field name="counterpadx">
+            {(field) => (
+              <FormNumberSlider
+                label="Padding X"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                min={0}
+                max={100}
+                unit="px"
+                help="Horizontal padding around counter"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
+
+          <form.Field name="counterpady">
+            {(field) => (
+              <FormNumberSlider
+                label="Padding Y"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                min={0}
+                max={100}
+                unit="px"
+                help="Vertical padding around counter"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <NumberSlider
-            label="Padding X"
-            value={params.counterpadx}
-            onChange={(val) => updateParam('counterpadx', val)}
-            min={0}
-            max={100}
-            unit="px"
-            help="Horizontal padding around counter"
-          />
-          <NumberSlider
-            label="Padding Y"
-            value={params.counterpady}
-            onChange={(val) => updateParam('counterpady', val)}
-            min={0}
-            max={100}
-            unit="px"
-            help="Vertical padding around counter"
-          />
+          <form.Field name="width">
+            {(field) => (
+              <FormTextInput
+                label="Width"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                placeholder="auto"
+                help="CSS width (auto, 200px, 50%, etc.)"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
+
+          <form.Field name="height">
+            {(field) => (
+              <FormTextInput
+                label="Height"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                placeholder="auto"
+                help="CSS height (auto, 100px, etc.)"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="config-label">Width</label>
-            <FormInput
-              type="text"
-              value={params.width}
-              onChange={(e) => updateParam('width', e.target.value)}
-              placeholder="auto"
+        <form.Field name="bg">
+          {(field) => (
+            <FormSwitch
+              label="Show Background Panel"
+              checked={field.state.value}
+              onCheckedChange={(checked) => field.handleChange(checked)}
+              error={field.state.meta.errors?.[0]}
             />
-            <p className="text-xs text-dark-muted mt-1">
-              CSS width (auto, 200px, 50%, etc.)
-            </p>
-          </div>
-          <div>
-            <label className="config-label">Height</label>
-            <FormInput
-              type="text"
-              value={params.height}
-              onChange={(e) => updateParam('height', e.target.value)}
-              placeholder="auto"
-            />
-            <p className="text-xs text-dark-muted mt-1">
-              CSS height (auto, 100px, etc.)
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <Label htmlFor="bg">Show Background Panel</Label>
-          <Switch
-            id="bg"
-            checked={params.bg}
-            onCheckedChange={(checked) => updateParam('bg', checked)}
-          />
-        </div>
+          )}
+        </form.Field>
       </CollapsibleSection>
 
       {/* Section 4: Typography */}
       <CollapsibleSection title="Typography" defaultOpen={false} storageKey="counter-typography">
         <div>
           <label className="config-label">Font Family</label>
-          <FontSelect
-            value={params.font}
-            onValueChange={(value) => updateParam('font', value as any)}
-            showGoogleFonts={true}
-          />
+          <form.Field name="font">
+            {(field) => (
+              <FontSelect
+                value={field.state.value}
+                onValueChange={(value) => field.handleChange(value as any)}
+                showGoogleFonts={true}
+              />
+            )}
+          </form.Field>
         </div>
 
-        <div>
-          <label className="config-label">Number Color</label>
-          <FormInput
-            type="text"
-            value={params.numbercolor}
-            onChange={(e) => updateParam('numbercolor', e.target.value)}
-            placeholder="Leave empty for gradient color"
-          />
-          <p className="text-xs text-dark-muted mt-1">
-            Hex color (e.g., FF0000) or leave empty for gradient color
-          </p>
-        </div>
+        <form.Field name="numbercolor">
+          {(field) => (
+            <FormTextInput
+              label="Number Color"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val)}
+              onBlur={field.handleBlur}
+              placeholder="Leave empty for gradient color"
+              help="Hex color (e.g., FF0000) or leave empty for gradient color"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
       </CollapsibleSection>
 
       {/* Section 5: Number Formatting */}
       <CollapsibleSection title="Number Formatting" defaultOpen={false} storageKey="counter-formatting">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="separator">Thousands Separator</Label>
-          <Switch
-            id="separator"
-            checked={params.separator}
-            onCheckedChange={(checked) => updateParam('separator', checked)}
-          />
-        </div>
-        <p className="text-xs text-dark-muted -mt-2">Format as 1,000 instead of 1000</p>
+        <form.Field name="separator">
+          {(field) => (
+            <FormSwitch
+              label="Thousands Separator"
+              checked={field.state.value}
+              onCheckedChange={(checked) => field.handleChange(checked)}
+              help="Format as 1,000 instead of 1000"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
-        <NumberSlider
-          label="Decimal Places"
-          value={params.decimals}
-          onChange={(val) => updateParam('decimals', val)}
-          min={0}
-          max={3}
-          help="Number of decimal places to show"
-        />
+        <form.Field name="decimals">
+          {(field) => (
+            <FormNumberSlider
+              label="Decimal Places"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val)}
+              onBlur={field.handleBlur}
+              min={0}
+              max={3}
+              help="Number of decimal places to show"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
-        <div>
-          <label className="config-label">Notation Style</label>
-          <FormSelect
-            value={params.notation}
-            onValueChange={(value) => updateParam('notation', value as any)}
-            options={[
-              { value: 'standard', label: 'Standard (1,234,567)' },
-              { value: 'compact', label: 'Compact (1.2M)' },
-              { value: 'scientific', label: 'Scientific (1.23e6)' },
-            ]}
-          />
-        </div>
+        <form.Field name="notation">
+          {(field) => (
+            <FormSelectInput
+              label="Notation Style"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val as any)}
+              options={[
+                { value: 'standard', label: 'Standard (1,234,567)' },
+                { value: 'compact', label: 'Compact (1.2M)' },
+                { value: 'scientific', label: 'Scientific (1.23e6)' },
+              ]}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
-        <div className="flex items-center justify-between">
-          <Label htmlFor="abbreviate">Abbreviate Large Numbers</Label>
-          <Switch
-            id="abbreviate"
-            checked={params.abbreviate}
-            onCheckedChange={(checked) => updateParam('abbreviate', checked)}
-          />
-        </div>
-        <p className="text-xs text-dark-muted -mt-2">Display as 1K, 1M, 1B</p>
+        <form.Field name="abbreviate">
+          {(field) => (
+            <FormSwitch
+              label="Abbreviate Large Numbers"
+              checked={field.state.value}
+              onCheckedChange={(checked) => field.handleChange(checked)}
+              help="Display as 1K, 1M, 1B"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
       </CollapsibleSection>
 
       {/* Section 6: Animation */}
       <CollapsibleSection title="Animation" defaultOpen={false} storageKey="counter-animation">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="animate">Animate Count-Up</Label>
-          <Switch
-            id="animate"
-            checked={params.animate}
-            onCheckedChange={(checked) => updateParam('animate', checked)}
-          />
-        </div>
-        <p className="text-xs text-dark-muted -mt-2">Animate number changes with smooth counting</p>
+        <form.Field name="animate">
+          {(field) => (
+            <FormSwitch
+              label="Animate Count-Up"
+              checked={field.state.value}
+              onCheckedChange={(checked) => field.handleChange(checked)}
+              help="Animate number changes with smooth counting"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
         {params.animate && (
-          <NumberSlider
-            label="Animation Duration"
-            value={params.duration}
-            onChange={(val) => updateParam('duration', val)}
-            min={0.1}
-            max={10}
-            step={0.1}
-            unit="s"
-            help="Duration of count-up animation"
-          />
+          <form.Field name="duration">
+            {(field) => (
+              <FormNumberSlider
+                label="Animation Duration"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                min={0.1}
+                max={10}
+                step={0.1}
+                unit="s"
+                help="Duration of count-up animation"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
         )}
 
-        <div className="flex items-center justify-between">
-          <Label htmlFor="trend">Show Trend Arrow</Label>
-          <Switch
-            id="trend"
-            checked={params.trend}
-            onCheckedChange={(checked) => updateParam('trend', checked)}
-          />
-        </div>
-        <p className="text-xs text-dark-muted -mt-2">Display up/down arrow for value changes</p>
+        <form.Field name="trend">
+          {(field) => (
+            <FormSwitch
+              label="Show Trend Arrow"
+              checked={field.state.value}
+              onCheckedChange={(checked) => field.handleChange(checked)}
+              help="Display up/down arrow for value changes"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
         {params.trend && (
-          <div>
-            <label className="config-label">Trend Arrow Color</label>
-            <FormInput
-              type="text"
-              value={params.trendcolor}
-              onChange={(e) => updateParam('trendcolor', e.target.value)}
-              placeholder="10b981"
-            />
-            <p className="text-xs text-dark-muted mt-1">
-              Hex color for trend arrow (e.g., 10b981 for green)
-            </p>
-          </div>
+          <form.Field name="trendcolor">
+            {(field) => (
+              <FormTextInput
+                label="Trend Arrow Color"
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                onBlur={field.handleBlur}
+                placeholder="10b981"
+                help="Hex color for trend arrow (e.g., 10b981 for green)"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
         )}
       </CollapsibleSection>
 
@@ -520,95 +618,114 @@ function CounterConfigurator() {
           />
         </div>
 
-        <div>
-          <label className="config-label">Service</label>
-          <FormSelect
-            value={params.service}
-            onValueChange={(value) => updateParam('service', value as any)}
-            options={[
-              { value: 'custom', label: 'Custom (manual value)' },
-              { value: 'youtube', label: 'YouTube' },
-              { value: 'twitch', label: 'Twitch' },
-              { value: 'github', label: 'GitHub' },
-              { value: 'poll', label: 'Custom API (polling)' },
-            ]}
-          />
-        </div>
+        <form.Field name="service">
+          {(field) => (
+            <FormSelectInput
+              label="Service"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val as any)}
+              options={[
+                { value: 'custom', label: 'Custom (manual value)' },
+                { value: 'youtube', label: 'YouTube' },
+                { value: 'twitch', label: 'Twitch' },
+                { value: 'github', label: 'GitHub' },
+                { value: 'poll', label: 'Custom API (polling)' },
+              ]}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
         {params.service !== 'custom' && (
           <>
-            <div>
-              <label className="config-label">User ID / Username</label>
-              <FormInput
-                type="text"
-                value={params.userid}
-                onChange={(e) => updateParam('userid', e.target.value)}
-                placeholder="Enter username or channel ID"
-              />
-            </div>
+            <form.Field name="userid">
+              {(field) => (
+                <FormTextInput
+                  label="User ID / Username"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  placeholder="Enter username or channel ID"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
 
-            <div>
-              <label className="config-label">API Key</label>
-              <FormInput
-                type="password"
-                value={params.apikey}
-                onChange={(e) => updateParam('apikey', e.target.value)}
-                placeholder="Enter API key (if required)"
-              />
-              <p className="text-xs text-dark-muted mt-1">
-                Required for YouTube and Twitch. GitHub works without API key but has rate limits.
-              </p>
-            </div>
+            <form.Field name="apikey">
+              {(field) => (
+                <FormTextInput
+                  label="API Key"
+                  type="password"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  placeholder="Enter API key (if required)"
+                  help="Required for YouTube and Twitch. GitHub works without API key but has rate limits."
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
 
-            <div>
-              <label className="config-label">Metric</label>
-              <FormInput
-                type="text"
-                value={params.metric}
-                onChange={(e) => updateParam('metric', e.target.value)}
-                placeholder="e.g., followers, subscribers, stars"
-              />
-              <p className="text-xs text-dark-muted mt-1">
-                Specify which metric to track (service-dependent)
-              </p>
-            </div>
+            <form.Field name="metric">
+              {(field) => (
+                <FormTextInput
+                  label="Metric"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  placeholder="e.g., followers, subscribers, stars"
+                  help="Specify which metric to track (service-dependent)"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
 
             {params.service === 'poll' && (
               <>
-                <div>
-                  <label className="config-label">Custom API URL</label>
-                  <FormInput
-                    type="text"
-                    value={params.poll}
-                    onChange={(e) => updateParam('poll', e.target.value)}
-                    placeholder="https://api.example.com/stats"
-                  />
-                </div>
+                <form.Field name="poll">
+                  {(field) => (
+                    <FormTextInput
+                      label="Custom API URL"
+                      value={field.state.value}
+                      onChange={(val) => field.handleChange(val)}
+                      onBlur={field.handleBlur}
+                      placeholder="https://api.example.com/stats"
+                      error={field.state.meta.errors?.[0]}
+                    />
+                  )}
+                </form.Field>
 
-                <div>
-                  <label className="config-label">JSON Path</label>
-                  <FormInput
-                    type="text"
-                    value={params.pollkey}
-                    onChange={(e) => updateParam('pollkey', e.target.value)}
-                    placeholder="e.g., data.count or value"
-                  />
-                  <p className="text-xs text-dark-muted mt-1">
-                    Path to extract value from JSON response (dot notation)
-                  </p>
-                </div>
+                <form.Field name="pollkey">
+                  {(field) => (
+                    <FormTextInput
+                      label="JSON Path"
+                      value={field.state.value}
+                      onChange={(val) => field.handleChange(val)}
+                      onBlur={field.handleBlur}
+                      placeholder="e.g., data.count or value"
+                      help="Path to extract value from JSON response (dot notation)"
+                      error={field.state.meta.errors?.[0]}
+                    />
+                  )}
+                </form.Field>
               </>
             )}
 
-            <NumberSlider
-              label="Poll Rate"
-              value={params.pollrate}
-              onChange={(val) => updateParam('pollrate', val)}
-              min={5}
-              max={300}
-              unit="s"
-              help="How often to fetch new data from API"
-            />
+            <form.Field name="pollrate">
+              {(field) => (
+                <FormNumberSlider
+                  label="Poll Rate"
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                  onBlur={field.handleBlur}
+                  min={5}
+                  max={300}
+                  unit="s"
+                  help="How often to fetch new data from API"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
           </>
         )}
       </CollapsibleSection>
@@ -629,32 +746,44 @@ function CounterConfigurator() {
         storageKey="counter-theme"
         onReset={resetTheme}
       >
-        <div>
-          <label className="config-label">Theme</label>
-          <FormSelect
-            value={params.theme}
-            onValueChange={(value) => updateParam('theme', value as any)}
-            options={[
-              { value: 'dark', label: 'Dark' },
-              { value: 'light', label: 'Light' },
-            ]}
-          />
-        </div>
+        <form.Field name="theme">
+          {(field) => (
+            <FormSelectInput
+              label="Theme"
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val as any)}
+              options={[
+                { value: 'dark', label: 'Dark' },
+                { value: 'light', label: 'Light' },
+              ]}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
         <div>
           <label className="config-label">Gradient Preset</label>
-          <GradientGrid
-            value={params.gradient}
-            onValueChange={(value) => updateParam('gradient', value as any)}
-          />
+          <form.Field name="gradient">
+            {(field) => (
+              <GradientGrid
+                value={field.state.value}
+                onValueChange={(value) => field.handleChange(value as any)}
+              />
+            )}
+          </form.Field>
         </div>
 
-        <ColorArrayInput
-          label="Custom Colors"
-          colors={params.colors}
-          onChange={(colors) => updateParam('colors', colors)}
-          maxColors={5}
-        />
+        <form.Field name="colors">
+          {(field) => (
+            <FormColorArray
+              label="Custom Colors"
+              colors={field.state.value}
+              onChange={(colors) => field.handleChange(colors)}
+              maxColors={5}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
       </CollapsibleSection>
     </>
   )
