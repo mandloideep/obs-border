@@ -171,16 +171,7 @@ function TextConfigurator() {
             <FontSelect
               value={params.font}
               onValueChange={(value) => updateParam('font', value as any)}
-              options={[
-                { value: 'display', label: 'Display', fontFamily: 'Orbitron, sans-serif' },
-                { value: 'body', label: 'Body', fontFamily: 'Inter, sans-serif' },
-                { value: 'mono', label: 'Mono', fontFamily: 'JetBrains Mono, monospace' },
-                { value: 'custom1', label: 'Custom 1', fontFamily: 'system-ui, sans-serif' },
-                { value: 'custom2', label: 'Custom 2', fontFamily: 'system-ui, sans-serif' },
-                { value: 'custom3', label: 'Custom 3', fontFamily: 'system-ui, sans-serif' },
-                { value: 'custom4', label: 'Custom 4', fontFamily: 'system-ui, sans-serif' },
-                { value: 'custom5', label: 'Custom 5', fontFamily: 'system-ui, sans-serif' },
-              ]}
+              showGoogleFonts={true}
             />
           </div>
 

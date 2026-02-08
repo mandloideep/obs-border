@@ -138,7 +138,7 @@ export function CTAOverlay() {
 
   const theme = useTheme(params.theme)
   const gradient = useGradient(params.gradient, params.colors)
-  const fontFamily = useFontFamily('display')
+  const fontFamily = useFontFamily(params.font)
 
   // Loop mode state machine
   const [loopState, setLoopState] = useState<LoopState>('entering')

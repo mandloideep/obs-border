@@ -40,6 +40,7 @@ export interface CTAOverlayParams {
   customicon: string
 
   // Text Styling
+  font: FontFamily
   textpadx: number
   textpady: number
   letterspacing: number
@@ -97,6 +98,7 @@ export const CTA_DEFAULTS: CTAOverlayParams = {
   iconcolor: '',
   iconsize: 0,
   customicon: '',
+  font: 'display',
   textpadx: 0,
   textpady: 0,
   letterspacing: 0,

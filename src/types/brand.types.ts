@@ -201,6 +201,7 @@ export type FontFamily =
   | 'custom3'
   | 'custom4'
   | 'custom5'
+  | string // Allow any Google Font family name
 
 // ===== NUMBER NOTATION TYPES =====
 

@@ -12,6 +12,7 @@ import { ColorArrayInput } from '../../components/configure/form/ColorArrayInput
 import { FormInput } from '../../components/configure/form/FormInput'
 import { FormSelect } from '../../components/configure/form/FormSelect'
 import { IconSelect } from '../../components/configure/form/IconSelect'
+import { FontSelect } from '../../components/configure/form/FontSelect'
 import { AnimationSelect } from '../../components/configure/form/AnimationSelect'
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { PresetManager } from '../../components/configure/PresetManager'
@@ -245,6 +246,15 @@ function CTAConfigurator() {
 
       {/* Section 4: Text Styling (Hidden Parameters) */}
       <CollapsibleSection title="Text Styling" defaultOpen={false} storageKey="cta-text">
+        <div>
+          <label className="config-label">Font Family</label>
+          <FontSelect
+            value={params.font}
+            onValueChange={(value) => updateParam('font', value as any)}
+            showGoogleFonts={true}
+          />
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
           <NumberSlider
             label="Text Padding X"

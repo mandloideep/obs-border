@@ -12,6 +12,7 @@ import { NumberSlider } from '../../components/configure/form/NumberSlider'
 import { ColorArrayInput } from '../../components/configure/form/ColorArrayInput'
 import { FormInput } from '../../components/configure/form/FormInput'
 import { FormSelect } from '../../components/configure/form/FormSelect'
+import { FontSelect } from '../../components/configure/form/FontSelect'
 import { AnimationSelect } from '../../components/configure/form/AnimationSelect'
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { PresetManager } from '../../components/configure/PresetManager'
@@ -561,6 +562,15 @@ function SocialsConfigurator() {
 
       {/* Section 5: Text Styling (Hidden Parameters) */}
       <CollapsibleSection title="Text Styling" defaultOpen={false} storageKey="socials-text">
+        <div>
+          <label className="config-label">Font Family</label>
+          <FontSelect
+            value={params.font}
+            onValueChange={(value) => updateParam('font', value as any)}
+            showGoogleFonts={true}
+          />
+        </div>
+
         <NumberSlider
           label="Font Size Override"
           value={params.fontsize}

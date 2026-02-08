@@ -12,6 +12,7 @@ import type {
   ExitAnimation,
   ThemeName,
   GradientName,
+  FontFamily,
 } from './brand.types'
 
 /**
@@ -38,6 +39,7 @@ export interface SocialsOverlayParams {
   iconpadding: number
 
   // Text Styling
+  font: FontFamily
   fontsize: number
   fontweight: number
   letterspacing: number
@@ -102,6 +104,7 @@ export const SOCIALS_DEFAULTS: SocialsOverlayParams = {
   iconcolor: 'brand',
   iconsize: 0,
   iconpadding: 0,
+  font: 'body',
   fontsize: 0,
   fontweight: 500,
   letterspacing: 0,

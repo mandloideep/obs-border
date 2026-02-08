@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect, useMemo, type CSSProperties } from 'react'
 import { useOverlayParams } from '../../hooks/useOverlayParams'
-import { useTheme, useGradient, useBrand } from '../../hooks/useBrand'
+import { useTheme, useGradient, useBrand, useFontFamily } from '../../hooks/useBrand'
 import { OverlayPanel } from './OverlayPanel'
 import { PLATFORMS } from '../../config/platform-icons'
 import { SOCIALS_DEFAULTS, SIZE_MAP } from '../../types/socials.types'
@@ -28,6 +28,7 @@ export function SocialsOverlay() {
   const brand = useBrand()
   const theme = useTheme(params.theme)
   const gradient = useGradient(params.gradient, params.colors)
+  const fontFamily = useFontFamily(params.font)
 
   // Parse handles override
   const handleOverrides = useMemo(() => {
@@ -247,6 +248,7 @@ export function SocialsOverlay() {
 
   const handleStyle: CSSProperties = {
     color: theme.text,
+    fontFamily,
     fontSize: `${handleSize}px`,
     fontWeight: params.fontweight,
     letterSpacing: `${params.letterspacing}px`,
