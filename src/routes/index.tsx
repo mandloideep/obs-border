@@ -34,7 +34,7 @@ const overlays: OverlayCard[] = [
     icon: Square,
     configPath: '/configure/border',
     color: '#6366f1',
-    features: ['5 Shapes', '5 Styles', '4 Animations', 'Multicolor'],
+    features: ['27 Parameters', '5 Animations', 'Color Shift', 'Glow Effects'],
   },
   {
     name: 'Text',
@@ -42,7 +42,7 @@ const overlays: OverlayCard[] = [
     icon: Type,
     configPath: '/configure/text',
     color: '#8b5cf6',
-    features: ['6 Presets', 'Loop Mode', 'Typewriter', 'Signature Lines'],
+    features: ['52 Parameters', '25 Animations', '8 Line Styles', 'Custom Fonts'],
   },
   {
     name: 'Counter',
@@ -50,7 +50,7 @@ const overlays: OverlayCard[] = [
     icon: Hash,
     configPath: '/configure/counter',
     color: '#ec4899',
-    features: ['API Polling', 'Count-up', 'Trend Arrows', '8 Icons'],
+    features: ['35 Parameters', 'API Integration', 'Trend Arrows', '3 Notations'],
   },
   {
     name: 'CTA',
@@ -58,7 +58,7 @@ const overlays: OverlayCard[] = [
     icon: Megaphone,
     configPath: '/configure/cta',
     color: '#f59e0b',
-    features: ['5 Presets', '7 Icon Anims', 'Loop Mode', 'Decorations'],
+    features: ['30 Parameters', '7 Icon Anims', '4 Positions', 'Decorations'],
   },
   {
     name: 'Socials',
@@ -66,7 +66,7 @@ const overlays: OverlayCard[] = [
     icon: Users,
     configPath: '/configure/socials',
     color: '#10b981',
-    features: ['9 Platforms', 'Stagger', 'One-by-One', '4 Color Modes'],
+    features: ['35 Parameters', '9 Platforms', 'One-by-One', 'Brand Colors'],
   },
 ]
 
@@ -79,22 +79,22 @@ function Dashboard() {
           OBS Overlay Toolkit
         </h1>
         <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
-          Professional stream overlays with React, TypeScript, and 140+ customizable parameters.
-          Configure visually or copy URLs directly to OBS.
+          Professional stream overlays with React, TypeScript, and 179 customizable parameters.
+          Configure visually with live preview or copy URLs directly to OBS.
         </p>
 
         <div className="flex justify-center gap-8 mt-8 flex-wrap">
           <div className="flex items-center gap-2 text-sm text-gray-400">
             <Palette size={16} />
-            <span>21 Gradient Presets</span>
+            <span>8 Gradient Presets</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-400">
             <Zap size={16} />
-            <span>60fps Animations</span>
+            <span>Fixed Preview Panel</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-400">
             <Sparkles size={16} />
-            <span>Type-Safe Configuration</span>
+            <span>Collapsible Sections</span>
           </div>
         </div>
       </div>
