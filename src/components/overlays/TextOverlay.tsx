@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect, useMemo, type CSSProperties } from 'react'
 import { useOverlayParams } from '../../hooks/useOverlayParams'
-import { useGradient, useTheme, useFontFamily, useLoadCustomFonts } from '../../hooks/useBrand'
+import { useGradient, useTheme, useFontFamily, useLoadCustomFonts, useLoadGoogleFont } from '../../hooks/useBrand'
 import { EntranceAnimation } from '../animations/EntranceAnimation'
 import { ExitAnimation, useDelayedExit } from '../animations/ExitAnimation'
 import { OverlayContainer } from './OverlayContainer'
@@ -40,6 +40,9 @@ export function TextOverlay() {
   const theme = useTheme(params.theme)
   const gradient = useGradient(params.gradient, params.colors)
   const fontFamily = useFontFamily(params.font)
+
+  // Load Google Font if needed
+  useLoadGoogleFont(params.font)
 
   // Load custom fonts if specified
   useLoadCustomFonts(params.colors)

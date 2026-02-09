@@ -7,7 +7,7 @@
 import React, { useState, useEffect, useMemo, type CSSProperties } from 'react'
 import { ThumbsUp, Bell, Share2, Heart, Star, UserPlus, Youtube } from 'lucide-react'
 import { useOverlayParams } from '../../hooks/useOverlayParams'
-import { useTheme, useGradient, useFontFamily } from '../../hooks/useBrand'
+import { useTheme, useGradient, useFontFamily, useLoadGoogleFont } from '../../hooks/useBrand'
 import { EntranceAnimation } from '../animations/EntranceAnimation'
 import { ExitAnimation, useDelayedExit } from '../animations/ExitAnimation'
 import { OverlayContainer } from './OverlayContainer'
@@ -139,6 +139,9 @@ export function CTAOverlay() {
   const theme = useTheme(params.theme)
   const gradient = useGradient(params.gradient, params.colors)
   const fontFamily = useFontFamily(params.font)
+
+  // Load Google Font if needed
+  useLoadGoogleFont(params.font)
 
   // Loop mode state machine
   const [loopState, setLoopState] = useState<LoopState>('entering')

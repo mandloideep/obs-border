@@ -3,7 +3,7 @@
  * Convenient hooks for accessing brand configuration
  */
 
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
 import { useBrandContext } from '../contexts/BrandContext'
 import type {
   BrandConfig,
@@ -131,8 +131,14 @@ export function useFontFamily(
       return brand.fonts.display
     }
 
-    // Standard fonts
-    return brand.fonts[name as 'display' | 'body' | 'mono'] || brand.fonts.display
+    // Standard fonts (display, body, mono)
+    const standardFonts = ['display', 'body', 'mono']
+    if (standardFonts.includes(name)) {
+      return brand.fonts[name as 'display' | 'body' | 'mono'] || brand.fonts.display
+    }
+
+    // Google Fonts: Return font name with fallback
+    return `'${name}', -apple-system, sans-serif`
   }, [brand, fontName, customFonts])
 }
 
@@ -175,4 +181,43 @@ export function useLoadCustomFonts(customFonts?: string[]): void {
       }
     }
   }, [brand, customFonts])
+}
+
+/**
+ * Load a Google Font dynamically if needed
+ * Automatically skips standard fonts (display, body, mono) and custom fonts
+ *
+ * @param fontName - Font name (e.g., 'Roboto', 'display', 'custom1')
+ *
+ * @example
+ * ```tsx
+ * const fontFamily = useFontFamily(params.font)
+ * useLoadGoogleFont(params.font)  // Loads Google Font if needed
+ * ```
+ */
+export function useLoadGoogleFont(fontName?: string): void {
+  useEffect(() => {
+    if (!fontName) return
+
+    // Skip standard fonts (already loaded via brand)
+    if (['display', 'body', 'mono'].includes(fontName)) return
+
+    // Skip custom fonts (handled by useLoadCustomFonts)
+    if (fontName.startsWith('custom')) return
+
+    // Google Font URL with common weights
+    const fontUrl = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, '+')}:wght@300;400;500;600;700;800;900&display=swap`
+
+    // Check if already loaded
+    if (document.querySelector(`link[href="${fontUrl}"]`)) return
+
+    // Load font
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = fontUrl
+    link.setAttribute('data-google-font', fontName)
+    document.head.appendChild(link)
+
+    // Cleanup: Keep font loaded for performance (may be reused)
+  }, [fontName])
 }

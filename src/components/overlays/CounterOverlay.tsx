@@ -19,7 +19,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useOverlayParams } from '../../hooks/useOverlayParams'
-import { useTheme, useGradient, useFontFamily } from '../../hooks/useBrand'
+import { useTheme, useGradient, useFontFamily, useLoadGoogleFont } from '../../hooks/useBrand'
 import { useCountUpWithTrend } from '../../hooks/useCountUp'
 import { useAPIPolling } from '../../hooks/useAPIPolling'
 import { OverlayContainer } from './OverlayContainer'
@@ -95,6 +95,9 @@ export function CounterOverlay() {
   const theme = useTheme(params.theme)
   const gradient = useGradient(params.gradient, params.colors)
   const fontFamily = useFontFamily(params.font)
+
+  // Load Google Font if needed
+  useLoadGoogleFont(params.font)
 
   // API polling (if service configured)
   const apiConfig = params.service !== 'custom' ? API_SERVICES[params.service] : null
