@@ -205,8 +205,12 @@ function CounterConfigurator() {
             <FormTextInput
               label="Value"
               type="text"
-              value={String(field.state.value)}
-              onChange={(val) => field.handleChange(Number(val) || 0)}
+              value={String(params.value)}
+              onChange={(val) => {
+                const numVal = Number(val) || 0
+                field.handleChange(numVal)
+                updateState({ ...params, value: numVal })
+              }}
               onBlur={field.handleBlur}
               placeholder="0"
               help="Current counter value (used when service is 'Custom')"
@@ -219,8 +223,11 @@ function CounterConfigurator() {
           {(field) => (
             <FormTextInput
               label="Label"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val)}
+              value={params.label}
+              onChange={(val) => {
+                field.handleChange(val)
+                updateState({ ...params, label: val })
+              }}
               onBlur={field.handleBlur}
               placeholder="e.g., Subscribers"
               error={field.state.meta.errors?.[0]}
@@ -233,8 +240,11 @@ function CounterConfigurator() {
             {(field) => (
               <FormTextInput
                 label="Prefix"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.prefix}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, prefix: val })
+                }}
                 onBlur={field.handleBlur}
                 placeholder="e.g., $"
                 error={field.state.meta.errors?.[0]}
@@ -246,8 +256,11 @@ function CounterConfigurator() {
             {(field) => (
               <FormTextInput
                 label="Suffix"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.suffix}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, suffix: val })
+                }}
                 onBlur={field.handleBlur}
                 placeholder="e.g., K"
                 error={field.state.meta.errors?.[0]}
@@ -261,8 +274,11 @@ function CounterConfigurator() {
             {(field) => (
               <FormNumberSlider
                 label="Number Size"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.size}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, size: val })
+                }}
                 onBlur={field.handleBlur}
                 min={12}
                 max={200}
@@ -277,8 +293,11 @@ function CounterConfigurator() {
             {(field) => (
               <FormNumberSlider
                 label="Label Size"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.labelsize}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, labelsize: val })
+                }}
                 onBlur={field.handleBlur}
                 min={8}
                 max={100}
@@ -298,8 +317,11 @@ function CounterConfigurator() {
           <form.Field name="icon">
             {(field) => (
               <IconSelect
-                value={field.state.value}
-                onValueChange={(value) => field.handleChange(value as any)}
+                value={params.icon}
+                onValueChange={(value) => {
+                  field.handleChange(value as any)
+                  updateState({ ...params, icon: value as any })
+                }}
                 options={[
                   { value: 'none', label: 'None' },
                   { value: 'star', label: 'Star' },
@@ -321,8 +343,11 @@ function CounterConfigurator() {
             {(field) => (
               <FormTextInput
                 label="Icon Color"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.iconcolor}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, iconcolor: val })
+                }}
                 onBlur={field.handleBlur}
                 placeholder="Leave empty for gradient color"
                 help="Hex color (e.g., FF0000) or leave empty for gradient color"
@@ -339,8 +364,11 @@ function CounterConfigurator() {
           {(field) => (
             <FormSelectInput
               label="Layout Style"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val as any)}
+              value={params.layout}
+              onChange={(val) => {
+                field.handleChange(val as any)
+                updateState({ ...params, layout: val as any })
+              }}
               options={[
                 { value: 'stack', label: 'Stack (vertical)' },
                 { value: 'inline', label: 'Inline (horizontal)' },
@@ -354,8 +382,11 @@ function CounterConfigurator() {
           {(field) => (
             <FormSelectInput
               label="Alignment"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val as any)}
+              value={params.align}
+              onChange={(val) => {
+                field.handleChange(val as any)
+                updateState({ ...params, align: val as any })
+              }}
               options={[
                 { value: 'left', label: 'Left' },
                 { value: 'center', label: 'Center' },
@@ -371,8 +402,11 @@ function CounterConfigurator() {
             {(field) => (
               <FormNumberSlider
                 label="Padding X"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.counterpadx}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, counterpadx: val })
+                }}
                 onBlur={field.handleBlur}
                 min={0}
                 max={100}
@@ -387,8 +421,11 @@ function CounterConfigurator() {
             {(field) => (
               <FormNumberSlider
                 label="Padding Y"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.counterpady}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, counterpady: val })
+                }}
                 onBlur={field.handleBlur}
                 min={0}
                 max={100}
@@ -405,8 +442,11 @@ function CounterConfigurator() {
             {(field) => (
               <FormTextInput
                 label="Width"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.width}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, width: val })
+                }}
                 onBlur={field.handleBlur}
                 placeholder="auto"
                 help="CSS width (auto, 200px, 50%, etc.)"
@@ -419,8 +459,11 @@ function CounterConfigurator() {
             {(field) => (
               <FormTextInput
                 label="Height"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.height}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, height: val })
+                }}
                 onBlur={field.handleBlur}
                 placeholder="auto"
                 help="CSS height (auto, 100px, etc.)"
@@ -434,8 +477,11 @@ function CounterConfigurator() {
           {(field) => (
             <FormSwitch
               label="Show Background Panel"
-              checked={field.state.value}
-              onCheckedChange={(checked) => field.handleChange(checked)}
+              checked={params.bg}
+              onCheckedChange={(checked) => {
+                field.handleChange(checked)
+                updateState({ ...params, bg: checked })
+              }}
               error={field.state.meta.errors?.[0]}
             />
           )}
@@ -449,8 +495,11 @@ function CounterConfigurator() {
           <form.Field name="font">
             {(field) => (
               <FontSelect
-                value={field.state.value}
-                onValueChange={(value) => field.handleChange(value as any)}
+                value={params.font}
+                onValueChange={(value) => {
+                  field.handleChange(value as any)
+                  updateState({ ...params, font: value as any })
+                }}
                 showGoogleFonts={true}
               />
             )}
@@ -461,8 +510,11 @@ function CounterConfigurator() {
           {(field) => (
             <FormTextInput
               label="Number Color"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val)}
+              value={params.numbercolor}
+              onChange={(val) => {
+                field.handleChange(val)
+                updateState({ ...params, numbercolor: val })
+              }}
               onBlur={field.handleBlur}
               placeholder="Leave empty for gradient color"
               help="Hex color (e.g., FF0000) or leave empty for gradient color"
@@ -478,8 +530,11 @@ function CounterConfigurator() {
           {(field) => (
             <FormSwitch
               label="Thousands Separator"
-              checked={field.state.value}
-              onCheckedChange={(checked) => field.handleChange(checked)}
+              checked={params.separator}
+              onCheckedChange={(checked) => {
+                field.handleChange(checked)
+                updateState({ ...params, separator: checked })
+              }}
               help="Format as 1,000 instead of 1000"
               error={field.state.meta.errors?.[0]}
             />
@@ -490,8 +545,11 @@ function CounterConfigurator() {
           {(field) => (
             <FormNumberSlider
               label="Decimal Places"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val)}
+              value={params.decimals}
+              onChange={(val) => {
+                field.handleChange(val)
+                updateState({ ...params, decimals: val })
+              }}
               onBlur={field.handleBlur}
               min={0}
               max={3}
@@ -505,8 +563,11 @@ function CounterConfigurator() {
           {(field) => (
             <FormSelectInput
               label="Notation Style"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val as any)}
+              value={params.notation}
+              onChange={(val) => {
+                field.handleChange(val as any)
+                updateState({ ...params, notation: val as any })
+              }}
               options={[
                 { value: 'standard', label: 'Standard (1,234,567)' },
                 { value: 'compact', label: 'Compact (1.2M)' },
@@ -521,8 +582,11 @@ function CounterConfigurator() {
           {(field) => (
             <FormSwitch
               label="Abbreviate Large Numbers"
-              checked={field.state.value}
-              onCheckedChange={(checked) => field.handleChange(checked)}
+              checked={params.abbreviate}
+              onCheckedChange={(checked) => {
+                field.handleChange(checked)
+                updateState({ ...params, abbreviate: checked })
+              }}
               help="Display as 1K, 1M, 1B"
               error={field.state.meta.errors?.[0]}
             />
@@ -536,8 +600,11 @@ function CounterConfigurator() {
           {(field) => (
             <FormSwitch
               label="Animate Count-Up"
-              checked={field.state.value}
-              onCheckedChange={(checked) => field.handleChange(checked)}
+              checked={params.animate}
+              onCheckedChange={(checked) => {
+                field.handleChange(checked)
+                updateState({ ...params, animate: checked })
+              }}
               help="Animate number changes with smooth counting"
               error={field.state.meta.errors?.[0]}
             />
@@ -549,8 +616,11 @@ function CounterConfigurator() {
             {(field) => (
               <FormNumberSlider
                 label="Animation Duration"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.duration}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, duration: val })
+                }}
                 onBlur={field.handleBlur}
                 min={0.1}
                 max={10}
@@ -567,8 +637,11 @@ function CounterConfigurator() {
           {(field) => (
             <FormSwitch
               label="Show Trend Arrow"
-              checked={field.state.value}
-              onCheckedChange={(checked) => field.handleChange(checked)}
+              checked={params.trend}
+              onCheckedChange={(checked) => {
+                field.handleChange(checked)
+                updateState({ ...params, trend: checked })
+              }}
               help="Display up/down arrow for value changes"
               error={field.state.meta.errors?.[0]}
             />
@@ -580,8 +653,11 @@ function CounterConfigurator() {
             {(field) => (
               <FormTextInput
                 label="Trend Arrow Color"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.trendcolor}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, trendcolor: val })
+                }}
                 onBlur={field.handleBlur}
                 placeholder="10b981"
                 help="Hex color for trend arrow (e.g., 10b981 for green)"
@@ -637,8 +713,11 @@ function CounterConfigurator() {
           {(field) => (
             <FormSelectInput
               label="Service"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val as any)}
+              value={params.service}
+              onChange={(val) => {
+                field.handleChange(val as any)
+                updateState({ ...params, service: val as any })
+              }}
               options={[
                 { value: 'custom', label: 'Custom (manual value)' },
                 { value: 'youtube', label: 'YouTube' },
@@ -657,8 +736,11 @@ function CounterConfigurator() {
               {(field) => (
                 <FormTextInput
                   label="User ID / Username"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.userid}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, userid: val })
+                  }}
                   onBlur={field.handleBlur}
                   placeholder="Enter username or channel ID"
                   error={field.state.meta.errors?.[0]}
@@ -671,8 +753,11 @@ function CounterConfigurator() {
                 <FormTextInput
                   label="API Key"
                   type="password"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.apikey}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, apikey: val })
+                  }}
                   onBlur={field.handleBlur}
                   placeholder="Enter API key (if required)"
                   help="Required for YouTube and Twitch. GitHub works without API key but has rate limits."
@@ -685,8 +770,11 @@ function CounterConfigurator() {
               {(field) => (
                 <FormTextInput
                   label="Metric"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.metric}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, metric: val })
+                  }}
                   onBlur={field.handleBlur}
                   placeholder="e.g., followers, subscribers, stars"
                   help="Specify which metric to track (service-dependent)"
@@ -701,8 +789,11 @@ function CounterConfigurator() {
                   {(field) => (
                     <FormTextInput
                       label="Custom API URL"
-                      value={field.state.value}
-                      onChange={(val) => field.handleChange(val)}
+                      value={params.poll}
+                      onChange={(val) => {
+                        field.handleChange(val)
+                        updateState({ ...params, poll: val })
+                      }}
                       onBlur={field.handleBlur}
                       placeholder="https://api.example.com/stats"
                       error={field.state.meta.errors?.[0]}
@@ -714,8 +805,11 @@ function CounterConfigurator() {
                   {(field) => (
                     <FormTextInput
                       label="JSON Path"
-                      value={field.state.value}
-                      onChange={(val) => field.handleChange(val)}
+                      value={params.pollkey}
+                      onChange={(val) => {
+                        field.handleChange(val)
+                        updateState({ ...params, pollkey: val })
+                      }}
                       onBlur={field.handleBlur}
                       placeholder="e.g., data.count or value"
                       help="Path to extract value from JSON response (dot notation)"
@@ -730,8 +824,11 @@ function CounterConfigurator() {
               {(field) => (
                 <FormNumberSlider
                   label="Poll Rate"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.pollrate}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, pollrate: val })
+                  }}
                   onBlur={field.handleBlur}
                   min={5}
                   max={300}
@@ -765,8 +862,11 @@ function CounterConfigurator() {
           {(field) => (
             <FormSelectInput
               label="Theme"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val as any)}
+              value={params.theme}
+              onChange={(val) => {
+                field.handleChange(val as any)
+                updateState({ ...params, theme: val as any })
+              }}
               options={[
                 { value: 'dark', label: 'Dark' },
                 { value: 'light', label: 'Light' },
@@ -781,8 +881,11 @@ function CounterConfigurator() {
           <form.Field name="gradient">
             {(field) => (
               <GradientGrid
-                value={field.state.value}
-                onValueChange={(value) => field.handleChange(value as any)}
+                value={params.gradient}
+                onValueChange={(value) => {
+                  field.handleChange(value as any)
+                  updateState({ ...params, gradient: value as any })
+                }}
                 onBlur={field.handleBlur}
               />
             )}
@@ -793,8 +896,11 @@ function CounterConfigurator() {
           {(field) => (
             <FormColorArray
               label="Custom Colors"
-              colors={field.state.value}
-              onChange={(colors) => field.handleChange(colors)}
+              colors={params.colors}
+              onChange={(colors) => {
+                field.handleChange(colors)
+                updateState({ ...params, colors })
+              }}
               maxColors={5}
               error={field.state.meta.errors?.[0]}
             />

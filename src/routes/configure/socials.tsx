@@ -438,8 +438,11 @@ function SocialsConfigurator() {
           {(field) => (
             <FormSelectInput
               label="Order Mode"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val as any)}
+              value={params.order}
+              onChange={(val) => {
+                field.handleChange(val as any)
+                updateState({ ...params, order: val as any })
+              }}
               options={[
                 { value: 'default', label: 'Default Order' },
                 { value: 'priority', label: 'Priority Order' },
@@ -454,8 +457,11 @@ function SocialsConfigurator() {
             {(field) => (
               <FormTextInput
                 label="Platform Priority"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.priority}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, priority: val })
+                }}
                 onBlur={field.handleBlur}
                 placeholder="e.g., youtube:1,github:2,twitter:3"
                 help="Set priority: platform:rank,platform:rank (lower rank appears first)"
@@ -472,8 +478,11 @@ function SocialsConfigurator() {
           {(field) => (
             <FormSelectInput
               label="Layout Direction"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val as any)}
+              value={params.layout}
+              onChange={(val) => {
+                field.handleChange(val as any)
+                updateState({ ...params, layout: val as any })
+              }}
               options={[
                 { value: 'horizontal', label: 'Horizontal' },
                 { value: 'vertical', label: 'Vertical' },
@@ -488,8 +497,11 @@ function SocialsConfigurator() {
           {(field) => (
             <FormSelectInput
               label="Size Preset"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val as any)}
+              value={params.size}
+              onChange={(val) => {
+                field.handleChange(val as any)
+                updateState({ ...params, size: val as any })
+              }}
               options={[
                 { value: 'sm', label: 'Small (icon: 20px, text: 13px)' },
                 { value: 'md', label: 'Medium (icon: 24px, text: 15px)' },
@@ -505,8 +517,11 @@ function SocialsConfigurator() {
           {(field) => (
             <FormNumberSlider
               label="Gap Between Items"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val)}
+              value={params.gap}
+              onChange={(val) => {
+                field.handleChange(val)
+                updateState({ ...params, gap: val })
+              }}
               onBlur={field.handleBlur}
               min={0}
               max={100}
@@ -521,8 +536,11 @@ function SocialsConfigurator() {
           {(field) => (
             <FormSwitch
               label="Show Platform Handles"
-              checked={field.state.value}
-              onCheckedChange={(checked) => field.handleChange(checked)}
+              checked={params.showtext}
+              onCheckedChange={(checked) => {
+                field.handleChange(checked)
+                updateState({ ...params, showtext: checked })
+              }}
               error={field.state.meta.errors?.[0]}
             />
           )}
@@ -532,8 +550,11 @@ function SocialsConfigurator() {
           {(field) => (
             <FormSwitch
               label="Show Background Panels"
-              checked={field.state.value}
-              onCheckedChange={(checked) => field.handleChange(checked)}
+              checked={params.bg}
+              onCheckedChange={(checked) => {
+                field.handleChange(checked)
+                updateState({ ...params, bg: checked })
+              }}
               error={field.state.meta.errors?.[0]}
             />
           )}
@@ -544,8 +565,11 @@ function SocialsConfigurator() {
             {(field) => (
               <FormNumberSlider
                 label="Border Radius"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.borderradius}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, borderradius: val })
+                }}
                 onBlur={field.handleBlur}
                 min={0}
                 max={32}
@@ -564,8 +588,11 @@ function SocialsConfigurator() {
           {(field) => (
             <FormSelectInput
               label="Icon Color Mode"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val as any)}
+              value={params.iconcolor}
+              onChange={(val) => {
+                field.handleChange(val as any)
+                updateState({ ...params, iconcolor: val as any })
+              }}
               options={[
                 { value: 'brand', label: "Brand Colors (each platform's color)" },
                 { value: 'platform', label: 'Platform Colors' },
@@ -581,8 +608,11 @@ function SocialsConfigurator() {
           {(field) => (
             <FormNumberSlider
               label="Icon Size Override"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val)}
+              value={params.iconsize}
+              onChange={(val) => {
+                field.handleChange(val)
+                updateState({ ...params, iconsize: val })
+              }}
               onBlur={field.handleBlur}
               min={0}
               max={64}
@@ -597,8 +627,11 @@ function SocialsConfigurator() {
           {(field) => (
             <FormNumberSlider
               label="Icon Padding"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val)}
+              value={params.iconpadding}
+              onChange={(val) => {
+                field.handleChange(val)
+                updateState({ ...params, iconpadding: val })
+              }}
               onBlur={field.handleBlur}
               min={0}
               max={32}
@@ -613,8 +646,11 @@ function SocialsConfigurator() {
           {(field) => (
             <FormTextInput
               label="Custom Icons"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val)}
+              value={params.icons}
+              onChange={(val) => {
+                field.handleChange(val)
+                updateState({ ...params, icons: val })
+              }}
               onBlur={field.handleBlur}
               placeholder="e.g., github:star,twitter:bird"
               help="Override icons: platform:iconname,platform:iconname (Lucide icon names)"
@@ -631,8 +667,11 @@ function SocialsConfigurator() {
           <form.Field name="font">
             {(field) => (
               <FontSelect
-                value={field.state.value}
-                onValueChange={(value) => field.handleChange(value as any)}
+                value={params.font}
+                onValueChange={(value) => {
+                  field.handleChange(value as any)
+                  updateState({ ...params, font: value as any })
+                }}
                 showGoogleFonts={true}
               />
             )}
@@ -643,8 +682,11 @@ function SocialsConfigurator() {
           {(field) => (
             <FormNumberSlider
               label="Font Size Override"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val)}
+              value={params.fontsize}
+              onChange={(val) => {
+                field.handleChange(val)
+                updateState({ ...params, fontsize: val })
+              }}
               onBlur={field.handleBlur}
               min={0}
               max={32}
@@ -659,8 +701,11 @@ function SocialsConfigurator() {
           {(field) => (
             <FormNumberSlider
               label="Font Weight"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val)}
+              value={params.fontweight}
+              onChange={(val) => {
+                field.handleChange(val)
+                updateState({ ...params, fontweight: val })
+              }}
               onBlur={field.handleBlur}
               min={100}
               max={900}
@@ -675,8 +720,11 @@ function SocialsConfigurator() {
           {(field) => (
             <FormNumberSlider
               label="Letter Spacing"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val)}
+              value={params.letterspacing}
+              onChange={(val) => {
+                field.handleChange(val)
+                updateState({ ...params, letterspacing: val })
+              }}
               onBlur={field.handleBlur}
               min={-2}
               max={4}
@@ -696,8 +744,11 @@ function SocialsConfigurator() {
           <form.Field name="entrance">
             {(field) => (
               <AnimationSelect
-                value={field.state.value}
-                onValueChange={(value) => field.handleChange(value as any)}
+                value={params.entrance}
+                onValueChange={(value) => {
+                  field.handleChange(value as any)
+                  updateState({ ...params, entrance: value as any })
+                }}
                 onBlur={field.handleBlur}
                 options={[
                   { value: 'none', label: 'None' },
@@ -719,8 +770,11 @@ function SocialsConfigurator() {
             {(field) => (
               <FormNumberSlider
                 label="Speed"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.speed}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, speed: val })
+                }}
                 onBlur={field.handleBlur}
                 min={0.1}
                 max={5}
@@ -736,8 +790,11 @@ function SocialsConfigurator() {
             {(field) => (
               <FormNumberSlider
                 label="Delay"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.delay}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, delay: val })
+                }}
                 onBlur={field.handleBlur}
                 min={0}
                 max={10}
@@ -758,8 +815,11 @@ function SocialsConfigurator() {
           <form.Field name="exit">
             {(field) => (
               <AnimationSelect
-                value={field.state.value}
-                onValueChange={(value) => field.handleChange(value as any)}
+                value={params.exit}
+                onValueChange={(value) => {
+                  field.handleChange(value as any)
+                  updateState({ ...params, exit: value as any })
+                }}
                 onBlur={field.handleBlur}
                 options={[
                   { value: 'none', label: 'None' },
@@ -779,8 +839,11 @@ function SocialsConfigurator() {
               {(field) => (
                 <FormNumberSlider
                   label="Exit Speed"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.exitspeed}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, exitspeed: val })
+                  }}
                   onBlur={field.handleBlur}
                   min={0.1}
                   max={5}
@@ -796,8 +859,11 @@ function SocialsConfigurator() {
               {(field) => (
                 <FormNumberSlider
                   label="Exit After"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.exitafter}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, exitafter: val })
+                  }}
                   onBlur={field.handleBlur}
                   min={0}
                   max={300}
@@ -817,8 +883,11 @@ function SocialsConfigurator() {
           {(field) => (
             <FormSwitch
               label="Enable Loop Mode"
-              checked={field.state.value}
-              onCheckedChange={(checked) => field.handleChange(checked)}
+              checked={params.loop}
+              onCheckedChange={(checked) => {
+                field.handleChange(checked)
+                updateState({ ...params, loop: checked })
+              }}
               help="All appear → hold → all disappear → pause → repeat"
               error={field.state.meta.errors?.[0]}
             />
@@ -831,8 +900,11 @@ function SocialsConfigurator() {
               {(field) => (
                 <FormNumberSlider
                   label="Hold Visible"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.hold}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, hold: val })
+                  }}
                   onBlur={field.handleBlur}
                   min={1}
                   max={60}
@@ -847,8 +919,11 @@ function SocialsConfigurator() {
               {(field) => (
                 <FormNumberSlider
                   label="Pause Hidden"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.pause}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, pause: val })
+                  }}
                   onBlur={field.handleBlur}
                   min={0}
                   max={60}
@@ -868,8 +943,11 @@ function SocialsConfigurator() {
           {(field) => (
             <FormSwitch
               label="Enable One-by-One Mode"
-              checked={field.state.value}
-              onCheckedChange={(checked) => field.handleChange(checked)}
+              checked={params.onebyone}
+              onCheckedChange={(checked) => {
+                field.handleChange(checked)
+                updateState({ ...params, onebyone: checked })
+              }}
               help="Show one platform at a time (cycle through all)"
               error={field.state.meta.errors?.[0]}
             />
@@ -882,8 +960,11 @@ function SocialsConfigurator() {
               {(field) => (
                 <FormNumberSlider
                   label="Show Each"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.each}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, each: val })
+                  }}
                   onBlur={field.handleBlur}
                   min={1}
                   max={30}
@@ -898,8 +979,11 @@ function SocialsConfigurator() {
               {(field) => (
                 <FormNumberSlider
                   label="Pause Between"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.eachpause}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, eachpause: val })
+                  }}
                   onBlur={field.handleBlur}
                   min={0}
                   max={10}
@@ -926,8 +1010,11 @@ function SocialsConfigurator() {
           <form.Field name="gradient">
             {(field) => (
               <GradientGrid
-                value={field.state.value}
-                onValueChange={(value) => field.handleChange(value as any)}
+                value={params.gradient}
+                onValueChange={(value) => {
+                  field.handleChange(value as any)
+                  updateState({ ...params, gradient: value as any })
+                }}
                 onBlur={field.handleBlur}
               />
             )}
@@ -938,8 +1025,11 @@ function SocialsConfigurator() {
           {(field) => (
             <FormColorArray
               label="Custom Colors"
-              colors={field.state.value}
-              onChange={(colors) => field.handleChange(colors)}
+              colors={params.colors}
+              onChange={(colors) => {
+                field.handleChange(colors)
+                updateState({ ...params, colors })
+              }}
               maxColors={5}
               error={field.state.meta.errors?.[0]}
             />

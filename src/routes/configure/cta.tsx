@@ -113,8 +113,11 @@ function CTAConfigurator() {
           {(field) => (
             <FormSelectInput
               label="Preset"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val as any)}
+              value={params.preset}
+              onChange={(val) => {
+                field.handleChange(val as any)
+                updateState({ ...params, preset: val as any })
+              }}
               options={[
                 { value: 'custom', label: 'Custom' },
                 { value: 'subscribe', label: 'Subscribe' },
@@ -148,8 +151,11 @@ function CTAConfigurator() {
           {(field) => (
             <FormTextInput
               label="Main Text"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val)}
+              value={params.text}
+              onChange={(val) => {
+                field.handleChange(val)
+                updateState({ ...params, text: val })
+              }}
               onBlur={field.handleBlur}
               placeholder="e.g., Subscribe"
               error={field.state.meta.errors?.[0]}
@@ -161,8 +167,11 @@ function CTAConfigurator() {
           {(field) => (
             <FormTextInput
               label="Subtitle"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val)}
+              value={params.sub}
+              onChange={(val) => {
+                field.handleChange(val)
+                updateState({ ...params, sub: val })
+              }}
               onBlur={field.handleBlur}
               placeholder="e.g., for more content!"
               error={field.state.meta.errors?.[0]}
@@ -174,8 +183,11 @@ function CTAConfigurator() {
           {(field) => (
             <FormNumberSlider
               label="Text Size"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val)}
+              value={params.size}
+              onChange={(val) => {
+                field.handleChange(val)
+                updateState({ ...params, size: val })
+              }}
               onBlur={field.handleBlur}
               min={12}
               max={100}
@@ -194,8 +206,11 @@ function CTAConfigurator() {
           <form.Field name="icon">
             {(field) => (
               <IconSelect
-                value={field.state.value}
-                onValueChange={(value) => field.handleChange(value as any)}
+                value={params.icon}
+                onValueChange={(value) => {
+                  field.handleChange(value as any)
+                  updateState({ ...params, icon: value as any })
+                }}
                 options={[
                   { value: 'none', label: 'None' },
                   { value: 'like', label: 'Thumbs Up (Like)' },
@@ -217,8 +232,11 @@ function CTAConfigurator() {
               {(field) => (
                 <FormTextInput
                   label="Custom Icon (Lucide name)"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.customicon}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, customicon: val })
+                  }}
                   onBlur={field.handleBlur}
                   placeholder="Leave empty to use preset icon"
                   help="Override with any Lucide icon name (e.g., 'heart', 'star', 'bell')"
@@ -231,8 +249,11 @@ function CTAConfigurator() {
               {(field) => (
                 <FormSelectInput
                   label="Icon Position"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val as any)}
+                  value={params.iconpos}
+                  onChange={(val) => {
+                    field.handleChange(val as any)
+                    updateState({ ...params, iconpos: val as any })
+                  }}
                   options={[
                     { value: 'left', label: 'Left' },
                     { value: 'right', label: 'Right' },
@@ -249,8 +270,11 @@ function CTAConfigurator() {
               <form.Field name="iconanim">
                 {(field) => (
                   <AnimationSelect
-                    value={field.state.value}
-                    onValueChange={(value) => field.handleChange(value as any)}
+                    value={params.iconanim}
+                    onValueChange={(value) => {
+                      field.handleChange(value as any)
+                      updateState({ ...params, iconanim: value as any })
+                    }}
                     onBlur={field.handleBlur}
                     options={[
                       { value: 'none', label: 'None' },
@@ -271,8 +295,11 @@ function CTAConfigurator() {
               {(field) => (
                 <FormNumberSlider
                   label="Icon Size Override"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.iconsize}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, iconsize: val })
+                  }}
                   onBlur={field.handleBlur}
                   min={0}
                   max={100}
@@ -287,8 +314,11 @@ function CTAConfigurator() {
               {(field) => (
                 <FormTextInput
                   label="Icon Color"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.iconcolor}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, iconcolor: val })
+                  }}
                   onBlur={field.handleBlur}
                   placeholder="Leave empty for auto color"
                   help="Hex color (e.g., FF0000) or leave empty for gradient color"
@@ -307,8 +337,11 @@ function CTAConfigurator() {
           <form.Field name="font">
             {(field) => (
               <FontSelect
-                value={field.state.value}
-                onValueChange={(value) => field.handleChange(value as any)}
+                value={params.font}
+                onValueChange={(value) => {
+                  field.handleChange(value as any)
+                  updateState({ ...params, font: value as any })
+                }}
                 showGoogleFonts={true}
               />
             )}
@@ -320,8 +353,11 @@ function CTAConfigurator() {
             {(field) => (
               <FormNumberSlider
                 label="Text Padding X"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.textpadx}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, textpadx: val })
+                }}
                 onBlur={field.handleBlur}
                 min={0}
                 max={100}
@@ -336,8 +372,11 @@ function CTAConfigurator() {
             {(field) => (
               <FormNumberSlider
                 label="Text Padding Y"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.textpady}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, textpady: val })
+                }}
                 onBlur={field.handleBlur}
                 min={0}
                 max={100}
@@ -353,8 +392,11 @@ function CTAConfigurator() {
           {(field) => (
             <FormNumberSlider
               label="Letter Spacing"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val)}
+              value={params.letterspacing}
+              onChange={(val) => {
+                field.handleChange(val)
+                updateState({ ...params, letterspacing: val })
+              }}
               onBlur={field.handleBlur}
               min={-2}
               max={4}
@@ -370,8 +412,11 @@ function CTAConfigurator() {
           {(field) => (
             <FormNumberSlider
               label="Line Height"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val)}
+              value={params.lineheight}
+              onChange={(val) => {
+                field.handleChange(val)
+                updateState({ ...params, lineheight: val })
+              }}
               onBlur={field.handleBlur}
               min={0.8}
               max={2}
@@ -389,8 +434,11 @@ function CTAConfigurator() {
           {(field) => (
             <FormSelectInput
               label="Decoration Style"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val as any)}
+              value={params.decoration}
+              onChange={(val) => {
+                field.handleChange(val as any)
+                updateState({ ...params, decoration: val as any })
+              }}
               options={[
                 { value: 'none', label: 'None' },
                 { value: 'line', label: 'Line' },
@@ -407,8 +455,11 @@ function CTAConfigurator() {
             {(field) => (
               <FormTextInput
                 label="Decoration Color"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.decorationcolor}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, decorationcolor: val })
+                }}
                 onBlur={field.handleBlur}
                 placeholder="Leave empty for auto color"
                 help="Hex color or leave empty for gradient color"
@@ -426,8 +477,11 @@ function CTAConfigurator() {
             {(field) => (
               <FormSelectInput
                 label="Horizontal Align"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val as any)}
+                value={params.align}
+                onChange={(val) => {
+                  field.handleChange(val as any)
+                  updateState({ ...params, align: val as any })
+                }}
                 options={[
                   { value: 'left', label: 'Left' },
                   { value: 'center', label: 'Center' },
@@ -442,8 +496,11 @@ function CTAConfigurator() {
             {(field) => (
               <FormSelectInput
                 label="Vertical Align"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val as any)}
+                value={params.valign}
+                onChange={(val) => {
+                  field.handleChange(val as any)
+                  updateState({ ...params, valign: val as any })
+                }}
                 options={[
                   { value: 'top', label: 'Top' },
                   { value: 'center', label: 'Center' },
@@ -459,8 +516,11 @@ function CTAConfigurator() {
           {(field) => (
             <FormSwitch
               label="Show Background Panel"
-              checked={field.state.value}
-              onCheckedChange={(checked) => field.handleChange(checked)}
+              checked={params.bg}
+              onCheckedChange={(checked) => {
+                field.handleChange(checked)
+                updateState({ ...params, bg: checked })
+              }}
               error={field.state.meta.errors?.[0]}
             />
           )}
@@ -473,8 +533,11 @@ function CTAConfigurator() {
           {(field) => (
             <FormSelectInput
               label="Entrance Animation"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val as any)}
+              value={params.entrance}
+              onChange={(val) => {
+                field.handleChange(val as any)
+                updateState({ ...params, entrance: val as any })
+              }}
               options={[
                 { value: 'none', label: 'None' },
                 { value: 'fade', label: 'Fade' },
@@ -495,8 +558,11 @@ function CTAConfigurator() {
             {(field) => (
               <FormNumberSlider
                 label="Entrance Speed"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.entrancespeed}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, entrancespeed: val })
+                }}
                 onBlur={field.handleBlur}
                 min={0.1}
                 max={5}
@@ -512,8 +578,11 @@ function CTAConfigurator() {
             {(field) => (
               <FormNumberSlider
                 label="Entrance Delay"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.delay}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, delay: val })
+                }}
                 onBlur={field.handleBlur}
                 min={0}
                 max={10}
@@ -530,8 +599,11 @@ function CTAConfigurator() {
           {(field) => (
             <FormSelectInput
               label="Exit Animation"
-              value={field.state.value}
-              onChange={(val) => field.handleChange(val as any)}
+              value={params.exit}
+              onChange={(val) => {
+                field.handleChange(val as any)
+                updateState({ ...params, exit: val as any })
+              }}
               options={[
                 { value: 'none', label: 'None' },
                 { value: 'fade', label: 'Fade' },
@@ -549,8 +621,11 @@ function CTAConfigurator() {
             {(field) => (
               <FormNumberSlider
                 label="Exit Speed"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.exitspeed}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, exitspeed: val })
+                }}
                 onBlur={field.handleBlur}
                 min={0.1}
                 max={5}
@@ -570,8 +645,11 @@ function CTAConfigurator() {
           {(field) => (
             <FormSwitch
               label="Enable Loop Mode"
-              checked={field.state.value}
-              onCheckedChange={(checked) => field.handleChange(checked)}
+              checked={params.loop}
+              onCheckedChange={(checked) => {
+                field.handleChange(checked)
+                updateState({ ...params, loop: checked })
+              }}
               help="Appear → hold → disappear → pause → repeat"
               error={field.state.meta.errors?.[0]}
             />
@@ -584,8 +662,11 @@ function CTAConfigurator() {
               {(field) => (
                 <FormNumberSlider
                   label="Hold Visible"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.hold}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, hold: val })
+                  }}
                   onBlur={field.handleBlur}
                   min={1}
                   max={60}
@@ -600,8 +681,11 @@ function CTAConfigurator() {
               {(field) => (
                 <FormNumberSlider
                   label="Pause Hidden"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.pause}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, pause: val })
+                  }}
                   onBlur={field.handleBlur}
                   min={0}
                   max={60}
@@ -627,8 +711,11 @@ function CTAConfigurator() {
           <form.Field name="gradient">
             {(field) => (
               <GradientGrid
-                value={field.state.value}
-                onValueChange={(value) => field.handleChange(value as any)}
+                value={params.gradient}
+                onValueChange={(value) => {
+                  field.handleChange(value as any)
+                  updateState({ ...params, gradient: value as any })
+                }}
                 onBlur={field.handleBlur}
               />
             )}
@@ -639,8 +726,11 @@ function CTAConfigurator() {
           {(field) => (
             <FormColorArray
               label="Custom Colors"
-              colors={field.state.value}
-              onChange={(colors) => field.handleChange(colors)}
+              colors={params.colors}
+              onChange={(colors) => {
+                field.handleChange(colors)
+                updateState({ ...params, colors })
+              }}
               maxColors={5}
               error={field.state.meta.errors?.[0]}
             />

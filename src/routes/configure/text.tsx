@@ -115,8 +115,11 @@ function TextConfigurator() {
             {(field) => (
               <FormSelectInput
                 label="Preset"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val as any)}
+                value={params.preset}
+                onChange={(val) => {
+                  field.handleChange(val as any)
+                  updateState({ ...params, preset: val as any })
+                }}
                 options={[
                   { value: 'custom', label: 'Custom' },
                   { value: 'brb', label: 'Be Right Back' },
@@ -150,8 +153,11 @@ function TextConfigurator() {
               {(field) => (
                 <FormTextInput
                   label="Main Text"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.text}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, text: val })
+                  }}
                   onBlur={field.handleBlur}
                   placeholder="Enter main text"
                   error={field.state.meta.errors?.[0]}
@@ -163,8 +169,11 @@ function TextConfigurator() {
               {(field) => (
                 <FormTextInput
                   label="Subtitle"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.sub}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, sub: val })
+                  }}
                   onBlur={field.handleBlur}
                   placeholder="Enter subtitle (optional)"
                   error={field.state.meta.errors?.[0]}
@@ -177,8 +186,11 @@ function TextConfigurator() {
                 {(field) => (
                   <FormNumberSlider
                     label="Text Size"
-                    value={field.state.value}
-                    onChange={(val) => field.handleChange(val)}
+                    value={params.size}
+                    onChange={(val) => {
+                      field.handleChange(val)
+                      updateState({ ...params, size: val })
+                    }}
                     onBlur={field.handleBlur}
                     min={12}
                     max={200}
@@ -192,8 +204,11 @@ function TextConfigurator() {
                 {(field) => (
                   <FormNumberSlider
                     label="Subtitle Size"
-                    value={field.state.value}
-                    onChange={(val) => field.handleChange(val)}
+                    value={params.subsize}
+                    onChange={(val) => {
+                      field.handleChange(val)
+                      updateState({ ...params, subsize: val })
+                    }}
                     onBlur={field.handleBlur}
                     min={8}
                     max={100}
@@ -212,8 +227,11 @@ function TextConfigurator() {
             <form.Field name="font">
               {(field) => (
                 <FontSelect
-                  value={field.state.value}
-                  onValueChange={(value) => field.handleChange(value as any)}
+                  value={params.font}
+                  onValueChange={(value) => {
+                    field.handleChange(value as any)
+                    updateState({ ...params, font: value as any })
+                  }}
                   showGoogleFonts={true}
                 />
               )}
@@ -224,8 +242,11 @@ function TextConfigurator() {
             {(field) => (
               <FormNumberSlider
                 label="Font Weight"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.weight}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, weight: val })
+                }}
                 onBlur={field.handleBlur}
                 min={100}
                 max={900}
@@ -241,8 +262,11 @@ function TextConfigurator() {
               {(field) => (
                 <FormTextInput
                   label="Text Color"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.textcolor}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, textcolor: val })
+                  }}
                   onBlur={field.handleBlur}
                   placeholder="Leave empty for gradient"
                   error={field.state.meta.errors?.[0]}
@@ -254,8 +278,11 @@ function TextConfigurator() {
               {(field) => (
                 <FormTextInput
                   label="Subtitle Color"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.subcolor}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, subcolor: val })
+                  }}
                   onBlur={field.handleBlur}
                   placeholder="Leave empty for gradient"
                   error={field.state.meta.errors?.[0]}
@@ -272,8 +299,11 @@ function TextConfigurator() {
               {(field) => (
                 <FormNumberSlider
                   label="Padding X"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.padx}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, padx: val })
+                  }}
                   onBlur={field.handleBlur}
                   min={0}
                   max={100}
@@ -288,8 +318,11 @@ function TextConfigurator() {
               {(field) => (
                 <FormNumberSlider
                   label="Padding Y"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.pady}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, pady: val })
+                  }}
                   onBlur={field.handleBlur}
                   min={0}
                   max={100}
@@ -306,8 +339,11 @@ function TextConfigurator() {
               {(field) => (
                 <FormNumberSlider
                   label="Margin X"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.marginx}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, marginx: val })
+                  }}
                   onBlur={field.handleBlur}
                   min={0}
                   max={200}
@@ -322,8 +358,11 @@ function TextConfigurator() {
               {(field) => (
                 <FormNumberSlider
                   label="Margin Y"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.marginy}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, marginy: val })
+                  }}
                   onBlur={field.handleBlur}
                   min={0}
                   max={200}
@@ -340,8 +379,11 @@ function TextConfigurator() {
               {(field) => (
                 <FormNumberSlider
                   label="Offset X"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.offsetx}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, offsetx: val })
+                  }}
                   onBlur={field.handleBlur}
                   min={-500}
                   max={500}
@@ -356,8 +398,11 @@ function TextConfigurator() {
               {(field) => (
                 <FormNumberSlider
                   label="Offset Y"
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
+                  value={params.offsety}
+                  onChange={(val) => {
+                    field.handleChange(val)
+                    updateState({ ...params, offsety: val })
+                  }}
                   onBlur={field.handleBlur}
                   min={-500}
                   max={500}
@@ -373,8 +418,11 @@ function TextConfigurator() {
             {(field) => (
               <FormTextInput
                 label="Max Width"
-                value={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                value={params.maxwidth}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, maxwidth: val })
+                }}
                 onBlur={field.handleBlur}
                 placeholder="auto, 500px, 80%, etc."
                 error={field.state.meta.errors?.[0]}
@@ -390,8 +438,11 @@ function TextConfigurator() {
                 {(field) => (
                   <FormSelectInput
                     label="Horizontal Align"
-                    value={field.state.value}
-                    onChange={(val) => field.handleChange(val as any)}
+                    value={params.align}
+                    onChange={(val) => {
+                      field.handleChange(val as any)
+                      updateState({ ...params, align: val as any })
+                    }}
                     options={[
                       { value: 'left', label: 'Left' },
                       { value: 'center', label: 'Center' },
@@ -406,8 +457,11 @@ function TextConfigurator() {
                 {(field) => (
                   <FormSelectInput
                     label="Vertical Align"
-                    value={field.state.value}
-                    onChange={(val) => field.handleChange(val as any)}
+                    value={params.valign}
+                    onChange={(val) => {
+                      field.handleChange(val as any)
+                      updateState({ ...params, valign: val as any })
+                    }}
                     options={[
                       { value: 'top', label: 'Top' },
                       { value: 'center', label: 'Center' },
@@ -423,8 +477,11 @@ function TextConfigurator() {
               {(field) => (
                 <FormSwitch
                   label="Show background panel"
-                  checked={field.state.value}
-                  onCheckedChange={(checked) => field.handleChange(checked)}
+                  checked={params.bg}
+                  onCheckedChange={(checked) => {
+                    field.handleChange(checked)
+                    updateState({ ...params, bg: checked })
+                  }}
                   error={field.state.meta.errors?.[0]}
                 />
               )}
@@ -437,8 +494,11 @@ function TextConfigurator() {
               {(field) => (
                 <FormSwitch
                   label="Show signature line"
-                  checked={field.state.value}
-                  onCheckedChange={(checked) => field.handleChange(checked)}
+                  checked={params.line}
+                  onCheckedChange={(checked) => {
+                    field.handleChange(checked)
+                    updateState({ ...params, line: checked })
+                  }}
                   error={field.state.meta.errors?.[0]}
                 />
               )}
@@ -450,8 +510,11 @@ function TextConfigurator() {
                   {(field) => (
                     <FormSelectInput
                       label="Line Style"
-                      value={field.state.value}
-                      onChange={(val) => field.handleChange(val as any)}
+                      value={params.linestyle}
+                      onChange={(val) => {
+                        field.handleChange(val as any)
+                        updateState({ ...params, linestyle: val as any })
+                      }}
                       options={[
                         { value: 'solid', label: 'Solid' },
                         { value: 'dashed', label: 'Dashed' },
@@ -471,8 +534,11 @@ function TextConfigurator() {
                   {(field) => (
                     <FormSelectInput
                       label="Line Animation"
-                      value={field.state.value}
-                      onChange={(val) => field.handleChange(val as any)}
+                      value={params.lineanim}
+                      onChange={(val) => {
+                        field.handleChange(val as any)
+                        updateState({ ...params, lineanim: val as any })
+                      }}
                       options={[
                         { value: 'none', label: 'None' },
                         { value: 'slide', label: 'Slide' },
@@ -488,8 +554,11 @@ function TextConfigurator() {
                   {(field) => (
                     <FormSelectInput
                       label="Line Position"
-                      value={field.state.value}
-                      onChange={(val) => field.handleChange(val as any)}
+                      value={params.linepos}
+                      onChange={(val) => {
+                        field.handleChange(val as any)
+                        updateState({ ...params, linepos: val as any })
+                      }}
                       options={[
                         { value: 'top', label: 'Top' },
                         { value: 'bottom', label: 'Bottom' },
@@ -505,8 +574,11 @@ function TextConfigurator() {
                     {(field) => (
                       <FormNumberSlider
                         label="Line Length"
-                        value={field.state.value}
-                        onChange={(val) => field.handleChange(val)}
+                        value={params.linelength}
+                        onChange={(val) => {
+                          field.handleChange(val)
+                          updateState({ ...params, linelength: val })
+                        }}
                         onBlur={field.handleBlur}
                         min={0}
                         max={100}
@@ -521,8 +593,11 @@ function TextConfigurator() {
                     {(field) => (
                       <FormNumberSlider
                         label="Line Width"
-                        value={field.state.value}
-                        onChange={(val) => field.handleChange(val)}
+                        value={params.linewidth}
+                        onChange={(val) => {
+                          field.handleChange(val)
+                          updateState({ ...params, linewidth: val })
+                        }}
                         onBlur={field.handleBlur}
                         min={1}
                         max={10}
@@ -538,8 +613,11 @@ function TextConfigurator() {
                   {(field) => (
                     <FormNumberSlider
                       label="Line Speed"
-                      value={field.state.value}
-                      onChange={(val) => field.handleChange(val)}
+                      value={params.linespeed}
+                      onChange={(val) => {
+                        field.handleChange(val)
+                        updateState({ ...params, linespeed: val })
+                      }}
                       onBlur={field.handleBlur}
                       min={0.5}
                       max={5}
@@ -561,8 +639,11 @@ function TextConfigurator() {
               <form.Field name="entrance">
                 {(field) => (
                   <AnimationSelect
-                    value={field.state.value}
-                    onValueChange={(value) => field.handleChange(value as any)}
+                    value={params.entrance}
+                    onValueChange={(value) => {
+                      field.handleChange(value as any)
+                      updateState({ ...params, entrance: value as any })
+                    }}
                     onBlur={field.handleBlur}
                     options={[
                       { value: 'none', label: 'None' },
@@ -590,8 +671,11 @@ function TextConfigurator() {
                 {(field) => (
                   <FormNumberSlider
                     label="Entrance Speed"
-                    value={field.state.value}
-                    onChange={(val) => field.handleChange(val)}
+                    value={params.entrancespeed}
+                    onChange={(val) => {
+                      field.handleChange(val)
+                      updateState({ ...params, entrancespeed: val })
+                    }}
                     onBlur={field.handleBlur}
                     min={0.1}
                     max={5}
@@ -607,8 +691,11 @@ function TextConfigurator() {
                 {(field) => (
                   <FormNumberSlider
                     label="Entrance Delay"
-                    value={field.state.value}
-                    onChange={(val) => field.handleChange(val)}
+                    value={params.delay}
+                    onChange={(val) => {
+                      field.handleChange(val)
+                      updateState({ ...params, delay: val })
+                    }}
                     onBlur={field.handleBlur}
                     min={0}
                     max={10}
@@ -626,8 +713,11 @@ function TextConfigurator() {
               <form.Field name="exit">
                 {(field) => (
                   <AnimationSelect
-                    value={field.state.value}
-                    onValueChange={(value) => field.handleChange(value as any)}
+                    value={params.exit}
+                    onValueChange={(value) => {
+                      field.handleChange(value as any)
+                      updateState({ ...params, exit: value as any })
+                    }}
                     onBlur={field.handleBlur}
                     options={[
                       { value: 'none', label: 'None' },
@@ -653,8 +743,11 @@ function TextConfigurator() {
                   {(field) => (
                     <FormNumberSlider
                       label="Exit Speed"
-                      value={field.state.value}
-                      onChange={(val) => field.handleChange(val)}
+                      value={params.exitspeed}
+                      onChange={(val) => {
+                        field.handleChange(val)
+                        updateState({ ...params, exitspeed: val })
+                      }}
                       onBlur={field.handleBlur}
                       min={0.1}
                       max={5}
@@ -670,8 +763,11 @@ function TextConfigurator() {
                   {(field) => (
                     <FormNumberSlider
                       label="Exit After"
-                      value={field.state.value}
-                      onChange={(val) => field.handleChange(val)}
+                      value={params.exitafter}
+                      onChange={(val) => {
+                        field.handleChange(val)
+                        updateState({ ...params, exitafter: val })
+                      }}
                       onBlur={field.handleBlur}
                       min={0}
                       max={300}
@@ -691,8 +787,11 @@ function TextConfigurator() {
               {(field) => (
                 <FormSwitch
                   label="Enable loop mode (appear → hold → disappear → pause → repeat)"
-                  checked={field.state.value}
-                  onCheckedChange={(checked) => field.handleChange(checked)}
+                  checked={params.loop}
+                  onCheckedChange={(checked) => {
+                    field.handleChange(checked)
+                    updateState({ ...params, loop: checked })
+                  }}
                   error={field.state.meta.errors?.[0]}
                 />
               )}
@@ -704,8 +803,11 @@ function TextConfigurator() {
                   {(field) => (
                     <FormNumberSlider
                       label="Hold Visible"
-                      value={field.state.value}
-                      onChange={(val) => field.handleChange(val)}
+                      value={params.hold}
+                      onChange={(val) => {
+                        field.handleChange(val)
+                        updateState({ ...params, hold: val })
+                      }}
                       onBlur={field.handleBlur}
                       min={1}
                       max={60}
@@ -719,8 +821,11 @@ function TextConfigurator() {
                   {(field) => (
                     <FormNumberSlider
                       label="Pause Hidden"
-                      value={field.state.value}
-                      onChange={(val) => field.handleChange(val)}
+                      value={params.pause}
+                      onChange={(val) => {
+                        field.handleChange(val)
+                        updateState({ ...params, pause: val })
+                      }}
                       onBlur={field.handleBlur}
                       min={0}
                       max={60}
@@ -745,8 +850,11 @@ function TextConfigurator() {
               <form.Field name="gradient">
                 {(field) => (
                   <GradientGrid
-                    value={field.state.value}
-                    onValueChange={(value) => field.handleChange(value as any)}
+                    value={params.gradient}
+                    onValueChange={(value) => {
+                      field.handleChange(value as any)
+                      updateState({ ...params, gradient: value as any })
+                    }}
                     onBlur={field.handleBlur}
                   />
                 )}
@@ -757,8 +865,11 @@ function TextConfigurator() {
               {(field) => (
                 <FormSwitch
                   label="Apply gradient to text"
-                  checked={field.state.value}
-                  onCheckedChange={(checked) => field.handleChange(checked)}
+                  checked={params.textgradient}
+                  onCheckedChange={(checked) => {
+                    field.handleChange(checked)
+                    updateState({ ...params, textgradient: checked })
+                  }}
                   error={field.state.meta.errors?.[0]}
                 />
               )}
@@ -768,8 +879,11 @@ function TextConfigurator() {
               {(field) => (
                 <FormColorArray
                   label="Custom Colors"
-                  colors={field.state.value}
-                  onChange={(colors) => field.handleChange(colors)}
+                  colors={params.colors}
+                  onChange={(colors) => {
+                    field.handleChange(colors)
+                    updateState({ ...params, colors })
+                  }}
                   maxColors={5}
                   error={field.state.meta.errors?.[0]}
                 />
