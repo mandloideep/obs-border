@@ -27,7 +27,7 @@ import type { ParamValue } from '../types/brand.types'
  * // params.colors: string[]
  * ```
  */
-export function useOverlayParams<T extends Record<string, ParamValue>>(
+export function useOverlayParams<T extends Record<string, any>>(
   defaults: T
 ): T {
   const params = useMemo(() => {
