@@ -10,7 +10,7 @@ interface UseHistoryOptions {
   debounceMs?: number
 }
 
-interface UseHistoryReturn<T> {
+export interface UseHistoryReturn<T> {
   state: T
   setState: (newState: T | ((prev: T) => T)) => void
   updateState: (newState: T) => void // Immediate update without debounce

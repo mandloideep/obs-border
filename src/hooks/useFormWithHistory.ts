@@ -4,7 +4,6 @@
  */
 
 import { useForm } from '@tanstack/react-form'
-import { zodValidator } from '@tanstack/zod-form-adapter'
 import { useEffect, useRef } from 'react'
 import type { UseHistoryReturn } from './useHistory'
 import type { z } from 'zod'
@@ -49,19 +48,20 @@ export function useFormWithHistory<T extends Record<string, any>>({
   const updatingFromHistory = useRef(false)
 
   // Create TanStack Form instance
+  // No validatorAdapter needed — Zod v4 implements Standard Schema,
+  // which TanStack Form supports natively
   const form = useForm({
     defaultValues: history.state,
-    validatorAdapter: zodValidator(),
     validators: {
       // Validate on blur only (not onChange) for better UX
       // This prevents jittery error messages while typing
-      onBlur: schema,
+      onBlur: schema as any,
     },
   })
 
   // Sync Form → History: Update history when form changes
   useEffect(() => {
-    const unsubscribe = form.store.subscribe((formState) => {
+    const unsubscribe = form.store.subscribe(({ currentVal }) => {
       // Skip if we're currently updating from history (undo/redo)
       if (updatingFromHistory.current) {
         return
@@ -69,7 +69,7 @@ export function useFormWithHistory<T extends Record<string, any>>({
 
       // Guard against undefined values during form initialization
       // TanStack Form's subscription can fire before values are hydrated
-      if (formState.values === undefined || formState.values === null) {
+      if (currentVal.values === undefined || currentVal.values === null) {
         return
       }
 
@@ -78,7 +78,7 @@ export function useFormWithHistory<T extends Record<string, any>>({
       // This ensures preview updates immediately even before blur validation
       // useHistory's setState is debounced (150ms)
       // This prevents excessive history entries during rapid input
-      history.setState(formState.values as T)
+      history.setState(currentVal.values as T)
     })
 
     return unsubscribe
@@ -86,7 +86,7 @@ export function useFormWithHistory<T extends Record<string, any>>({
 
   // Sync History → Form: Update form when history changes (undo/redo)
   useEffect(() => {
-    const currentValues = form.getFieldValue('') // Get all form values
+    const currentValues = form.state.values
 
     // Only update if values actually changed
     // This prevents unnecessary re-renders
@@ -94,14 +94,8 @@ export function useFormWithHistory<T extends Record<string, any>>({
       // Set flag to prevent circular updates
       updatingFromHistory.current = true
 
-      // Update form with history state
-      // validate: false - Skip validation when restoring from history
-      // This allows invalid historical states to be restored
-      // (user might have had invalid state before validation was added)
-      form.update({
-        values: history.state as any,
-        fieldMeta: {},
-      })
+      // Reset form to history state (skips validation)
+      form.reset(history.state as any)
 
       // Clear flag after React finishes rendering
       // Using setTimeout ensures the flag is cleared after all effects run
