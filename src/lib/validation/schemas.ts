@@ -243,19 +243,10 @@ export const ctaOverlaySchema = z.object({
 
   // Icon
   icon: z.string(), // CTAIcon
-  iconanim: z.enum([
-    'none',
-    'bounce',
-    'pulse',
-    'spin',
-    'shake',
-    'tada',
-    'wobble',
-    'float',
-  ]),
+  iconanim: z.enum(['none', 'bounce', 'shake', 'pulse', 'spin', 'wiggle', 'flip', 'heartbeat']),
   iconpos: z.enum(['left', 'right', 'top', 'bottom']),
   iconcolor: hexColorValidator,
-  iconsize: rangeValidator(16, 200, 'px'),
+  iconsize: z.number().min(0).max(200),
   customicon: z.string(),
 
   // Text Styling
@@ -266,7 +257,7 @@ export const ctaOverlaySchema = z.object({
   lineheight: rangeValidator(0.8, 3),
 
   // Decoration
-  decoration: z.enum(['none', 'underline', 'overline', 'line-through', 'arrows']),
+  decoration: z.enum(['none', 'line', 'slant', 'swirl']),
   decorationcolor: hexColorValidator,
 
   // Layout
@@ -322,7 +313,7 @@ export const socialsOverlaySchema = z.object({
   handles: z.string(), // Override handles (github:user,youtube:@chan)
 
   // Layout
-  layout: z.enum(['horizontal', 'vertical', 'grid']),
+  layout: z.enum(['horizontal', 'vertical']),
   size: z.enum(['sm', 'md', 'lg', 'xl']),
   showtext: z.boolean(),
   bg: z.boolean(),
@@ -331,13 +322,13 @@ export const socialsOverlaySchema = z.object({
   borderradius: rangeValidator(0, 50, 'px'),
 
   // Icon Styling
-  iconcolor: z.enum(['brand', 'mono', 'gradient']),
-  iconsize: rangeValidator(16, 200, 'px'),
+  iconcolor: z.enum(['brand', 'platform', 'white', 'gradient']),
+  iconsize: z.number().min(0).max(200),
   iconpadding: rangeValidator(0, 50, 'px'),
 
   // Text Styling
   font: z.string(), // FontFamily
-  fontsize: rangeValidator(8, 100, 'px'),
+  fontsize: z.number().min(0).max(100),
   fontweight: z.number().min(100).max(900).multipleOf(100),
   letterspacing: rangeValidator(-5, 20, 'px'),
 

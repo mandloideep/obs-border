@@ -81,7 +81,7 @@ export interface CTAPreset {
   text?: string
   sub?: string
   icon?: CTAIcon
-  iconanim?: CTAIconAnimation
+  iconanim?: IconAnimation
 }
 
 /**
