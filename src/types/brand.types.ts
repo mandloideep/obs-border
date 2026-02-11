@@ -1,7 +1,40 @@
 /**
  * Brand Configuration Types
  * Complete type definitions for the OBS Overlay Toolkit brand system
+ * All union types are derived from the centralized constants file.
  */
+
+import {
+  ENTRANCE_ANIMATIONS,
+  EXIT_ANIMATIONS,
+  ICON_ANIMATIONS,
+  BORDER_ANIMATIONS,
+  LINE_ANIMATIONS,
+  SHAPES,
+  BORDER_STYLES,
+  LINE_STYLES,
+  DECORATION_STYLES,
+  HORIZONTAL_ALIGNS,
+  VERTICAL_ALIGNS,
+  LAYOUTS,
+  COUNTER_LAYOUTS,
+  ICON_POSITIONS,
+  LINE_POSITIONS,
+  SIZE_PRESETS,
+  COUNTER_ICONS,
+  CTA_ICONS,
+  ICON_COLOR_MODES,
+  NUMBER_NOTATIONS,
+  API_SERVICES,
+  THEMES,
+  GRADIENT_NAMES,
+  SOCIAL_PLATFORMS,
+  TEXT_PRESETS,
+  CTA_PRESETS,
+  PLATFORM_ORDERS,
+  STANDARD_FONT_NAMES,
+  LOOP_STATES,
+} from '../lib/constants'
 
 // ===== CORE BRAND TYPES =====
 
@@ -29,28 +62,7 @@ export interface ThemeConfig {
   light: ThemeColors
 }
 
-export type GradientName =
-  | 'indigo'
-  | 'cyan'
-  | 'sunset'
-  | 'emerald'
-  | 'neon'
-  | 'frost'
-  | 'fire'
-  | 'ocean'
-  | 'purple'
-  | 'mono'
-  | 'rainbow'
-  | 'lavender'
-  | 'crimson'
-  | 'mint'
-  | 'amber'
-  | 'navy'
-  | 'coral'
-  | 'slate'
-  | 'gold'
-  | 'teal'
-  | 'magenta'
+export type GradientName = typeof GRADIENT_NAMES[number]
 
 export type GradientMap = Record<GradientName, string[]>
 
@@ -59,18 +71,6 @@ export interface FontConfig {
   body: string
   mono: string
   custom: string[]
-}
-
-export interface SocialHandles {
-  github?: string
-  twitter?: string
-  linkedin?: string
-  youtube?: string
-  instagram?: string
-  twitch?: string
-  kick?: string
-  discord?: string
-  website?: string
 }
 
 export interface BrandConfig {
@@ -85,117 +85,62 @@ export interface BrandConfig {
 
 // ===== ANIMATION TYPES =====
 
-export type EntranceAnimation =
-  | 'fade'
-  | 'slideUp'
-  | 'slideDown'
-  | 'slideLeft'
-  | 'slideRight'
-  | 'scale'
-  | 'bounce'
-  | 'typewriter'
-  | 'flipIn'
-  | 'zoomBounce'
-  | 'rotateIn'
-  | 'zoomIn'
-  | 'stagger'
-  | 'none'
+export type EntranceAnimation = typeof ENTRANCE_ANIMATIONS[number]
 
-export type ExitAnimation =
-  | 'none'
-  | 'fade'
-  | 'slideDown'
-  | 'slideUp'
-  | 'slideLeft'
-  | 'slideRight'
-  | 'scale'
-  | 'fadeLeft'
-  | 'zoomOut'
-  | 'rotateOut'
-  | 'flipOut'
+export type ExitAnimation = typeof EXIT_ANIMATIONS[number]
 
-export type IconAnimation =
-  | 'bounce'
-  | 'shake'
-  | 'pulse'
-  | 'spin'
-  | 'wiggle'
-  | 'flip'
-  | 'heartbeat'
-  | 'none'
+export type IconAnimation = typeof ICON_ANIMATIONS[number]
 
-export type BorderAnimation = 'dash' | 'rotate' | 'pulse' | 'breathe' | 'none'
+export type BorderAnimation = typeof BORDER_ANIMATIONS[number]
 
-export type LineAnimation = 'slide' | 'grow' | 'pulse' | 'none'
+export type LineAnimation = typeof LINE_ANIMATIONS[number]
+
+export type LoopState = typeof LOOP_STATES[number]
 
 // ===== COMPONENT SHAPE/STYLE TYPES =====
 
-export type Shape = 'rect' | 'circle'
+export type Shape = typeof SHAPES[number]
 
-export type BorderStyle = 'solid' | 'dashed' | 'dotted' | 'double' | 'neon'
+export type BorderStyle = typeof BORDER_STYLES[number]
 
-export type LineStyle =
-  | 'solid'
-  | 'dashed'
-  | 'dotted'
-  | 'gradient'
-  | 'slant'
-  | 'wave'
-  | 'swirl'
-  | 'bracket'
+export type LineStyle = typeof LINE_STYLES[number]
 
-export type DecorationStyle = 'line' | 'slant' | 'swirl' | 'none'
+export type DecorationStyle = typeof DECORATION_STYLES[number]
 
 // ===== LAYOUT TYPES =====
 
-export type HorizontalAlign = 'left' | 'center' | 'right'
+export type HorizontalAlign = typeof HORIZONTAL_ALIGNS[number]
 
-export type VerticalAlign = 'top' | 'center' | 'bottom'
+export type VerticalAlign = typeof VERTICAL_ALIGNS[number]
 
-export type Layout = 'horizontal' | 'vertical'
+export type Layout = typeof LAYOUTS[number]
 
-export type CounterLayout = 'stack' | 'inline'
+export type CounterLayout = typeof COUNTER_LAYOUTS[number]
 
-export type IconPosition = 'left' | 'right' | 'top' | 'bottom'
+export type IconPosition = typeof ICON_POSITIONS[number]
 
-export type LinePosition = 'top' | 'bottom' | 'both'
+export type LinePosition = typeof LINE_POSITIONS[number]
 
 // ===== SIZE TYPES =====
 
-export type SizePreset = 'sm' | 'md' | 'lg' | 'xl'
+export type SizePreset = typeof SIZE_PRESETS[number]
 
 // ===== ICON TYPES =====
 
-export type CounterIcon =
-  | 'heart'
-  | 'star'
-  | 'users'
-  | 'eye'
-  | 'zap'
-  | 'fire'
-  | 'trophy'
-  | 'bell'
-  | 'none'
+export type CounterIcon = typeof COUNTER_ICONS[number]
 
 export type CTAIcon =
-  | 'like'
-  | 'sub'
-  | 'bell'
-  | 'share'
-  | 'heart'
-  | 'star'
-  | 'follow'
-  | 'none'
+  | typeof CTA_ICONS[number]
   | string // Allow any Lucide icon name
 
-export type IconColorMode = 'brand' | 'platform' | 'white' | 'gradient'
+export type IconColorMode = typeof ICON_COLOR_MODES[number]
 
 // ===== FONT TYPES =====
 
+export type StandardFontName = typeof STANDARD_FONT_NAMES[number]
+
 export type FontFamily =
-  | 'display'
-  | 'body'
-  | 'mono'
+  | StandardFontName
   | 'custom1'
   | 'custom2'
   | 'custom3'
@@ -205,46 +150,29 @@ export type FontFamily =
 
 // ===== NUMBER NOTATION TYPES =====
 
-export type NumberNotation = 'standard' | 'compact' | 'scientific'
+export type NumberNotation = typeof NUMBER_NOTATIONS[number]
 
 // ===== THEME TYPES =====
 
-export type ThemeName = 'dark' | 'light'
+export type ThemeName = typeof THEMES[number]
 
 // ===== SOCIAL PLATFORM TYPES =====
 
-export type SocialPlatform =
-  | 'github'
-  | 'twitter'
-  | 'linkedin'
-  | 'youtube'
-  | 'instagram'
-  | 'twitch'
-  | 'kick'
-  | 'discord'
-  | 'website'
+export type SocialPlatform = typeof SOCIAL_PLATFORMS[number]
+
+export type SocialHandles = Partial<Record<SocialPlatform, string>>
 
 // ===== API SERVICE TYPES =====
 
-export type APIService = 'custom' | 'youtube' | 'twitch' | 'github'
+export type APIService = typeof API_SERVICES[number]
 
 // ===== PRESET TYPES =====
 
-export type TextPresetName =
-  | 'brb'
-  | 'chatting'
-  | 'starting'
-  | 'ending'
-  | 'technical'
-  | 'custom'
+export type TextPresetName = typeof TEXT_PRESETS[number]
 
-export type CTAPresetName =
-  | 'subscribe'
-  | 'like'
-  | 'follow'
-  | 'share'
-  | 'notify'
-  | 'custom'
+export type CTAPresetName = typeof CTA_PRESETS[number]
+
+export type PlatformOrder = typeof PLATFORM_ORDERS[number]
 
 // ===== UTILITY TYPES =====
 

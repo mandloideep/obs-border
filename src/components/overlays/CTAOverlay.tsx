@@ -14,12 +14,9 @@ import { OverlayContainer } from './OverlayContainer'
 import { OverlayPanel } from './OverlayPanel'
 import { CTA_PRESETS } from '../../config/cta-presets'
 import { CTA_DEFAULTS } from '../../types/cta.types'
-import type { CTAOverlayParams, CTAIcon } from '../../types/cta.types'
-import type { IconAnimation } from '../../types/brand.types'
+import type { CTAOverlayParams } from '../../types/cta.types'
+import type { IconAnimation, LoopState } from '../../types/brand.types'
 import { createLinearGradient } from '../../utils/css.utils'
-
-// Loop state machine states
-type LoopState = 'entering' | 'visible' | 'exiting' | 'hidden'
 
 /**
  * Icon mapping from parameter to Lucide icon component

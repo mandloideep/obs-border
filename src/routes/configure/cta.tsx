@@ -20,6 +20,17 @@ import { FontSelect } from '../../components/configure/form/FontSelect'
 import { AnimationSelect } from '../../components/configure/form/AnimationSelect'
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { PresetManager } from '../../components/configure/PresetManager'
+import {
+  CTA_PRESET_OPTIONS,
+  CTA_ICON_OPTIONS,
+  ICON_ANIMATION_OPTIONS,
+  ICON_POSITION_OPTIONS,
+  DECORATION_STYLE_OPTIONS,
+  HORIZONTAL_ALIGN_OPTIONS,
+  VERTICAL_ALIGN_OPTIONS,
+  ENTRANCE_ANIMATION_OPTIONS,
+  EXIT_ANIMATION_OPTIONS,
+} from '../../lib/constants'
 import { CTA_DEFAULTS } from '../../types/cta.types'
 import type { CTAOverlayParams } from '../../types/cta.types'
 import { useHistory } from '../../hooks/useHistory'
@@ -119,14 +130,7 @@ function CTAConfigurator() {
                 field.handleChange(val as any)
                 updateState({ ...params, preset: val as any })
               }}
-              options={[
-                { value: 'custom', label: 'Custom' },
-                { value: 'subscribe', label: 'Subscribe' },
-                { value: 'like', label: 'Like & Subscribe' },
-                { value: 'follow', label: 'Follow' },
-                { value: 'share', label: 'Share' },
-                { value: 'notify', label: 'Turn on Notifications' },
-              ]}
+              options={CTA_PRESET_OPTIONS}
               error={field.state.meta.errors?.[0]}
             />
           )}
@@ -212,16 +216,7 @@ function CTAConfigurator() {
                   field.handleChange(value as any)
                   updateState({ ...params, icon: value as any })
                 }}
-                options={[
-                  { value: 'none', label: 'None' },
-                  { value: 'like', label: 'Thumbs Up (Like)' },
-                  { value: 'sub', label: 'YouTube Subscribe' },
-                  { value: 'bell', label: 'Bell (Notifications)' },
-                  { value: 'share', label: 'Share' },
-                  { value: 'heart', label: 'Heart' },
-                  { value: 'star', label: 'Star' },
-                  { value: 'follow', label: 'Follow' },
-                ]}
+                options={CTA_ICON_OPTIONS}
               />
             )}
           </form.Field>
@@ -255,12 +250,7 @@ function CTAConfigurator() {
                     field.handleChange(val as any)
                     updateState({ ...params, iconpos: val as any })
                   }}
-                  options={[
-                    { value: 'left', label: 'Left' },
-                    { value: 'right', label: 'Right' },
-                    { value: 'top', label: 'Top' },
-                    { value: 'bottom', label: 'Bottom' },
-                  ]}
+                  options={ICON_POSITION_OPTIONS}
                   error={field.state.meta.errors?.[0]}
                 />
               )}
@@ -277,16 +267,7 @@ function CTAConfigurator() {
                       updateState({ ...params, iconanim: value as any })
                     }}
                     onBlur={field.handleBlur}
-                    options={[
-                      { value: 'none', label: 'None' },
-                      { value: 'bounce', label: 'Bounce' },
-                      { value: 'shake', label: 'Shake' },
-                      { value: 'pulse', label: 'Pulse' },
-                      { value: 'spin', label: 'Spin' },
-                      { value: 'wiggle', label: 'Wiggle' },
-                      { value: 'flip', label: 'Flip' },
-                      { value: 'heartbeat', label: 'Heartbeat' },
-                    ]}
+                    options={ICON_ANIMATION_OPTIONS}
                   />
                 )}
               </form.Field>
@@ -440,12 +421,7 @@ function CTAConfigurator() {
                 field.handleChange(val as any)
                 updateState({ ...params, decoration: val as any })
               }}
-              options={[
-                { value: 'none', label: 'None' },
-                { value: 'line', label: 'Line' },
-                { value: 'slant', label: 'Slant' },
-                { value: 'swirl', label: 'Swirl' },
-              ]}
+              options={DECORATION_STYLE_OPTIONS}
               error={field.state.meta.errors?.[0]}
             />
           )}
@@ -483,11 +459,7 @@ function CTAConfigurator() {
                   field.handleChange(val as any)
                   updateState({ ...params, align: val as any })
                 }}
-                options={[
-                  { value: 'left', label: 'Left' },
-                  { value: 'center', label: 'Center' },
-                  { value: 'right', label: 'Right' },
-                ]}
+                options={HORIZONTAL_ALIGN_OPTIONS}
                 error={field.state.meta.errors?.[0]}
               />
             )}
@@ -502,11 +474,7 @@ function CTAConfigurator() {
                   field.handleChange(val as any)
                   updateState({ ...params, valign: val as any })
                 }}
-                options={[
-                  { value: 'top', label: 'Top' },
-                  { value: 'center', label: 'Center' },
-                  { value: 'bottom', label: 'Bottom' },
-                ]}
+                options={VERTICAL_ALIGN_OPTIONS}
                 error={field.state.meta.errors?.[0]}
               />
             )}
@@ -539,16 +507,7 @@ function CTAConfigurator() {
                 field.handleChange(val as any)
                 updateState({ ...params, entrance: val as any })
               }}
-              options={[
-                { value: 'none', label: 'None' },
-                { value: 'fade', label: 'Fade' },
-                { value: 'slideUp', label: 'Slide Up' },
-                { value: 'slideDown', label: 'Slide Down' },
-                { value: 'slideLeft', label: 'Slide Left' },
-                { value: 'slideRight', label: 'Slide Right' },
-                { value: 'scale', label: 'Scale' },
-                { value: 'bounce', label: 'Bounce' },
-              ]}
+              options={ENTRANCE_ANIMATION_OPTIONS}
               error={field.state.meta.errors?.[0]}
             />
           )}
@@ -605,13 +564,7 @@ function CTAConfigurator() {
                 field.handleChange(val as any)
                 updateState({ ...params, exit: val as any })
               }}
-              options={[
-                { value: 'none', label: 'None' },
-                { value: 'fade', label: 'Fade' },
-                { value: 'slideDown', label: 'Slide Down' },
-                { value: 'slideUp', label: 'Slide Up' },
-                { value: 'scale', label: 'Scale' },
-              ]}
+              options={EXIT_ANIMATION_OPTIONS}
               error={field.state.meta.errors?.[0]}
             />
           )}

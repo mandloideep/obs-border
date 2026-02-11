@@ -24,8 +24,9 @@ import { useCountUpWithTrend } from '../../hooks/useCountUp'
 import { useAPIPolling } from '../../hooks/useAPIPolling'
 import { OverlayContainer } from './OverlayContainer'
 import { OverlayPanel } from './OverlayPanel'
-import { COUNTER_DEFAULTS, API_SERVICES } from '../../types/counter.types'
-import type { CounterOverlayParams, CounterIcon } from '../../types/counter.types'
+import { COUNTER_DEFAULTS, API_SERVICE_CONFIGS } from '../../types/counter.types'
+import type { CounterOverlayParams } from '../../types/counter.types'
+import type { CounterIcon, NumberNotation } from '../../types/brand.types'
 import { createLinearGradient } from '../../utils/css.utils'
 
 /**
@@ -40,6 +41,7 @@ const ICON_MAP: Record<CounterIcon, LucideIcon | null> = {
   fire: Flame,
   trophy: Trophy,
   bell: Bell,
+  trending: TrendingUp,
   none: null,
 }
 
@@ -52,7 +54,7 @@ function formatNumber(
     separator: boolean
     decimals: number
     abbreviate: boolean
-    notation: 'standard' | 'compact' | 'scientific'
+    notation: NumberNotation
   }
 ): string {
   const { separator, decimals, abbreviate, notation } = options
@@ -100,7 +102,8 @@ export function CounterOverlay() {
   useLoadGoogleFont(params.font)
 
   // API polling (if service configured)
-  const apiConfig = params.service !== 'custom' ? API_SERVICES[params.service] : null
+  const useBuiltInService = params.service !== 'custom' && params.service !== 'poll'
+  const apiConfig = useBuiltInService ? API_SERVICE_CONFIGS[params.service] : null
   const { data: apiData } = useAPIPolling({
     config: apiConfig || { url: () => params.poll, path: params.pollkey },
     userId: params.userid,
@@ -108,8 +111,8 @@ export function CounterOverlay() {
     path: params.pollkey,
     interval: params.pollrate,
     enabled:
-      (params.service !== 'custom' && !!params.userid && !!apiConfig) ||
-      (params.service === 'custom' && !!params.poll),
+      (useBuiltInService && !!params.userid && !!apiConfig) ||
+      ((params.service === 'custom' || params.service === 'poll') && !!params.poll),
   })
 
   // Determine target value (API data or manual value)

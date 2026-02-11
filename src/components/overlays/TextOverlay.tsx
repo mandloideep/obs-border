@@ -15,10 +15,8 @@ import { SignatureLine, lineAnimationStyles } from './TextOverlay/SignatureLine'
 import { TEXT_PRESETS } from '../../config/text-presets'
 import { TEXT_DEFAULTS } from '../../types/text.types'
 import type { TextOverlayParams } from '../../types/text.types'
+import type { LoopState } from '../../types/brand.types'
 import { createLinearGradient } from '../../utils/css.utils'
-
-// Loop state machine states
-type LoopState = 'entering' | 'visible' | 'exiting' | 'hidden'
 
 export function TextOverlay() {
   // Parse URL parameters

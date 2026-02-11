@@ -18,6 +18,11 @@ import { AnimationSelect } from '../../components/configure/form/AnimationSelect
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { PresetManager } from '../../components/configure/PresetManager'
 import { Label } from '../../components/ui/label'
+import {
+  SHAPE_OPTIONS,
+  BORDER_STYLE_OPTIONS,
+  BORDER_ANIMATION_OPTIONS,
+} from '../../lib/constants'
 import { BORDER_DEFAULTS } from '../../types/border.types'
 import type { BorderOverlayParams } from '../../types/border.types'
 import { useHistory } from '../../hooks/useHistory'
@@ -133,10 +138,7 @@ function BorderConfigurator() {
                 field.handleChange(val as any)
                 updateState({ ...params, shape: val as any })
               }}
-              options={[
-                { value: 'rect', label: 'Rectangle' },
-                { value: 'circle', label: 'Circle' },
-              ]}
+              options={SHAPE_OPTIONS}
               error={field.state.meta.errors?.[0]}
             />
           )}
@@ -151,13 +153,7 @@ function BorderConfigurator() {
                 field.handleChange(val as any)
                 updateState({ ...params, style: val as any })
               }}
-              options={[
-                { value: 'solid', label: 'Solid' },
-                { value: 'dashed', label: 'Dashed' },
-                { value: 'dotted', label: 'Dotted' },
-                { value: 'double', label: 'Double' },
-                { value: 'neon', label: 'Neon' },
-              ]}
+              options={BORDER_STYLE_OPTIONS}
               error={field.state.meta.errors?.[0]}
             />
           )}
@@ -174,13 +170,7 @@ function BorderConfigurator() {
                   updateState({ ...params, animation: value as any })
                 }}
                 onBlur={field.handleBlur}
-                options={[
-                  { value: 'none', label: 'None' },
-                  { value: 'dash', label: 'Dash' },
-                  { value: 'rotate', label: 'Rotate' },
-                  { value: 'pulse', label: 'Pulse' },
-                  { value: 'breathe', label: 'Breathe' },
-                ]}
+                options={BORDER_ANIMATION_OPTIONS}
               />
             )}
           </form.Field>
@@ -283,7 +273,7 @@ function BorderConfigurator() {
                 value={params.gradient}
                 onValueChange={(value) => {
                   field.handleChange(value as any)
-                  updateState({ ...params, gradient: value })
+                  updateState({ ...params, gradient: value as any })
                 }}
                 onBlur={field.handleBlur}
               />

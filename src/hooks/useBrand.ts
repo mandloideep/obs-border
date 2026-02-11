@@ -8,10 +8,13 @@ import { useBrandContext } from '../contexts/BrandContext'
 import type {
   BrandConfig,
   ThemeColors,
+  ThemeName,
   GradientName,
   ContrastAccents,
   FontFamily,
+  StandardFontName,
 } from '../types/brand.types'
+import { STANDARD_FONT_NAMES } from '../lib/constants'
 
 /**
  * Get the full brand configuration
@@ -27,7 +30,7 @@ export function useBrand(): BrandConfig {
  *
  * @param themeName - Optional theme name override (from URL param)
  */
-export function useTheme(themeName?: 'dark' | 'light'): ThemeColors {
+export function useTheme(themeName?: ThemeName): ThemeColors {
   const { brand } = useBrandContext()
 
   return useMemo(() => {
@@ -75,7 +78,7 @@ export function useGradient(
  * @param themeName - Current theme name
  */
 export function useAccents(
-  themeName?: 'dark' | 'light'
+  themeName?: ThemeName
 ): ContrastAccents {
   return useMemo(() => {
     const theme = themeName || 'dark'
@@ -132,9 +135,8 @@ export function useFontFamily(
     }
 
     // Standard fonts (display, body, mono)
-    const standardFonts = ['display', 'body', 'mono']
-    if (standardFonts.includes(name)) {
-      return brand.fonts[name as 'display' | 'body' | 'mono'] || brand.fonts.display
+    if ((STANDARD_FONT_NAMES as readonly string[]).includes(name)) {
+      return brand.fonts[name as StandardFontName] || brand.fonts.display
     }
 
     // Google Fonts: Return font name with fallback
@@ -200,7 +202,7 @@ export function useLoadGoogleFont(fontName?: string): void {
     if (!fontName) return
 
     // Skip standard fonts (already loaded via brand)
-    if (['display', 'body', 'mono'].includes(fontName)) return
+    if ((STANDARD_FONT_NAMES as readonly string[]).includes(fontName)) return
 
     // Skip custom fonts (handled by useLoadCustomFonts)
     if (fontName.startsWith('custom')) return

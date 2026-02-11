@@ -14,7 +14,7 @@ const GRADIENT_CATEGORIES = {
   Popular: ['indigo', 'cyan', 'sunset', 'emerald', 'purple', 'neon', 'fire', 'ocean'],
   'Warm Tones': ['sunset', 'fire', 'coral', 'amber', 'crimson', 'gold'],
   'Cool Tones': ['frost', 'ocean', 'navy', 'teal', 'cyan', 'lavender'],
-  Nature: ['emerald', 'mint', 'forest'],
+  Nature: ['emerald', 'mint'],
   Monochrome: ['mono', 'slate'],
   Special: ['rainbow', 'magenta'],
 } as const

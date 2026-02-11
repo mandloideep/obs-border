@@ -1,6 +1,7 @@
 /**
  * Zod Validation Schemas
- * Type-safe validation schemas for all overlay configurators
+ * Type-safe validation schemas for all overlay configurators.
+ * All enum values are derived from the centralized constants file.
  */
 
 import { z } from 'zod'
@@ -17,14 +18,41 @@ import {
   colorArrayValidator,
   apiKeyValidators,
 } from './validators'
+import {
+  SHAPES,
+  BORDER_STYLES,
+  BORDER_ANIMATIONS,
+  LINE_STYLES,
+  LINE_ANIMATIONS,
+  LINE_POSITIONS,
+  ENTRANCE_ANIMATIONS,
+  EXIT_ANIMATIONS,
+  ICON_ANIMATIONS,
+  ICON_POSITIONS,
+  HORIZONTAL_ALIGNS,
+  VERTICAL_ALIGNS,
+  LAYOUTS,
+  COUNTER_LAYOUTS,
+  COUNTER_ICONS,
+  SIZE_PRESETS,
+  ICON_COLOR_MODES,
+  DECORATION_STYLES,
+  NUMBER_NOTATIONS,
+  API_SERVICES,
+  GRADIENT_NAMES,
+  THEMES,
+  TEXT_PRESETS,
+  CTA_PRESETS,
+  PLATFORM_ORDERS,
+} from '../constants'
 
 // ===== BORDER OVERLAY SCHEMA =====
 
 export const borderOverlaySchema = z.object({
   // Shape & Style
-  shape: z.enum(['rect', 'circle']),
-  style: z.enum(['solid', 'dashed', 'dotted', 'double', 'neon']),
-  animation: z.enum(['none', 'dash', 'rotate', 'pulse', 'breathe']),
+  shape: z.enum(SHAPES),
+  style: z.enum(BORDER_STYLES),
+  animation: z.enum(BORDER_ANIMATIONS),
 
   // Geometry
   r: rangeValidator(0, 50, 'px'),
@@ -32,7 +60,7 @@ export const borderOverlaySchema = z.object({
   dash: rangeValidator(0, 1),
 
   // Colors
-  gradient: z.string(), // GradientName enum
+  gradient: z.enum(GRADIENT_NAMES),
   colors: colorArrayValidator(5),
   random: z.boolean(),
 
@@ -50,14 +78,14 @@ export const borderOverlaySchema = z.object({
   shiftspeed: rangeValidator(1, 30, 's'),
 
   // Global
-  theme: z.string(), // ThemeName enum
+  theme: z.enum(THEMES),
 }) satisfies z.ZodType<BorderOverlayParams>
 
 // ===== TEXT OVERLAY SCHEMA =====
 
 export const textOverlaySchema = z.object({
   // Preset
-  preset: z.string(), // TextPresetName enum
+  preset: z.enum(TEXT_PRESETS),
 
   // Content
   text: z.string(),
@@ -65,11 +93,11 @@ export const textOverlaySchema = z.object({
   size: rangeValidator(12, 200, 'px'),
   subsize: rangeValidator(8, 100, 'px'),
   weight: z.number().min(100).max(900).multipleOf(100),
-  font: z.string(), // FontFamily
+  font: z.string(), // FontFamily (includes Google Fonts)
 
   // Layout
-  align: z.enum(['left', 'center', 'right']),
-  valign: z.enum(['top', 'center', 'bottom']),
+  align: z.enum(HORIZONTAL_ALIGNS),
+  valign: z.enum(VERTICAL_ALIGNS),
   maxwidth: cssValueValidator,
   pad: rangeValidator(0, 100, 'px'),
   padx: rangeValidator(0, 100, 'px'),
@@ -87,42 +115,20 @@ export const textOverlaySchema = z.object({
 
   // Line Decoration
   line: z.boolean(),
-  linestyle: z.enum(['solid', 'dashed', 'dotted', 'gradient']),
-  lineanim: z.enum(['none', 'expand', 'slide', 'fade']),
-  linepos: z.enum(['top', 'bottom', 'both']),
+  linestyle: z.enum(LINE_STYLES),
+  lineanim: z.enum(LINE_ANIMATIONS),
+  linepos: z.enum(LINE_POSITIONS),
   linelength: rangeValidator(0, 100, '%'),
   linewidth: rangeValidator(1, 20, 'px'),
   linespeed: rangeValidator(0.1, 5, 's'),
 
   // Entrance Animation
-  entrance: z.enum([
-    'fade',
-    'slideUp',
-    'slideDown',
-    'slideLeft',
-    'slideRight',
-    'scale',
-    'bounce',
-    'typewriter',
-    'flipIn',
-    'zoomBounce',
-    'rotateIn',
-    'zoomIn',
-    'none',
-  ]),
+  entrance: z.enum(ENTRANCE_ANIMATIONS),
   entrancespeed: rangeValidator(0.1, 5, 's'),
   delay: rangeValidator(0, 10, 's'),
 
   // Exit Animation
-  exit: z.enum([
-    'fade',
-    'slideUp',
-    'slideDown',
-    'slideLeft',
-    'slideRight',
-    'scale',
-    'none',
-  ]),
+  exit: z.enum(EXIT_ANIMATIONS),
   exitafter: rangeValidator(0, 60, 's'),
   exitspeed: rangeValidator(0.1, 5, 's'),
 
@@ -132,8 +138,8 @@ export const textOverlaySchema = z.object({
   pause: rangeValidator(0, 60, 's'),
 
   // Global
-  theme: z.string(), // ThemeName
-  gradient: z.string(), // GradientName
+  theme: z.enum(THEMES),
+  gradient: z.enum(GRADIENT_NAMES),
   colors: colorArrayValidator(5),
 }).refine(
   (data) => {
@@ -155,17 +161,17 @@ export const counterOverlaySchema = z
     label: z.string(),
     prefix: z.string(),
     suffix: z.string(),
-    icon: z.string(), // CounterIcon
+    icon: z.enum(COUNTER_ICONS),
     size: rangeValidator(12, 200, 'px'),
     labelsize: rangeValidator(8, 100, 'px'),
-    font: z.string(), // FontFamily
-    layout: z.enum(['horizontal', 'vertical', 'stacked']),
-    align: z.enum(['left', 'center', 'right']),
+    font: z.string(), // FontFamily (includes Google Fonts)
+    layout: z.enum(COUNTER_LAYOUTS),
+    align: z.enum(HORIZONTAL_ALIGNS),
 
     // Number Formatting
     separator: z.boolean(),
     decimals: rangeValidator(0, 4),
-    notation: z.enum(['standard', 'compact', 'scientific', 'engineering']),
+    notation: z.enum(NUMBER_NOTATIONS),
     abbreviate: z.boolean(),
 
     // Animation
@@ -175,7 +181,7 @@ export const counterOverlaySchema = z
     trendcolor: hexColorValidator,
 
     // API Integration
-    service: z.enum(['youtube', 'twitch', 'github', 'custom']),
+    service: z.enum(API_SERVICES),
     apikey: z.string(),
     userid: z.string(),
     metric: z.string(),
@@ -193,8 +199,8 @@ export const counterOverlaySchema = z
 
     // Style
     bg: z.boolean(),
-    theme: z.string(), // ThemeName
-    gradient: z.string(), // GradientName
+    theme: z.enum(THEMES),
+    gradient: z.enum(GRADIENT_NAMES),
     colors: colorArrayValidator(5),
   })
   .refine(
@@ -234,7 +240,7 @@ export const counterOverlaySchema = z
 
 export const ctaOverlaySchema = z.object({
   // Preset
-  preset: z.string(), // CTAPresetName
+  preset: z.enum(CTA_PRESETS),
 
   // Content
   text: z.string(),
@@ -242,54 +248,32 @@ export const ctaOverlaySchema = z.object({
   size: rangeValidator(12, 200, 'px'),
 
   // Icon
-  icon: z.string(), // CTAIcon
-  iconanim: z.enum(['none', 'bounce', 'shake', 'pulse', 'spin', 'wiggle', 'flip', 'heartbeat']),
-  iconpos: z.enum(['left', 'right', 'top', 'bottom']),
+  icon: z.string(), // CTAIcon (includes | string for custom Lucide icons)
+  iconanim: z.enum(ICON_ANIMATIONS),
+  iconpos: z.enum(ICON_POSITIONS),
   iconcolor: hexColorValidator,
   iconsize: z.number().min(0).max(200),
   customicon: z.string(),
 
   // Text Styling
-  font: z.string(), // FontFamily
+  font: z.string(), // FontFamily (includes Google Fonts)
   textpadx: rangeValidator(0, 100, 'px'),
   textpady: rangeValidator(0, 100, 'px'),
   letterspacing: rangeValidator(-5, 20, 'px'),
   lineheight: rangeValidator(0.8, 3),
 
   // Decoration
-  decoration: z.enum(['none', 'line', 'slant', 'swirl']),
+  decoration: z.enum(DECORATION_STYLES),
   decorationcolor: hexColorValidator,
 
   // Layout
-  align: z.enum(['left', 'center', 'right']),
-  valign: z.enum(['top', 'center', 'bottom']),
+  align: z.enum(HORIZONTAL_ALIGNS),
+  valign: z.enum(VERTICAL_ALIGNS),
   bg: z.boolean(),
 
   // Animation
-  entrance: z.enum([
-    'fade',
-    'slideUp',
-    'slideDown',
-    'slideLeft',
-    'slideRight',
-    'scale',
-    'bounce',
-    'typewriter',
-    'flipIn',
-    'zoomBounce',
-    'rotateIn',
-    'zoomIn',
-    'none',
-  ]),
-  exit: z.enum([
-    'fade',
-    'slideUp',
-    'slideDown',
-    'slideLeft',
-    'slideRight',
-    'scale',
-    'none',
-  ]),
+  entrance: z.enum(ENTRANCE_ANIMATIONS),
+  exit: z.enum(EXIT_ANIMATIONS),
   delay: rangeValidator(0, 10, 's'),
   entrancespeed: rangeValidator(0.1, 5, 's'),
   exitspeed: rangeValidator(0.1, 5, 's'),
@@ -300,8 +284,8 @@ export const ctaOverlaySchema = z.object({
   pause: rangeValidator(0, 60, 's'),
 
   // Global Theme
-  theme: z.string(), // ThemeName
-  gradient: z.string(), // GradientName
+  theme: z.enum(THEMES),
+  gradient: z.enum(GRADIENT_NAMES),
   colors: colorArrayValidator(5),
 }) satisfies z.ZodType<CTAOverlayParams>
 
@@ -313,8 +297,8 @@ export const socialsOverlaySchema = z.object({
   handles: z.string(), // Override handles (github:user,youtube:@chan)
 
   // Layout
-  layout: z.enum(['horizontal', 'vertical']),
-  size: z.enum(['sm', 'md', 'lg', 'xl']),
+  layout: z.enum(LAYOUTS),
+  size: z.enum(SIZE_PRESETS),
   showtext: z.boolean(),
   bg: z.boolean(),
   gap: rangeValidator(0, 100, 'px'),
@@ -322,45 +306,23 @@ export const socialsOverlaySchema = z.object({
   borderradius: rangeValidator(0, 50, 'px'),
 
   // Icon Styling
-  iconcolor: z.enum(['brand', 'platform', 'white', 'gradient']),
+  iconcolor: z.enum(ICON_COLOR_MODES),
   iconsize: z.number().min(0).max(200),
   iconpadding: rangeValidator(0, 50, 'px'),
 
   // Text Styling
-  font: z.string(), // FontFamily
+  font: z.string(), // FontFamily (includes Google Fonts)
   fontsize: z.number().min(0).max(100),
   fontweight: z.number().min(100).max(900).multipleOf(100),
   letterspacing: rangeValidator(-5, 20, 'px'),
 
   // Entrance Animation
-  entrance: z.enum([
-    'fade',
-    'slideUp',
-    'slideDown',
-    'slideLeft',
-    'slideRight',
-    'scale',
-    'bounce',
-    'flipIn',
-    'zoomBounce',
-    'rotateIn',
-    'zoomIn',
-    'stagger',
-    'none',
-  ]),
+  entrance: z.enum(ENTRANCE_ANIMATIONS),
   speed: rangeValidator(0.1, 5, 's'),
   delay: rangeValidator(0, 10, 's'),
 
   // Exit Animation
-  exit: z.enum([
-    'fade',
-    'slideUp',
-    'slideDown',
-    'slideLeft',
-    'slideRight',
-    'scale',
-    'none',
-  ]),
+  exit: z.enum(EXIT_ANIMATIONS),
   exitafter: rangeValidator(0, 60, 's'),
   exitspeed: rangeValidator(0.1, 5, 's'),
 
@@ -375,15 +337,15 @@ export const socialsOverlaySchema = z.object({
   eachpause: rangeValidator(0, 60, 's'),
 
   // Platform Ordering
-  order: z.enum(['default', 'priority']),
+  order: z.enum(PLATFORM_ORDERS),
   priority: z.string(), // 'youtube:1,twitch:2,github:3'
 
   // Icon Customization
   icons: z.string(), // 'github:github,youtube:video,twitch:zap'
 
   // Global Theme
-  theme: z.string(), // ThemeName
-  gradient: z.string(), // GradientName
+  theme: z.enum(THEMES),
+  gradient: z.enum(GRADIENT_NAMES),
   colors: colorArrayValidator(5),
 }) satisfies z.ZodType<SocialsOverlayParams>
 

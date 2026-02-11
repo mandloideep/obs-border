@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils'
 import { useGoogleFonts } from '@/hooks/useGoogleFonts'
 import { googleFontsService } from '@/services/googleFonts'
 import { RefreshCw } from 'lucide-react'
+import { STANDARD_FONT_NAMES } from '@/lib/constants'
 
 export interface FontOption {
   value: string
@@ -208,7 +209,7 @@ function FontPreview({ font, showValue = true }: FontPreviewProps) {
 
   useEffect(() => {
     // Skip standard fonts (already loaded)
-    if (['display', 'body', 'mono'].includes(font.value)) {
+    if ((STANDARD_FONT_NAMES as readonly string[]).includes(font.value)) {
       setLoaded(true)
       return
     }

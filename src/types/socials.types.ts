@@ -13,6 +13,7 @@ import type {
   ThemeName,
   GradientName,
   FontFamily,
+  PlatformOrder,
 } from './brand.types'
 
 /**
@@ -45,7 +46,7 @@ export interface SocialsOverlayParams {
   letterspacing: number
 
   // Entrance Animation
-  entrance: EntranceAnimation | 'stagger'
+  entrance: EntranceAnimation
   speed: number
   delay: number
 
@@ -65,7 +66,7 @@ export interface SocialsOverlayParams {
   eachpause: number
 
   // Platform Ordering
-  order: 'default' | 'priority'
+  order: PlatformOrder
   priority: string // 'youtube:1,twitch:2,github:3'
 
   // Icon Customization

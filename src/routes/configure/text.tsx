@@ -19,6 +19,16 @@ import { FontSelect } from '../../components/configure/form/FontSelect'
 import { AnimationSelect } from '../../components/configure/form/AnimationSelect'
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { PresetManager } from '../../components/configure/PresetManager'
+import {
+  TEXT_PRESET_OPTIONS,
+  LINE_STYLE_OPTIONS,
+  LINE_ANIMATION_OPTIONS,
+  LINE_POSITION_OPTIONS,
+  HORIZONTAL_ALIGN_OPTIONS,
+  VERTICAL_ALIGN_OPTIONS,
+  ENTRANCE_ANIMATION_OPTIONS,
+  EXIT_ANIMATION_OPTIONS,
+} from '../../lib/constants'
 import { TEXT_DEFAULTS } from '../../types/text.types'
 import type { TextOverlayParams } from '../../types/text.types'
 import { useHistory } from '../../hooks/useHistory'
@@ -121,14 +131,7 @@ function TextConfigurator() {
                   field.handleChange(val as any)
                   updateState({ ...params, preset: val as any })
                 }}
-                options={[
-                  { value: 'custom', label: 'Custom' },
-                  { value: 'brb', label: 'Be Right Back' },
-                  { value: 'chatting', label: 'Just Chatting' },
-                  { value: 'starting', label: 'Starting Soon' },
-                  { value: 'ending', label: 'Thanks for Watching' },
-                  { value: 'technical', label: 'Technical Difficulties' },
-                ]}
+                options={TEXT_PRESET_OPTIONS}
                 error={field.state.meta.errors?.[0]}
               />
             )}
@@ -444,11 +447,7 @@ function TextConfigurator() {
                       field.handleChange(val as any)
                       updateState({ ...params, align: val as any })
                     }}
-                    options={[
-                      { value: 'left', label: 'Left' },
-                      { value: 'center', label: 'Center' },
-                      { value: 'right', label: 'Right' },
-                    ]}
+                    options={HORIZONTAL_ALIGN_OPTIONS}
                     error={field.state.meta.errors?.[0]}
                   />
                 )}
@@ -463,11 +462,7 @@ function TextConfigurator() {
                       field.handleChange(val as any)
                       updateState({ ...params, valign: val as any })
                     }}
-                    options={[
-                      { value: 'top', label: 'Top' },
-                      { value: 'center', label: 'Center' },
-                      { value: 'bottom', label: 'Bottom' },
-                    ]}
+                    options={VERTICAL_ALIGN_OPTIONS}
                     error={field.state.meta.errors?.[0]}
                   />
                 )}
@@ -516,16 +511,7 @@ function TextConfigurator() {
                         field.handleChange(val as any)
                         updateState({ ...params, linestyle: val as any })
                       }}
-                      options={[
-                        { value: 'solid', label: 'Solid' },
-                        { value: 'dashed', label: 'Dashed' },
-                        { value: 'dotted', label: 'Dotted' },
-                        { value: 'gradient', label: 'Gradient' },
-                        { value: 'slant', label: 'Slant' },
-                        { value: 'wave', label: 'Wave' },
-                        { value: 'swirl', label: 'Swirl' },
-                        { value: 'bracket', label: 'Bracket' },
-                      ]}
+                      options={LINE_STYLE_OPTIONS}
                       error={field.state.meta.errors?.[0]}
                     />
                   )}
@@ -540,12 +526,7 @@ function TextConfigurator() {
                         field.handleChange(val as any)
                         updateState({ ...params, lineanim: val as any })
                       }}
-                      options={[
-                        { value: 'none', label: 'None' },
-                        { value: 'slide', label: 'Slide' },
-                        { value: 'grow', label: 'Grow' },
-                        { value: 'pulse', label: 'Pulse' },
-                      ]}
+                      options={LINE_ANIMATION_OPTIONS}
                       error={field.state.meta.errors?.[0]}
                     />
                   )}
@@ -560,11 +541,7 @@ function TextConfigurator() {
                         field.handleChange(val as any)
                         updateState({ ...params, linepos: val as any })
                       }}
-                      options={[
-                        { value: 'top', label: 'Top' },
-                        { value: 'bottom', label: 'Bottom' },
-                        { value: 'both', label: 'Both' },
-                      ]}
+                      options={LINE_POSITION_OPTIONS}
                       error={field.state.meta.errors?.[0]}
                     />
                   )}
@@ -646,22 +623,7 @@ function TextConfigurator() {
                       updateState({ ...params, entrance: value as any })
                     }}
                     onBlur={field.handleBlur}
-                    options={[
-                      { value: 'none', label: 'None' },
-                      { value: 'fade', label: 'Fade' },
-                      { value: 'slideUp', label: 'Slide Up' },
-                      { value: 'slideDown', label: 'Slide Down' },
-                      { value: 'slideLeft', label: 'Slide Left' },
-                      { value: 'slideRight', label: 'Slide Right' },
-                      { value: 'scale', label: 'Scale' },
-                      { value: 'bounce', label: 'Bounce' },
-                      { value: 'typewriter', label: 'Typewriter' },
-                      { value: 'flipIn', label: 'Flip In' },
-                      { value: 'zoomBounce', label: 'Zoom Bounce' },
-                      { value: 'rotateIn', label: 'Rotate In' },
-                      { value: 'zoomIn', label: 'Zoom In' },
-                      { value: 'stagger', label: 'Stagger' },
-                    ]}
+                    options={ENTRANCE_ANIMATION_OPTIONS}
                   />
                 )}
               </form.Field>
@@ -720,19 +682,7 @@ function TextConfigurator() {
                       updateState({ ...params, exit: value as any })
                     }}
                     onBlur={field.handleBlur}
-                    options={[
-                      { value: 'none', label: 'None' },
-                      { value: 'fade', label: 'Fade' },
-                      { value: 'slideDown', label: 'Slide Down' },
-                      { value: 'slideUp', label: 'Slide Up' },
-                      { value: 'slideLeft', label: 'Slide Left' },
-                      { value: 'slideRight', label: 'Slide Right' },
-                      { value: 'scale', label: 'Scale' },
-                      { value: 'fadeLeft', label: 'Fade Left' },
-                      { value: 'zoomOut', label: 'Zoom Out' },
-                      { value: 'rotateOut', label: 'Rotate Out' },
-                      { value: 'flipOut', label: 'Flip Out' },
-                    ]}
+                    options={EXIT_ANIMATION_OPTIONS}
                   />
                 )}
               </form.Field>

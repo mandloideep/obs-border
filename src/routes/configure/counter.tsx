@@ -19,6 +19,14 @@ import { IconSelect } from '../../components/configure/form/IconSelect'
 import { FontSelect } from '../../components/configure/form/FontSelect'
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { PresetManager } from '../../components/configure/PresetManager'
+import {
+  COUNTER_LAYOUT_OPTIONS,
+  COUNTER_ICON_OPTIONS,
+  HORIZONTAL_ALIGN_OPTIONS,
+  NUMBER_NOTATION_OPTIONS,
+  API_SERVICE_OPTIONS,
+  THEME_OPTIONS,
+} from '../../lib/constants'
 import { Switch } from '../../components/ui/switch'
 import { Label } from '../../components/ui/label'
 import { COUNTER_DEFAULTS } from '../../types/counter.types'
@@ -323,17 +331,7 @@ function CounterConfigurator() {
                   field.handleChange(value as any)
                   updateState({ ...params, icon: value as any })
                 }}
-                options={[
-                  { value: 'none', label: 'None' },
-                  { value: 'star', label: 'Star' },
-                  { value: 'heart', label: 'Heart' },
-                  { value: 'fire', label: 'Fire' },
-                  { value: 'trophy', label: 'Trophy' },
-                  { value: 'users', label: 'Users' },
-                  { value: 'eye', label: 'Eye' },
-                  { value: 'trending', label: 'Trending Up' },
-                  { value: 'zap', label: 'Zap / Lightning' },
-                ]}
+                options={COUNTER_ICON_OPTIONS}
               />
             )}
           </form.Field>
@@ -370,10 +368,7 @@ function CounterConfigurator() {
                 field.handleChange(val as any)
                 updateState({ ...params, layout: val as any })
               }}
-              options={[
-                { value: 'stack', label: 'Stack (vertical)' },
-                { value: 'inline', label: 'Inline (horizontal)' },
-              ]}
+              options={COUNTER_LAYOUT_OPTIONS}
               error={field.state.meta.errors?.[0]}
             />
           )}
@@ -388,11 +383,7 @@ function CounterConfigurator() {
                 field.handleChange(val as any)
                 updateState({ ...params, align: val as any })
               }}
-              options={[
-                { value: 'left', label: 'Left' },
-                { value: 'center', label: 'Center' },
-                { value: 'right', label: 'Right' },
-              ]}
+              options={HORIZONTAL_ALIGN_OPTIONS}
               error={field.state.meta.errors?.[0]}
             />
           )}
@@ -569,11 +560,7 @@ function CounterConfigurator() {
                 field.handleChange(val as any)
                 updateState({ ...params, notation: val as any })
               }}
-              options={[
-                { value: 'standard', label: 'Standard (1,234,567)' },
-                { value: 'compact', label: 'Compact (1.2M)' },
-                { value: 'scientific', label: 'Scientific (1.23e6)' },
-              ]}
+              options={NUMBER_NOTATION_OPTIONS}
               error={field.state.meta.errors?.[0]}
             />
           )}
@@ -719,13 +706,7 @@ function CounterConfigurator() {
                 field.handleChange(val as any)
                 updateState({ ...params, service: val as any })
               }}
-              options={[
-                { value: 'custom', label: 'Custom (manual value)' },
-                { value: 'youtube', label: 'YouTube' },
-                { value: 'twitch', label: 'Twitch' },
-                { value: 'github', label: 'GitHub' },
-                { value: 'poll', label: 'Custom API (polling)' },
-              ]}
+              options={API_SERVICE_OPTIONS}
               error={field.state.meta.errors?.[0]}
             />
           )}
@@ -868,10 +849,7 @@ function CounterConfigurator() {
                 field.handleChange(val as any)
                 updateState({ ...params, theme: val as any })
               }}
-              options={[
-                { value: 'dark', label: 'Dark' },
-                { value: 'light', label: 'Light' },
-              ]}
+              options={THEME_OPTIONS}
               error={field.state.meta.errors?.[0]}
             />
           )}

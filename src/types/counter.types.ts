@@ -80,7 +80,7 @@ export interface APIServiceConfig {
 /**
  * API service configurations for built-in services
  */
-export const API_SERVICES: Record<string, APIServiceConfig> = {
+export const API_SERVICE_CONFIGS: Record<string, APIServiceConfig> = {
   youtube: {
     url: (channelId, apiKey) =>
       `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`,

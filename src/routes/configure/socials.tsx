@@ -19,6 +19,14 @@ import { FontSelect } from '../../components/configure/form/FontSelect'
 import { AnimationSelect } from '../../components/configure/form/AnimationSelect'
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { PresetManager } from '../../components/configure/PresetManager'
+import {
+  LAYOUT_OPTIONS,
+  SIZE_PRESET_OPTIONS,
+  ICON_COLOR_MODE_OPTIONS,
+  PLATFORM_ORDER_OPTIONS,
+  ENTRANCE_ANIMATION_OPTIONS,
+  EXIT_ANIMATION_OPTIONS,
+} from '../../lib/constants'
 import { Switch } from '../../components/ui/switch'
 import { Label } from '../../components/ui/label'
 import { Input } from '../../components/ui/input'
@@ -30,6 +38,7 @@ import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { usePresets } from '../../hooks/usePresets'
 import { SocialsOverlayHelp } from '../../components/configure/help/SocialsOverlayHelp'
 import { socialsOverlaySchema } from '../../lib/validation/schemas'
+import type { SocialPlatform } from '../../types/brand.types'
 
 export const Route = createFileRoute('/configure/socials')({
   component: SocialsConfigurator,
@@ -40,17 +49,7 @@ type PlatformData = {
   handle: string
 }
 
-type AllPlatforms = {
-  github: PlatformData
-  twitter: PlatformData
-  linkedin: PlatformData
-  youtube: PlatformData
-  instagram: PlatformData
-  twitch: PlatformData
-  kick: PlatformData
-  discord: PlatformData
-  website: PlatformData
-}
+type AllPlatforms = Record<SocialPlatform, PlatformData>
 
 function SocialsConfigurator() {
   // History management (undo/redo + debouncing)
@@ -444,10 +443,7 @@ function SocialsConfigurator() {
                 field.handleChange(val as any)
                 updateState({ ...params, order: val as any })
               }}
-              options={[
-                { value: 'default', label: 'Default Order' },
-                { value: 'priority', label: 'Priority Order' },
-              ]}
+              options={PLATFORM_ORDER_OPTIONS}
               error={field.state.meta.errors?.[0]}
             />
           )}
@@ -484,11 +480,7 @@ function SocialsConfigurator() {
                 field.handleChange(val as any)
                 updateState({ ...params, layout: val as any })
               }}
-              options={[
-                { value: 'horizontal', label: 'Horizontal' },
-                { value: 'vertical', label: 'Vertical' },
-                { value: 'grid', label: 'Grid' },
-              ]}
+              options={LAYOUT_OPTIONS}
               error={field.state.meta.errors?.[0]}
             />
           )}
@@ -503,12 +495,7 @@ function SocialsConfigurator() {
                 field.handleChange(val as any)
                 updateState({ ...params, size: val as any })
               }}
-              options={[
-                { value: 'sm', label: 'Small (icon: 20px, text: 13px)' },
-                { value: 'md', label: 'Medium (icon: 24px, text: 15px)' },
-                { value: 'lg', label: 'Large (icon: 32px, text: 18px)' },
-                { value: 'xl', label: 'Extra Large (icon: 40px, text: 22px)' },
-              ]}
+              options={SIZE_PRESET_OPTIONS}
               error={field.state.meta.errors?.[0]}
             />
           )}
@@ -594,12 +581,7 @@ function SocialsConfigurator() {
                 field.handleChange(val as any)
                 updateState({ ...params, iconcolor: val as any })
               }}
-              options={[
-                { value: 'brand', label: "Brand Colors (each platform's color)" },
-                { value: 'platform', label: 'Platform Colors' },
-                { value: 'gradient', label: 'Gradient' },
-                { value: 'white', label: 'White' },
-              ]}
+              options={ICON_COLOR_MODE_OPTIONS}
               error={field.state.meta.errors?.[0]}
             />
           )}
@@ -751,16 +733,7 @@ function SocialsConfigurator() {
                   updateState({ ...params, entrance: value as any })
                 }}
                 onBlur={field.handleBlur}
-                options={[
-                  { value: 'none', label: 'None' },
-                  { value: 'fade', label: 'Fade' },
-                  { value: 'slideUp', label: 'Slide Up' },
-                  { value: 'slideDown', label: 'Slide Down' },
-                  { value: 'slideLeft', label: 'Slide Left' },
-                  { value: 'slideRight', label: 'Slide Right' },
-                  { value: 'scale', label: 'Scale' },
-                  { value: 'stagger', label: 'Stagger (one by one)' },
-                ]}
+                options={ENTRANCE_ANIMATION_OPTIONS}
               />
             )}
           </form.Field>
@@ -822,13 +795,7 @@ function SocialsConfigurator() {
                   updateState({ ...params, exit: value as any })
                 }}
                 onBlur={field.handleBlur}
-                options={[
-                  { value: 'none', label: 'None' },
-                  { value: 'fade', label: 'Fade' },
-                  { value: 'slideDown', label: 'Slide Down' },
-                  { value: 'slideUp', label: 'Slide Up' },
-                  { value: 'scale', label: 'Scale' },
-                ]}
+                options={EXIT_ANIMATION_OPTIONS}
               />
             )}
           </form.Field>
