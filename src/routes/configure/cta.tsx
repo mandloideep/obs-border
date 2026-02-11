@@ -8,6 +8,7 @@ import { useMemo } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { ConfigLayout } from '../../components/configure/ConfigLayout'
 import { URLGenerator } from '../../components/configure/URLGenerator'
+import { getBaseUrl } from '../../lib/baseUrl'
 import { CollapsibleSection } from '../../components/configure/form/CollapsibleSection'
 import { FormNumberSlider } from '../../components/configure/form/FormNumberSlider'
 import { FormColorArray } from '../../components/configure/form/FormColorArray'
@@ -90,7 +91,7 @@ function CTAConfigurator() {
   const previewUrl = useMemo(() => {
     // Guard against undefined params during initialization
     if (!params) {
-      return `${window.location.origin}/overlays/cta`
+      return `${getBaseUrl()}/overlays/cta`
     }
 
     const searchParams = new URLSearchParams(
@@ -101,7 +102,7 @@ function CTAConfigurator() {
         return acc
       }, {} as Record<string, string>)
     )
-    return `${window.location.origin}/overlays/cta?${searchParams.toString()}`
+    return `${getBaseUrl()}/overlays/cta?${searchParams.toString()}`
   }, [params])
 
   const configSections = (

@@ -8,6 +8,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect, useMemo } from 'react'
 import { ConfigLayout } from '../../components/configure/ConfigLayout'
 import { URLGenerator } from '../../components/configure/URLGenerator'
+import { getBaseUrl } from '../../lib/baseUrl'
 import { CollapsibleSection } from '../../components/configure/form/CollapsibleSection'
 import { FormNumberSlider } from '../../components/configure/form/FormNumberSlider'
 import { FormColorArray } from '../../components/configure/form/FormColorArray'
@@ -187,7 +188,7 @@ function SocialsConfigurator() {
   const previewUrl = useMemo(() => {
     // Guard against undefined params during initialization
     if (!params) {
-      return `${window.location.origin}/overlays/socials`
+      return `${getBaseUrl()}/overlays/socials`
     }
 
     const searchParams = new URLSearchParams(
@@ -198,7 +199,7 @@ function SocialsConfigurator() {
         return acc
       }, {} as Record<string, string>)
     )
-    return `${window.location.origin}/overlays/socials?${searchParams.toString()}`
+    return `${getBaseUrl()}/overlays/socials?${searchParams.toString()}`
   }, [params])
 
   const configSections = (

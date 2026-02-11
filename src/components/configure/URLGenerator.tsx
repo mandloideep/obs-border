@@ -8,6 +8,7 @@ import React, { useMemo, useState, useCallback, useRef } from 'react'
 import { Copy, Check, ExternalLink, Download, Upload } from 'lucide-react'
 import { Button } from '../ui/button'
 import { useConfigExport } from '@/hooks/useConfigExport'
+import { getBaseUrl } from '@/lib/baseUrl'
 
 interface URLGeneratorProps {
   overlayPath: string
@@ -30,7 +31,7 @@ export function URLGenerator({ overlayPath, params, defaults, baseUrl, sensitive
 
   // Helper function to generate URL with optional param exclusions
   const generateUrl = useCallback((excludeParams: string[] = []) => {
-    const base = baseUrl || window.location.origin
+    const base = baseUrl || getBaseUrl()
     const searchParams = new URLSearchParams()
 
     // Only add parameters that differ from defaults

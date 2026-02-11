@@ -8,6 +8,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect, useMemo } from 'react'
 import { ConfigLayout } from '../../components/configure/ConfigLayout'
 import { URLGenerator } from '../../components/configure/URLGenerator'
+import { getBaseUrl } from '../../lib/baseUrl'
 import { CollapsibleSection } from '../../components/configure/form/CollapsibleSection'
 import { FormNumberSlider } from '../../components/configure/form/FormNumberSlider'
 import { FormColorArray } from '../../components/configure/form/FormColorArray'
@@ -147,7 +148,7 @@ function CounterConfigurator() {
   const previewUrl = useMemo(() => {
     // Guard against undefined params during initialization
     if (!params) {
-      return `${window.location.origin}/overlays/counter`
+      return `${getBaseUrl()}/overlays/counter`
     }
 
     const searchParams = new URLSearchParams(
@@ -158,14 +159,14 @@ function CounterConfigurator() {
         return acc
       }, {} as Record<string, string>)
     )
-    return `${window.location.origin}/overlays/counter?${searchParams.toString()}`
+    return `${getBaseUrl()}/overlays/counter?${searchParams.toString()}`
   }, [params])
 
   // Fullscreen URL: Excludes API key for security
   const fullscreenUrl = useMemo(() => {
     // Guard against undefined params during initialization
     if (!params) {
-      return `${window.location.origin}/overlays/counter`
+      return `${getBaseUrl()}/overlays/counter`
     }
 
     const searchParams = new URLSearchParams(
@@ -180,7 +181,7 @@ function CounterConfigurator() {
         return acc
       }, {} as Record<string, string>)
     )
-    return `${window.location.origin}/overlays/counter?${searchParams.toString()}`
+    return `${getBaseUrl()}/overlays/counter?${searchParams.toString()}`
   }, [params])
 
   const configSections = (
