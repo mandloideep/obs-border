@@ -68,7 +68,7 @@ export const OVERLAYS: OverlayMeta[] = [
     icon: Layers,
     configurePath: '/configure/mesh',
     color: '#a855f7',
-    features: ['10 Parameters', '5 Animations', '12 Palettes', 'Seeded RNG'],
+    features: ['11 Parameters', '5 Animations', '18 Palettes', 'Light/Dark Mode'],
   },
 ]
 
@@ -402,7 +402,8 @@ export const MESH_ANIMATION_OPTIONS: Option<typeof MESH_ANIMATIONS[number]>[] = 
 export const MESH_PALETTES = [
   'pastel', 'vibrant', 'earth', 'ocean', 'neon',
   'warm', 'cool', 'monochrome', 'sunset', 'forest',
-  'candy', 'aurora',
+  'candy', 'aurora', 'twilight', 'tropical', 'lavender',
+  'slate', 'ember', 'sakura',
 ] as const
 
 export const MESH_PALETTE_OPTIONS: Option<typeof MESH_PALETTES[number]>[] = [
@@ -418,14 +419,24 @@ export const MESH_PALETTE_OPTIONS: Option<typeof MESH_PALETTES[number]>[] = [
   { value: 'forest', label: 'Forest' },
   { value: 'candy', label: 'Candy' },
   { value: 'aurora', label: 'Aurora' },
+  { value: 'twilight', label: 'Twilight' },
+  { value: 'tropical', label: 'Tropical' },
+  { value: 'lavender', label: 'Lavender' },
+  { value: 'slate', label: 'Slate' },
+  { value: 'ember', label: 'Ember' },
+  { value: 'sakura', label: 'Sakura' },
 ]
 
-export const MESH_POINTS = [2, 3, 4] as const
+export const MESH_POINTS = [2, 3, 4, 5, 6, 7, 8] as const
 
 export const MESH_POINT_OPTIONS: Option<string>[] = [
   { value: '2', label: '2 Blobs' },
   { value: '3', label: '3 Blobs' },
   { value: '4', label: '4 Blobs' },
+  { value: '5', label: '5 Blobs' },
+  { value: '6', label: '6 Blobs' },
+  { value: '7', label: '7 Blobs' },
+  { value: '8', label: '8 Blobs' },
 ]
 
 export const MESH_BLEND_MODES = ['normal', 'screen', 'multiply', 'overlay'] as const
@@ -435,4 +446,12 @@ export const MESH_BLEND_MODE_OPTIONS: Option<typeof MESH_BLEND_MODES[number]>[] 
   { value: 'screen', label: 'Screen (Lighter)' },
   { value: 'multiply', label: 'Multiply (Darker)' },
   { value: 'overlay', label: 'Overlay (Contrast)' },
+]
+
+export const MESH_MODES = ['normal', 'light', 'dark'] as const
+
+export const MESH_MODE_OPTIONS: Option<typeof MESH_MODES[number]>[] = [
+  { value: 'normal', label: 'Normal' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
 ]

@@ -48,6 +48,7 @@ import {
   MESH_ANIMATIONS,
   MESH_PALETTES,
   MESH_BLEND_MODES,
+  MESH_MODES,
 } from '../constants'
 
 // ===== BORDER OVERLAY SCHEMA =====
@@ -357,8 +358,12 @@ export const socialsOverlaySchema = z.object({
 
 export const meshOverlaySchema = z.object({
   seed: rangeValidator(1, 999999),
-  points: z.union([z.literal(2), z.literal(3), z.literal(4)]),
+  points: z.union([
+    z.literal(2), z.literal(3), z.literal(4), z.literal(5),
+    z.literal(6), z.literal(7), z.literal(8),
+  ]),
   palette: z.enum(MESH_PALETTES),
+  mode: z.enum(MESH_MODES),
   animation: z.enum(MESH_ANIMATIONS),
   speed: rangeValidator(0.1, 3),
   blur: rangeValidator(20, 200, 'px'),

@@ -37,6 +37,7 @@ import {
   MESH_ANIMATIONS,
   MESH_PALETTES,
   MESH_BLEND_MODES,
+  MESH_MODES,
 } from '../lib/constants'
 
 // ===== CORE BRAND TYPES =====
@@ -184,6 +185,8 @@ export type MeshAnimation = typeof MESH_ANIMATIONS[number]
 export type MeshPalette = typeof MESH_PALETTES[number]
 
 export type MeshBlendMode = typeof MESH_BLEND_MODES[number]
+
+export type MeshMode = typeof MESH_MODES[number]
 
 // ===== UTILITY TYPES =====
 

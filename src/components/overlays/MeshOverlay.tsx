@@ -13,6 +13,7 @@ import { createSeededRandom, seededFloat } from '../../lib/seededRandom'
 import {
   MESH_PALETTE_DEFINITIONS,
   generatePaletteColors,
+  applyModeShift,
 } from '../../lib/meshPalettes'
 import type { RGBColor } from '../../lib/meshPalettes'
 import type { MeshOverlayParams } from '../../types/mesh.types'
@@ -44,8 +45,8 @@ export function MeshOverlay() {
   const pointsRef = useRef<ControlPoint[]>([])
 
   // Pre-allocate reusable arrays for animated positions (avoid GC in animation loop)
-  const animatedX = useRef<Float64Array>(new Float64Array(4))
-  const animatedY = useRef<Float64Array>(new Float64Array(4))
+  const animatedX = useRef<Float64Array>(new Float64Array(8))
+  const animatedY = useRef<Float64Array>(new Float64Array(8))
 
   // Generate deterministic control points from seed
   const controlPoints = useMemo(() => {
@@ -53,13 +54,16 @@ export function MeshOverlay() {
     const paletteDef = MESH_PALETTE_DEFINITIONS[params.palette]
     if (!paletteDef) return []
 
-    const colors = generatePaletteColors(paletteDef, params.points, rng)
+    // Apply light/dark mode shift to palette lightness
+    const adjustedPalette = applyModeShift(paletteDef, params.mode)
+    const colors = generatePaletteColors(adjustedPalette, params.points, rng)
 
     // Place points in evenly-spaced sectors around the center
     const angleStep = (Math.PI * 2) / params.points
     const baseAngle = seededFloat(rng, 0, Math.PI * 2)
     // Scale controls how far from center the points are placed (0-1 normalized)
-    const spreadDist = 0.15 + params.scale * 0.2
+    // Wider range: 0.21 at scale=0.5 to 0.70 at scale=2.0
+    const spreadDist = 0.05 + params.scale * 0.325
 
     const points: ControlPoint[] = Array.from(
       { length: params.points },
@@ -92,7 +96,7 @@ export function MeshOverlay() {
     }
 
     return points
-  }, [params.seed, params.points, params.palette, params.scale])
+  }, [params.seed, params.points, params.palette, params.mode, params.scale])
 
   // Render the mesh gradient to canvas using inverse distance weighting
   const renderMesh = useCallback(
@@ -119,6 +123,9 @@ export function MeshOverlay() {
       // High blur (200) → power 1.2 (very smooth blending)
       const power = 3.0 - ((params.blur - 20) / (200 - 20)) * 1.8
 
+      // Scale affects IDW softness: low scale = sharp blobs, high scale = soft diffuse blobs
+      const softness = 0.00001 + (params.scale - 0.5) * 0.02
+
       for (let py = 0; py < RESOLUTION; py++) {
         const ny = py / (RESOLUTION - 1)
         for (let px = 0; px < RESOLUTION; px++) {
@@ -133,8 +140,8 @@ export function MeshOverlay() {
             const dx = nx - posX[i]
             const dy = ny - posY[i]
             const distSq = dx * dx + dy * dy
-            // Inverse distance weighting: weight = 1 / (dist^power + epsilon)
-            const weight = 1 / (Math.pow(distSq, power * 0.5) + 0.00001)
+            // Inverse distance weighting: weight = 1 / (dist^power + softness)
+            const weight = 1 / (Math.pow(distSq, power * 0.5) + softness)
             totalWeight += weight
             r += points[i].color.r * weight
             g += points[i].color.g * weight
@@ -151,7 +158,7 @@ export function MeshOverlay() {
 
       ctx.putImageData(imageDataRef.current, 0, 0)
     },
-    [params.blur]
+    [params.blur, params.scale]
   )
 
   // Initial render for static mode
@@ -177,7 +184,7 @@ export function MeshOverlay() {
         return
       }
 
-      const t = timestamp * 0.001 * params.speed
+      const t = timestamp * 0.003 * params.speed
 
       for (let i = 0; i < points.length; i++) {
         const pt = points[i]
@@ -186,8 +193,8 @@ export function MeshOverlay() {
 
         switch (params.animation) {
           case 'drift': {
-            x += Math.sin(t * pt.driftVx * 0.3 + pt.angle) * 0.15
-            y += Math.cos(t * pt.driftVy * 0.3 + pt.breathePhase) * 0.15
+            x += Math.sin(t * pt.driftVx * 0.5 + pt.angle) * 0.20
+            y += Math.cos(t * pt.driftVy * 0.5 + pt.breathePhase) * 0.20
             break
           }
           case 'orbit': {
@@ -196,16 +203,16 @@ export function MeshOverlay() {
             break
           }
           case 'breathe': {
-            const scale = 1 + 0.3 * Math.sin(t * 0.5 + pt.breathePhase)
+            const scale = 1 + 0.35 * Math.sin(t * 0.6 + pt.breathePhase)
             x = 0.5 + (pt.baseX - 0.5) * scale
             y = 0.5 + (pt.baseY - 0.5) * scale
-            x += Math.sin(t * 0.2 + pt.angle) * 0.03
-            y += Math.cos(t * 0.15 + pt.breathePhase) * 0.03
+            x += Math.sin(t * 0.3 + pt.angle) * 0.05
+            y += Math.cos(t * 0.25 + pt.breathePhase) * 0.05
             break
           }
           case 'wave': {
-            x += Math.sin(t * pt.waveFreq + pt.wavePhase) * 0.12
-            y += Math.cos(t * pt.waveFreq * 0.7 + pt.wavePhase) * 0.08
+            x += Math.sin(t * pt.waveFreq + pt.wavePhase) * 0.18
+            y += Math.cos(t * pt.waveFreq * 0.7 + pt.wavePhase) * 0.12
             break
           }
         }

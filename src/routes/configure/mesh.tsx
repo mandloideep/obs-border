@@ -19,6 +19,7 @@ import {
   MESH_PALETTE_OPTIONS,
   MESH_POINT_OPTIONS,
   MESH_BLEND_MODE_OPTIONS,
+  MESH_MODE_OPTIONS,
 } from '../../lib/constants'
 import { MESH_DEFAULTS } from '../../types/mesh.types'
 import type { MeshOverlayParams } from '../../types/mesh.types'
@@ -83,6 +84,7 @@ function MeshConfigurator() {
       seed: MESH_DEFAULTS.seed,
       points: MESH_DEFAULTS.points,
       palette: MESH_DEFAULTS.palette,
+      mode: MESH_DEFAULTS.mode,
     })
   }
 
@@ -189,7 +191,7 @@ function MeshConfigurator() {
                 label="Mesh Points"
                 value={String(params.points)}
                 onChange={(val) => {
-                  const num = Number(val) as 2 | 3 | 4
+                  const num = Number(val) as 2 | 3 | 4 | 5 | 6 | 7 | 8
                   field.handleChange(num)
                   updateState({ ...params, points: num })
                 }}
@@ -211,6 +213,22 @@ function MeshConfigurator() {
                 }}
                 options={MESH_PALETTE_OPTIONS}
                 help="Color category for generated colors"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
+
+          <form.Field name="mode">
+            {(field) => (
+              <FormSelectInput
+                label="Mode"
+                value={params.mode}
+                onChange={(val) => {
+                  field.handleChange(val as any)
+                  updateState({ ...params, mode: val as any })
+                }}
+                options={MESH_MODE_OPTIONS}
+                help="Light shifts colors brighter, Dark shifts colors deeper"
                 error={field.state.meta.errors?.[0]}
               />
             )}

@@ -85,6 +85,61 @@ export const MESH_PALETTE_DEFINITIONS: Record<string, PaletteRange> = {
     lightness: [40, 65],
     hueSpread: 80,
   },
+  twilight: {
+    hue: [240, 320],
+    saturation: [40, 70],
+    lightness: [20, 45],
+  },
+  tropical: {
+    hue: [50, 180],
+    saturation: [70, 95],
+    lightness: [50, 70],
+    hueSpread: 100,
+  },
+  lavender: {
+    hue: [250, 310],
+    saturation: [30, 60],
+    lightness: [65, 85],
+    hueSpread: 50,
+  },
+  slate: {
+    hue: [200, 230],
+    saturation: [10, 30],
+    lightness: [30, 60],
+  },
+  ember: {
+    hue: [0, 40],
+    saturation: [70, 95],
+    lightness: [35, 55],
+  },
+  sakura: {
+    hue: [330, 10],
+    saturation: [40, 70],
+    lightness: [70, 88],
+    hueSpread: 30,
+  },
+}
+
+/**
+ * Apply light/dark mode shift to a palette's lightness range.
+ * - 'light': shift lightness up by 15 points
+ * - 'dark': shift lightness down by 15 points
+ * - 'normal': no change
+ */
+export function applyModeShift(
+  palette: PaletteRange,
+  mode: 'normal' | 'light' | 'dark'
+): PaletteRange {
+  if (mode === 'normal') return palette
+
+  const shift = mode === 'light' ? 15 : -15
+  return {
+    ...palette,
+    lightness: [
+      Math.max(0, Math.min(100, palette.lightness[0] + shift)),
+      Math.max(0, Math.min(100, palette.lightness[1] + shift)),
+    ],
+  }
 }
 
 /**
