@@ -63,6 +63,7 @@ export interface TextOverlayParams {
   linelength: number
   linewidth: number
   linespeed: number
+  linecolor: string
 
   // Entrance Animation
   entrance: EntranceAnimation
@@ -93,6 +94,7 @@ export interface TextOverlayParams {
   colors: string[]
   colormode: ColorMode
   bggradient: boolean
+  bggradientname: string
 }
 
 /**
@@ -114,9 +116,17 @@ export interface TextPreset {
   line?: boolean
   linestyle?: LineStyle
   lineanim?: LineAnimation
+  linecolor?: string
   gradient?: GradientName
+  gradienttype?: GradientType
   textcolor?: string
+  subcolor?: string
+  textgradient?: boolean
   bg?: boolean
+  bggradient?: boolean
+  bggradientname?: string
+  colormode?: ColorMode
+  theme?: ThemeName
 }
 
 /**
@@ -167,4 +177,5 @@ export const TEXT_DEFAULTS: TextOverlayParams = {
   colors: [],
   colormode: 'normal',
   bggradient: false,
+  bggradientname: '',
 }

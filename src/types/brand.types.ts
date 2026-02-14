@@ -33,6 +33,9 @@ import {
   SOCIAL_PLATFORMS,
   TEXT_PRESETS,
   CTA_PRESETS,
+  COUNTER_PRESETS,
+  SOCIALS_PRESETS,
+  BORDER_PRESETS,
   PLATFORM_ORDERS,
   STANDARD_FONT_NAMES,
   LOOP_STATES,
@@ -183,6 +186,12 @@ export type APIService = typeof API_SERVICES[number]
 export type TextPresetName = typeof TEXT_PRESETS[number]
 
 export type CTAPresetName = typeof CTA_PRESETS[number]
+
+export type CounterPresetName = typeof COUNTER_PRESETS[number]
+
+export type SocialsPresetName = typeof SOCIALS_PRESETS[number]
+
+export type BorderPresetName = typeof BORDER_PRESETS[number]
 
 export type PlatformOrder = typeof PLATFORM_ORDERS[number]
 

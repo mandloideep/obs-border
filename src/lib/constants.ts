@@ -371,7 +371,7 @@ export const SOCIAL_PLATFORMS = [
 // === PRESET CONSTANTS ===
 
 export const TEXT_PRESETS = [
-  'brb', 'chatting', 'starting', 'ending', 'technical', 'custom',
+  'brb', 'chatting', 'starting', 'ending', 'technical', 'gaming', 'podcast', 'creative', 'custom',
 ] as const
 
 export const TEXT_PRESET_OPTIONS: Option<typeof TEXT_PRESETS[number]>[] = [
@@ -381,10 +381,13 @@ export const TEXT_PRESET_OPTIONS: Option<typeof TEXT_PRESETS[number]>[] = [
   { value: 'starting', label: 'Starting Soon' },
   { value: 'ending', label: 'Thanks for Watching' },
   { value: 'technical', label: 'Technical Difficulties' },
+  { value: 'gaming', label: 'Gaming / Live' },
+  { value: 'podcast', label: 'Podcast' },
+  { value: 'creative', label: 'Creative' },
 ]
 
 export const CTA_PRESETS = [
-  'subscribe', 'like', 'follow', 'share', 'notify', 'custom',
+  'subscribe', 'like', 'follow', 'share', 'notify', 'donate', 'merch', 'discord', 'custom',
 ] as const
 
 export const CTA_PRESET_OPTIONS: Option<typeof CTA_PRESETS[number]>[] = [
@@ -394,6 +397,45 @@ export const CTA_PRESET_OPTIONS: Option<typeof CTA_PRESETS[number]>[] = [
   { value: 'follow', label: 'Follow' },
   { value: 'share', label: 'Share' },
   { value: 'notify', label: 'Turn on Notifications' },
+  { value: 'donate', label: 'Donate / Support' },
+  { value: 'merch', label: 'Merch' },
+  { value: 'discord', label: 'Discord' },
+]
+
+export const COUNTER_PRESETS = [
+  'subscriber', 'follower', 'viewer', 'donation', 'custom',
+] as const
+
+export const COUNTER_PRESET_OPTIONS: Option<typeof COUNTER_PRESETS[number]>[] = [
+  { value: 'custom', label: 'Custom' },
+  { value: 'subscriber', label: 'Subscribers' },
+  { value: 'follower', label: 'Followers' },
+  { value: 'viewer', label: 'Viewers' },
+  { value: 'donation', label: 'Donations' },
+]
+
+export const SOCIALS_PRESETS = [
+  'minimal', 'colorful', 'branded', 'neon', 'custom',
+] as const
+
+export const SOCIALS_PRESET_OPTIONS: Option<typeof SOCIALS_PRESETS[number]>[] = [
+  { value: 'custom', label: 'Custom' },
+  { value: 'minimal', label: 'Minimal' },
+  { value: 'colorful', label: 'Colorful' },
+  { value: 'branded', label: 'Branded' },
+  { value: 'neon', label: 'Neon' },
+]
+
+export const BORDER_PRESETS = [
+  'neon', 'rainbow', 'subtle', 'pulse', 'custom',
+] as const
+
+export const BORDER_PRESET_OPTIONS: Option<typeof BORDER_PRESETS[number]>[] = [
+  { value: 'custom', label: 'Custom' },
+  { value: 'neon', label: 'Neon Glow' },
+  { value: 'rainbow', label: 'Rainbow' },
+  { value: 'subtle', label: 'Subtle' },
+  { value: 'pulse', label: 'Pulse' },
 ]
 
 // === PLATFORM ORDER CONSTANTS ===

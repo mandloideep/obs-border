@@ -45,6 +45,8 @@ export interface CTAOverlayParams {
 
   // Text Styling
   font: FontFamily
+  textcolor: string
+  subcolor: string
   textpadx: number
   textpady: number
   letterspacing: number
@@ -85,6 +87,7 @@ export interface CTAOverlayParams {
   colors: string[]
   colormode: ColorMode
   bggradient: boolean
+  bggradientname: string
 }
 
 /**
@@ -94,8 +97,24 @@ export interface CTAOverlayParams {
 export interface CTAPreset {
   text?: string
   sub?: string
+  size?: number
   icon?: CTAIcon
   iconanim?: IconAnimation
+  iconcolor?: string
+  font?: FontFamily
+  textcolor?: string
+  subcolor?: string
+  decoration?: DecorationStyle
+  decorationcolor?: string
+  gradient?: GradientName
+  gradienttype?: GradientType
+  entrance?: EntranceAnimation
+  exit?: ExitAnimation
+  bg?: boolean
+  bggradient?: boolean
+  bggradientname?: string
+  colormode?: ColorMode
+  theme?: ThemeName
 }
 
 /**
@@ -113,6 +132,8 @@ export const CTA_DEFAULTS: CTAOverlayParams = {
   iconsize: 0,
   customicon: '',
   font: 'display',
+  textcolor: '',
+  subcolor: '',
   textpadx: 0,
   textpady: 0,
   letterspacing: 0,
@@ -137,4 +158,5 @@ export const CTA_DEFAULTS: CTAOverlayParams = {
   colors: [],
   colormode: 'normal',
   bggradient: false,
+  bggradientname: '',
 }

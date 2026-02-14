@@ -6,6 +6,7 @@
 import type {
   CounterLayout,
   CounterIcon,
+  CounterPresetName,
   FontFamily,
   HorizontalAlign,
   NumberNotation,
@@ -23,6 +24,9 @@ import { BG_PANEL_DEFAULTS } from '../lib/constants'
  * All 35+ parameters for the counter overlay
  */
 export interface CounterOverlayParams {
+  // Preset
+  preset: CounterPresetName
+
   // Display
   value: number
   label: string
@@ -63,6 +67,7 @@ export interface CounterOverlayParams {
   height: string
   iconcolor: string
   numbercolor: string
+  labelcolor: string
 
   // Style
   bg: boolean
@@ -81,6 +86,7 @@ export interface CounterOverlayParams {
   colors: string[]
   colormode: ColorMode
   bggradient: boolean
+  bggradientname: string
 }
 
 /**
@@ -119,7 +125,31 @@ export const API_SERVICE_CONFIGS: Record<string, APIServiceConfig> = {
 /**
  * Default values for counter overlay parameters
  */
+/**
+ * Counter Preset Configuration
+ * Preset values that can be overridden by URL parameters
+ */
+export interface CounterPreset {
+  label?: string
+  icon?: CounterIcon
+  size?: number
+  labelsize?: number
+  font?: FontFamily
+  layout?: CounterLayout
+  gradient?: GradientName
+  gradienttype?: GradientType
+  iconcolor?: string
+  numbercolor?: string
+  labelcolor?: string
+  bg?: boolean
+  bggradient?: boolean
+  bggradientname?: string
+  colormode?: ColorMode
+  theme?: ThemeName
+}
+
 export const COUNTER_DEFAULTS: CounterOverlayParams = {
+  preset: 'custom',
   value: 0,
   label: 'Subscribers',
   prefix: '',
@@ -151,6 +181,7 @@ export const COUNTER_DEFAULTS: CounterOverlayParams = {
   height: 'auto',
   iconcolor: '',
   numbercolor: '',
+  labelcolor: '',
   bg: false,
   ...BG_PANEL_DEFAULTS,
   theme: 'dark',
@@ -159,4 +190,5 @@ export const COUNTER_DEFAULTS: CounterOverlayParams = {
   colors: [],
   colormode: 'normal',
   bggradient: false,
+  bggradientname: '',
 }

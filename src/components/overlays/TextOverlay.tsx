@@ -38,6 +38,12 @@ export function TextOverlay() {
 
   const theme = useTheme(params.theme)
   const gradient = useGradient(params.gradient, params.colors, undefined, params.colormode)
+  const bgGradient = useGradient(
+    (params.bggradientname || params.gradient) as any,
+    params.bggradientname ? undefined : params.colors,
+    undefined,
+    params.colormode
+  )
   const fontFamily = useFontFamily(params.font)
 
   // Load Google Font if needed
@@ -169,7 +175,7 @@ export function TextOverlay() {
         length={params.linelength}
         width={params.linewidth}
         speed={params.linespeed}
-        gradient={gradient}
+        gradient={params.linecolor ? [hexToCssColor(params.linecolor)] : gradient}
       />
     )
   }
@@ -177,7 +183,7 @@ export function TextOverlay() {
   const content = (
     <div style={contentStyle}>
       {params.bg ? (
-        <OverlayPanel bgcolor={params.bgcolor} bgopacity={params.bgopacity} bgshadow={params.bgshadow} blur={params.bgblur} borderRadius={params.bgradius} gradientColors={params.bggradient ? gradient : undefined} gradientType={params.gradienttype}>
+        <OverlayPanel bgcolor={params.bgcolor} bgopacity={params.bgopacity} bgshadow={params.bgshadow} blur={params.bgblur} borderRadius={params.bgradius} gradientColors={params.bggradient ? bgGradient : undefined} gradientType={params.gradienttype}>
           {renderLine('top')}
           <h1 style={getTextStyle()}>{params.text}</h1>
           {params.sub && <p style={getSubStyle()}>{params.sub}</p>}

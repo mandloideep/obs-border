@@ -337,6 +337,42 @@ function CTAConfigurator() {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
+          <form.Field name="textcolor">
+            {(field) => (
+              <FormColorPicker
+                label="Text Color"
+                value={params.textcolor}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, textcolor: val })
+                }}
+                onBlur={field.handleBlur}
+                placeholder="Leave empty for theme color"
+                help="Override text color"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
+
+          <form.Field name="subcolor">
+            {(field) => (
+              <FormColorPicker
+                label="Subtitle Color"
+                value={params.subcolor}
+                onChange={(val) => {
+                  field.handleChange(val)
+                  updateState({ ...params, subcolor: val })
+                }}
+                onBlur={field.handleBlur}
+                placeholder="Leave empty for theme color"
+                help="Override subtitle color"
+                error={field.state.meta.errors?.[0]}
+              />
+            )}
+          </form.Field>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
           <form.Field name="textpadx">
             {(field) => (
               <FormNumberSlider
@@ -611,6 +647,24 @@ function CTAConfigurator() {
               />
             )}
           </form.Field>
+
+          {params.bggradient && (
+            <div>
+              <label className="config-label">Background Gradient</label>
+              <form.Field name="bggradientname">
+                {(field) => (
+                  <GradientGrid
+                    value={params.bggradientname || params.gradient}
+                    onValueChange={(value) => {
+                      field.handleChange(value as any)
+                      updateState({ ...params, bggradientname: value as any })
+                    }}
+                    onBlur={field.handleBlur}
+                  />
+                )}
+              </form.Field>
+            </div>
+          )}
         </CollapsibleSection>
       )}
 

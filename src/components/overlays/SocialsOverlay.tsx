@@ -11,7 +11,9 @@ import { OverlayPanel } from './OverlayPanel'
 import { PLATFORMS } from '../../config/platform-icons'
 import { SOCIALS_DEFAULTS, SIZE_MAP } from '../../types/socials.types'
 import type { SocialsOverlayParams } from '../../types/socials.types'
+import { SOCIALS_PRESETS } from '../../config/socials-presets'
 import type { SocialPlatform } from '../../types/brand.types'
+import { hexToCssColor } from '../../utils/color.utils'
 
 type AnimationMode = 'idle' | 'entering' | 'visible' | 'exiting'
 
@@ -23,11 +25,23 @@ interface SocialItem {
 
 export function SocialsOverlay() {
   // Parse URL parameters
-  const params = useOverlayParams<SocialsOverlayParams>(SOCIALS_DEFAULTS)
+  const urlParams = useOverlayParams<SocialsOverlayParams>(SOCIALS_DEFAULTS)
+
+  // Resolve preset (URL params override preset defaults)
+  const params = useMemo(() => {
+    const preset = SOCIALS_PRESETS[urlParams.preset] || {}
+    return { ...SOCIALS_DEFAULTS, ...preset, ...urlParams }
+  }, [urlParams])
 
   const brand = useBrand()
   const theme = useTheme(params.theme)
   const gradient = useGradient(params.gradient, params.colors, undefined, params.colormode)
+  const bgGradient = useGradient(
+    (params.bggradientname || params.gradient) as any,
+    params.bggradientname ? undefined : params.colors,
+    undefined,
+    params.colormode
+  )
   const fontFamily = useFontFamily(params.font)
 
   // Load Google Font if needed
@@ -250,7 +264,7 @@ export function SocialsOverlay() {
   }
 
   const handleStyle: CSSProperties = {
-    color: theme.text,
+    color: params.handlecolor ? hexToCssColor(params.handlecolor) : theme.text,
     fontFamily,
     fontSize: `${handleSize}px`,
     fontWeight: params.fontweight,
@@ -303,7 +317,7 @@ export function SocialsOverlay() {
         pointerEvents: 'none',
       }}
     >
-      {params.bg ? <OverlayPanel bgcolor={params.bgcolor} bgopacity={params.bgopacity} bgshadow={params.bgshadow} blur={params.bgblur} borderRadius={params.bgradius} gradientColors={params.bggradient ? gradient : undefined} gradientType={params.gradienttype}>{content}</OverlayPanel> : content}
+      {params.bg ? <OverlayPanel bgcolor={params.bgcolor} bgopacity={params.bgopacity} bgshadow={params.bgshadow} blur={params.bgblur} borderRadius={params.bgradius} gradientColors={params.bggradient ? bgGradient : undefined} gradientType={params.gradienttype}>{content}</OverlayPanel> : content}
     </div>
   )
 }

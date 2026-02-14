@@ -45,6 +45,9 @@ import {
   THEMES,
   TEXT_PRESETS,
   CTA_PRESETS,
+  COUNTER_PRESETS,
+  SOCIALS_PRESETS,
+  BORDER_PRESETS,
   PLATFORM_ORDERS,
   MESH_ANIMATIONS,
   MESH_PALETTES,
@@ -57,6 +60,9 @@ import {
 // ===== BORDER OVERLAY SCHEMA =====
 
 export const borderOverlaySchema = z.object({
+  // Preset
+  preset: z.enum(BORDER_PRESETS),
+
   // Shape & Style
   shape: z.enum(SHAPES),
   style: z.enum(BORDER_STYLES),
@@ -131,6 +137,7 @@ export const textOverlaySchema = z.object({
   linelength: rangeValidator(0, 100, '%'),
   linewidth: rangeValidator(1, 20, 'px'),
   linespeed: rangeValidator(0.1, 5, 's'),
+  linecolor: hexColorValidator,
 
   // Entrance Animation
   entrance: z.enum(ENTRANCE_ANIMATIONS),
@@ -161,6 +168,7 @@ export const textOverlaySchema = z.object({
   colors: colorArrayValidator(5),
   colormode: z.enum(COLOR_MODES),
   bggradient: z.boolean(),
+  bggradientname: z.enum(ALL_GRADIENT_NAMES).or(z.literal('')),
 }).refine(
   (data) => {
     // Exit speed only relevant if exit animation is not 'none'
@@ -176,6 +184,9 @@ export const textOverlaySchema = z.object({
 
 export const counterOverlaySchema = z
   .object({
+    // Preset
+    preset: z.enum(COUNTER_PRESETS),
+
     // Display
     value: z.number(),
     label: z.string(),
@@ -216,6 +227,7 @@ export const counterOverlaySchema = z
     height: cssValueValidator,
     iconcolor: hexColorValidator,
     numbercolor: hexColorValidator,
+    labelcolor: hexColorValidator,
 
     // Style
     bg: z.boolean(),
@@ -234,6 +246,7 @@ export const counterOverlaySchema = z
     colors: colorArrayValidator(5),
     colormode: z.enum(COLOR_MODES),
     bggradient: z.boolean(),
+    bggradientname: z.enum(ALL_GRADIENT_NAMES).or(z.literal('')),
   })
   .refine(
     (data) => {
@@ -289,6 +302,8 @@ export const ctaOverlaySchema = z.object({
 
   // Text Styling
   font: z.string(), // FontFamily (includes Google Fonts)
+  textcolor: hexColorValidator,
+  subcolor: hexColorValidator,
   textpadx: rangeValidator(0, 100, 'px'),
   textpady: rangeValidator(0, 100, 'px'),
   letterspacing: rangeValidator(-5, 20, 'px'),
@@ -329,11 +344,15 @@ export const ctaOverlaySchema = z.object({
   colors: colorArrayValidator(5),
   colormode: z.enum(COLOR_MODES),
   bggradient: z.boolean(),
+  bggradientname: z.enum(ALL_GRADIENT_NAMES).or(z.literal('')),
 }) satisfies z.ZodType<CTAOverlayParams>
 
 // ===== SOCIALS OVERLAY SCHEMA =====
 
 export const socialsOverlaySchema = z.object({
+  // Preset
+  preset: z.enum(SOCIALS_PRESETS),
+
   // Platforms & Handles
   show: z.string(), // Comma-separated platforms
   handles: z.string(), // Override handles (github:user,youtube:@chan)
@@ -357,6 +376,7 @@ export const socialsOverlaySchema = z.object({
   fontsize: z.number().min(0).max(100),
   fontweight: z.number().min(100).max(900).multipleOf(100),
   letterspacing: rangeValidator(-5, 20, 'px'),
+  handlecolor: hexColorValidator,
 
   // Entrance Animation
   entrance: z.enum(ENTRANCE_ANIMATIONS),
@@ -399,6 +419,7 @@ export const socialsOverlaySchema = z.object({
   colors: colorArrayValidator(5),
   colormode: z.enum(COLOR_MODES),
   bggradient: z.boolean(),
+  bggradientname: z.enum(ALL_GRADIENT_NAMES).or(z.literal('')),
 }) satisfies z.ZodType<SocialsOverlayParams>
 
 // ===== MESH OVERLAY SCHEMA =====

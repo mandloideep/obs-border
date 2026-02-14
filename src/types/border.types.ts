@@ -7,6 +7,7 @@ import type {
   Shape,
   BorderStyle,
   BorderAnimation,
+  BorderPresetName,
   GradientName,
   GradientType,
   ThemeName,
@@ -18,6 +19,9 @@ import type {
  * All 27 parameters for the border overlay
  */
 export interface BorderOverlayParams {
+  // Preset
+  preset: BorderPresetName
+
   // Shape & Style
   shape: Shape
   style: BorderStyle
@@ -55,7 +59,31 @@ export interface BorderOverlayParams {
 /**
  * Default values for border overlay parameters
  */
+/**
+ * Border Preset Configuration
+ * Preset values that can be overridden by URL parameters
+ */
+export interface BorderPreset {
+  shape?: Shape
+  style?: BorderStyle
+  animation?: BorderAnimation
+  thickness?: number
+  dash?: number
+  gradient?: GradientName
+  gradienttype?: GradientType
+  glow?: boolean
+  glowsize?: number
+  opacity?: number
+  speed?: number
+  multicolor?: boolean
+  colorshift?: boolean
+  shiftspeed?: number
+  colormode?: ColorMode
+  theme?: ThemeName
+}
+
 export const BORDER_DEFAULTS: BorderOverlayParams = {
+  preset: 'custom',
   shape: 'rect',
   style: 'solid',
   animation: 'dash',

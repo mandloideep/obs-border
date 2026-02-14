@@ -24,6 +24,7 @@ import { PresetManager } from '../../components/configure/PresetManager'
 import {
   LAYOUT_OPTIONS,
   SIZE_PRESET_OPTIONS,
+  SOCIALS_PRESET_OPTIONS,
   ICON_COLOR_MODE_OPTIONS,
   PLATFORM_ORDER_OPTIONS,
   ENTRANCE_ANIMATION_OPTIONS,
@@ -209,6 +210,25 @@ function SocialsConfigurator() {
 
   const configSections = (
     <>
+      {/* Section: Quick Presets */}
+      <div className="config-section">
+        <h2 className="text-2xl font-semibold mb-6">Quick Presets</h2>
+        <form.Field name="preset">
+          {(field) => (
+            <FormSelectInput
+              label="Preset"
+              value={params.preset}
+              onChange={(val) => {
+                field.handleChange(val as any)
+                updateState({ ...params, preset: val as any })
+              }}
+              options={SOCIALS_PRESET_OPTIONS}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
+      </div>
+
       {/* Custom Presets Manager */}
       <PresetManager
         presets={presets}
@@ -685,6 +705,24 @@ function SocialsConfigurator() {
               />
             )}
           </form.Field>
+
+          {params.bggradient && (
+            <div>
+              <label className="config-label">Background Gradient</label>
+              <form.Field name="bggradientname">
+                {(field) => (
+                  <GradientGrid
+                    value={params.bggradientname || params.gradient}
+                    onValueChange={(value) => {
+                      field.handleChange(value as any)
+                      updateState({ ...params, bggradientname: value as any })
+                    }}
+                    onBlur={field.handleBlur}
+                  />
+                )}
+              </form.Field>
+            </div>
+          )}
         </CollapsibleSection>
       )}
 
@@ -832,6 +870,23 @@ function SocialsConfigurator() {
               step={0.1}
               unit="px"
               help="Space between letters"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
+
+        <form.Field name="handlecolor">
+          {(field) => (
+            <FormColorPicker
+              label="Handle Text Color"
+              value={params.handlecolor}
+              onChange={(val) => {
+                field.handleChange(val)
+                updateState({ ...params, handlecolor: val })
+              }}
+              onBlur={field.handleBlur}
+              placeholder="Leave empty for theme color"
+              help="Override handle text color"
               error={field.state.meta.errors?.[0]}
             />
           )}

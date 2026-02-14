@@ -136,6 +136,12 @@ export function CTAOverlay() {
 
   const theme = useTheme(params.theme)
   const gradient = useGradient(params.gradient, params.colors, undefined, params.colormode)
+  const bgGradient = useGradient(
+    (params.bggradientname || params.gradient) as any,
+    params.bggradientname ? undefined : params.colors,
+    undefined,
+    params.colormode
+  )
   const fontFamily = useFontFamily(params.font)
 
   // Load Google Font if needed
@@ -234,7 +240,7 @@ export function CTAOverlay() {
   }
 
   const mainTextStyle: CSSProperties = {
-    color: theme.text,
+    color: params.textcolor ? hexToCssColor(params.textcolor) : theme.text,
     fontSize: `${params.size}px`,
     fontWeight: 700,
     fontFamily,
@@ -245,7 +251,7 @@ export function CTAOverlay() {
   }
 
   const subTextStyle: CSSProperties = {
-    color: theme.textMuted,
+    color: params.subcolor ? hexToCssColor(params.subcolor) : theme.textMuted,
     fontSize: `${params.size * 0.6}px`,
     fontWeight: 400,
     fontFamily,
@@ -347,7 +353,7 @@ export function CTAOverlay() {
             // Force re-mount on loop cycle to retrigger exit animation
             key={`exit-${loopCycle}`}
           >
-            {params.bg ? <OverlayPanel bgcolor={params.bgcolor} bgopacity={params.bgopacity} bgshadow={params.bgshadow} blur={params.bgblur} borderRadius={params.bgradius} gradientColors={params.bggradient ? gradient : undefined} gradientType={params.gradienttype}>{content}</OverlayPanel> : content}
+            {params.bg ? <OverlayPanel bgcolor={params.bgcolor} bgopacity={params.bgopacity} bgshadow={params.bgshadow} blur={params.bgblur} borderRadius={params.bgradius} gradientColors={params.bggradient ? bgGradient : undefined} gradientType={params.gradienttype}>{content}</OverlayPanel> : content}
           </ExitAnimation>
         </EntranceAnimation>
       )}

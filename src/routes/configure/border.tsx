@@ -22,6 +22,7 @@ import {
   SHAPE_OPTIONS,
   BORDER_STYLE_OPTIONS,
   BORDER_ANIMATION_OPTIONS,
+  BORDER_PRESET_OPTIONS,
   COLOR_MODE_OPTIONS,
   GRADIENT_TYPE_OPTIONS,
 } from '../../lib/constants'
@@ -116,6 +117,25 @@ function BorderConfigurator() {
 
   const configSections = (
     <>
+      {/* Section: Quick Presets */}
+      <div className="config-section">
+        <h2 className="text-2xl font-semibold mb-6">Quick Presets</h2>
+        <form.Field name="preset">
+          {(field) => (
+            <FormSelectInput
+              label="Preset"
+              value={params.preset}
+              onChange={(val) => {
+                field.handleChange(val as any)
+                updateState({ ...params, preset: val as any })
+              }}
+              options={BORDER_PRESET_OPTIONS}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
+      </div>
+
       {/* Custom Presets Manager */}
       <PresetManager
         presets={presets}

@@ -26,6 +26,7 @@ import { OverlayContainer } from './OverlayContainer'
 import { OverlayPanel } from './OverlayPanel'
 import { COUNTER_DEFAULTS, API_SERVICE_CONFIGS } from '../../types/counter.types'
 import type { CounterOverlayParams } from '../../types/counter.types'
+import { COUNTER_PRESETS } from '../../config/counter-presets'
 import type { CounterIcon, NumberNotation } from '../../types/brand.types'
 import { createLinearGradient } from '../../utils/css.utils'
 import { hexToCssColor } from '../../utils/color.utils'
@@ -93,10 +94,22 @@ function formatNumber(
 
 export function CounterOverlay() {
   // Parse URL parameters
-  const params = useOverlayParams<CounterOverlayParams>(COUNTER_DEFAULTS)
+  const urlParams = useOverlayParams<CounterOverlayParams>(COUNTER_DEFAULTS)
+
+  // Resolve preset (URL params override preset defaults)
+  const params = useMemo(() => {
+    const preset = COUNTER_PRESETS[urlParams.preset] || {}
+    return { ...COUNTER_DEFAULTS, ...preset, ...urlParams }
+  }, [urlParams])
 
   const theme = useTheme(params.theme)
   const gradient = useGradient(params.gradient, params.colors, undefined, params.colormode)
+  const bgGradient = useGradient(
+    (params.bggradientname || params.gradient) as any,
+    params.bggradientname ? undefined : params.colors,
+    undefined,
+    params.colormode
+  )
   const fontFamily = useFontFamily(params.font)
 
   // Load Google Font if needed
@@ -171,7 +184,7 @@ export function CounterOverlay() {
     fontSize: `${params.labelsize}px`,
     fontWeight: 400,
     fontFamily,
-    color: theme.textMuted,
+    color: params.labelcolor ? hexToCssColor(params.labelcolor) : theme.textMuted,
     lineHeight: 1.5,
     margin: 0,
   }
@@ -218,7 +231,7 @@ export function CounterOverlay() {
 
   return (
     <OverlayContainer align={params.align} valign="center" showBg={false}>
-      {params.bg ? <OverlayPanel bgcolor={params.bgcolor} bgopacity={params.bgopacity} bgshadow={params.bgshadow} blur={params.bgblur} borderRadius={params.bgradius} gradientColors={params.bggradient ? gradient : undefined} gradientType={params.gradienttype}>{content}</OverlayPanel> : content}
+      {params.bg ? <OverlayPanel bgcolor={params.bgcolor} bgopacity={params.bgopacity} bgshadow={params.bgshadow} blur={params.bgblur} borderRadius={params.bgradius} gradientColors={params.bggradient ? bgGradient : undefined} gradientType={params.gradienttype}>{content}</OverlayPanel> : content}
     </OverlayContainer>
   )
 }

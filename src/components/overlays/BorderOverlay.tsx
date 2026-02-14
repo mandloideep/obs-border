@@ -4,7 +4,7 @@
  * Migrated from border.html with full feature parity
  */
 
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect, useMemo } from 'react'
 import { useOverlayParams } from '../../hooks/useOverlayParams'
 import { useGradient, useBrand } from '../../hooks/useBrand'
 import { useRAFAnimation } from '../../hooks/useRAFAnimation'
@@ -13,10 +13,18 @@ import { interpolateColor } from '../../utils/css.utils'
 import { GradientDef } from '../svg/GradientDef'
 import type { BorderOverlayParams } from '../../types/border.types'
 import { BORDER_DEFAULTS } from '../../types/border.types'
+import { BORDER_PRESETS } from '../../config/border-presets'
 import type { BrandGradientName } from '../../types/brand.types'
 
 export function BorderOverlay() {
-  const params = useOverlayParams<BorderOverlayParams>(BORDER_DEFAULTS)
+  const urlParams = useOverlayParams<BorderOverlayParams>(BORDER_DEFAULTS)
+
+  // Resolve preset (URL params override preset defaults)
+  const params = useMemo(() => {
+    const preset = BORDER_PRESETS[urlParams.preset] || {}
+    return { ...BORDER_DEFAULTS, ...preset, ...urlParams }
+  }, [urlParams])
+
   const brand = useBrand()
 
   // Gradient colors with random/custom support

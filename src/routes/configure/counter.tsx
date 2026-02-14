@@ -23,6 +23,7 @@ import { PresetManager } from '../../components/configure/PresetManager'
 import {
   COUNTER_LAYOUT_OPTIONS,
   COUNTER_ICON_OPTIONS,
+  COUNTER_PRESET_OPTIONS,
   HORIZONTAL_ALIGN_OPTIONS,
   NUMBER_NOTATION_OPTIONS,
   API_SERVICE_OPTIONS,
@@ -199,6 +200,25 @@ function CounterConfigurator() {
 
   const configSections = (
     <>
+      {/* Section: Quick Presets */}
+      <div className="config-section">
+        <h2 className="text-2xl font-semibold mb-6">Quick Presets</h2>
+        <form.Field name="preset">
+          {(field) => (
+            <FormSelectInput
+              label="Preset"
+              value={params.preset}
+              onChange={(val) => {
+                field.handleChange(val as any)
+                updateState({ ...params, preset: val as any })
+              }}
+              options={COUNTER_PRESET_OPTIONS}
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
+      </div>
+
       {/* Custom Presets Manager */}
       <PresetManager
         presets={presets}
@@ -594,6 +614,24 @@ function CounterConfigurator() {
               />
             )}
           </form.Field>
+
+          {params.bggradient && (
+            <div>
+              <label className="config-label">Background Gradient</label>
+              <form.Field name="bggradientname">
+                {(field) => (
+                  <GradientGrid
+                    value={params.bggradientname || params.gradient}
+                    onValueChange={(value) => {
+                      field.handleChange(value as any)
+                      updateState({ ...params, bggradientname: value as any })
+                    }}
+                    onBlur={field.handleBlur}
+                  />
+                )}
+              </form.Field>
+            </div>
+          )}
         </CollapsibleSection>
       )}
 
@@ -627,6 +665,23 @@ function CounterConfigurator() {
               onBlur={field.handleBlur}
               placeholder="Leave empty for gradient color"
               help="Leave empty for gradient color"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
+
+        <form.Field name="labelcolor">
+          {(field) => (
+            <FormColorPicker
+              label="Label Color"
+              value={params.labelcolor}
+              onChange={(val) => {
+                field.handleChange(val)
+                updateState({ ...params, labelcolor: val })
+              }}
+              onBlur={field.handleBlur}
+              placeholder="Leave empty for theme color"
+              help="Override label text color"
               error={field.state.meta.errors?.[0]}
             />
           )}

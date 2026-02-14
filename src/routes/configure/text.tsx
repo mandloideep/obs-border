@@ -601,6 +601,24 @@ function TextConfigurator() {
                 />
               )}
             </form.Field>
+
+            {params.bggradient && (
+              <div>
+                <label className="config-label">Background Gradient</label>
+                <form.Field name="bggradientname">
+                  {(field) => (
+                    <GradientGrid
+                      value={params.bggradientname || params.gradient}
+                      onValueChange={(value) => {
+                        field.handleChange(value as any)
+                        updateState({ ...params, bggradientname: value as any })
+                      }}
+                      onBlur={field.handleBlur}
+                    />
+                  )}
+                </form.Field>
+              </div>
+            )}
           </CollapsibleSection>
         )}
 
@@ -722,6 +740,23 @@ function TextConfigurator() {
                       step={0.1}
                       unit="s"
                       help="Animation speed in seconds"
+                      error={field.state.meta.errors?.[0]}
+                    />
+                  )}
+                </form.Field>
+
+                <form.Field name="linecolor">
+                  {(field) => (
+                    <FormColorPicker
+                      label="Line Color"
+                      value={params.linecolor}
+                      onChange={(val) => {
+                        field.handleChange(val)
+                        updateState({ ...params, linecolor: val })
+                      }}
+                      onBlur={field.handleBlur}
+                      placeholder="Leave empty for gradient"
+                      help="Override line color (empty = use gradient)"
                       error={field.state.meta.errors?.[0]}
                     />
                   )}
