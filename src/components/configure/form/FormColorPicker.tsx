@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { hexToRgba, rgbaToHex, hexToCssColor } from '../../../utils/color.utils'
+import { getErrorMessage } from '@/lib/validation/validators'
 
 interface FormColorPickerProps {
   label: string
@@ -17,7 +18,7 @@ interface FormColorPickerProps {
   onChange: (value: string) => void
   onBlur?: () => void
   help?: string
-  error?: string
+  error?: unknown
   showAlpha?: boolean
   placeholder?: string
   allowEmpty?: boolean
@@ -185,7 +186,7 @@ export function FormColorPicker({
 
       {/* Error message */}
       {error && (
-        <p className="text-xs text-destructive">{error}</p>
+        <p className="text-xs text-destructive">{getErrorMessage(error)}</p>
       )}
     </div>
   )

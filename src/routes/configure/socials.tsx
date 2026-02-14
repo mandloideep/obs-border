@@ -21,10 +21,11 @@ import { AnimationSelect } from '../../components/configure/form/AnimationSelect
 import { AnimationTimeline } from '../../components/configure/form/AnimationTimeline'
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { PresetManager } from '../../components/configure/PresetManager'
+import { PresetCards } from '../../components/configure/PresetCards'
+import { SOCIALS_PRESET_CARDS } from '../../config/preset-cards'
 import {
   LAYOUT_OPTIONS,
   SIZE_PRESET_OPTIONS,
-  SOCIALS_PRESET_OPTIONS,
   ICON_COLOR_MODE_OPTIONS,
   PLATFORM_ORDER_OPTIONS,
   ENTRANCE_ANIMATION_OPTIONS,
@@ -40,6 +41,7 @@ import { Input } from '../../components/ui/input'
 import { SOCIALS_DEFAULTS } from '../../types/socials.types'
 import type { SocialsOverlayParams } from '../../types/socials.types'
 import { useHistory } from '../../hooks/useHistory'
+import { useGlobalSettings, applyGlobalDefaults } from '../../hooks/useGlobalSettings'
 import { useFormWithHistory } from '../../hooks/useFormWithHistory'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { usePresets } from '../../hooks/usePresets'
@@ -59,8 +61,12 @@ type PlatformData = {
 type AllPlatforms = Record<SocialPlatform, PlatformData>
 
 function SocialsConfigurator() {
+  // Global brand settings
+  const { settings: globalSettings } = useGlobalSettings()
+  const resolvedDefaults = useMemo(() => applyGlobalDefaults(SOCIALS_DEFAULTS, globalSettings), [globalSettings])
+
   // History management (undo/redo + debouncing)
-  const history = useHistory<SocialsOverlayParams>(SOCIALS_DEFAULTS)
+  const history = useHistory<SocialsOverlayParams>(resolvedDefaults)
   const { state: params, setState: setParams, updateState, undo, redo, canUndo, canRedo } = history
 
   // TanStack Form with Zod validation
@@ -213,20 +219,11 @@ function SocialsConfigurator() {
       {/* Section: Quick Presets */}
       <div className="config-section">
         <h2 className="text-2xl font-semibold mb-6">Quick Presets</h2>
-        <form.Field name="preset">
-          {(field) => (
-            <FormSelectInput
-              label="Preset"
-              value={params.preset}
-              onChange={(val) => {
-                field.handleChange(val as any)
-                updateState({ ...params, preset: val as any })
-              }}
-              options={SOCIALS_PRESET_OPTIONS}
-              error={field.state.meta.errors?.[0]}
-            />
-          )}
-        </form.Field>
+        <PresetCards
+          presets={SOCIALS_PRESET_CARDS}
+          value={params.preset}
+          onSelect={(val) => updateState({ ...params, preset: val as any })}
+        />
       </div>
 
       {/* Custom Presets Manager */}

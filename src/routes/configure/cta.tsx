@@ -22,8 +22,9 @@ import { AnimationSelect } from '../../components/configure/form/AnimationSelect
 import { AnimationTimeline } from '../../components/configure/form/AnimationTimeline'
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { PresetManager } from '../../components/configure/PresetManager'
+import { PresetCards } from '../../components/configure/PresetCards'
+import { CTA_PRESET_CARDS } from '../../config/preset-cards'
 import {
-  CTA_PRESET_OPTIONS,
   CTA_ICON_OPTIONS,
   ICON_ANIMATION_OPTIONS,
   ICON_POSITION_OPTIONS,
@@ -40,6 +41,7 @@ import {
 import { CTA_DEFAULTS } from '../../types/cta.types'
 import type { CTAOverlayParams } from '../../types/cta.types'
 import { useHistory } from '../../hooks/useHistory'
+import { useGlobalSettings, applyGlobalDefaults } from '../../hooks/useGlobalSettings'
 import { useFormWithHistory } from '../../hooks/useFormWithHistory'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { usePresets } from '../../hooks/usePresets'
@@ -51,8 +53,12 @@ export const Route = createFileRoute('/configure/cta')({
 })
 
 function CTAConfigurator() {
+  // Global brand settings
+  const { settings: globalSettings } = useGlobalSettings()
+  const resolvedDefaults = useMemo(() => applyGlobalDefaults(CTA_DEFAULTS, globalSettings), [globalSettings])
+
   // History management (undo/redo + debouncing)
-  const history = useHistory<CTAOverlayParams>(CTA_DEFAULTS)
+  const history = useHistory<CTAOverlayParams>(resolvedDefaults)
   const { state: params, updateState, undo, redo, canUndo, canRedo } = history
 
   // TanStack Form with Zod validation
@@ -127,20 +133,11 @@ function CTAConfigurator() {
       {/* Section 1: Quick Presets */}
       <div className="config-section">
         <h2 className="text-2xl font-semibold mb-6">Quick Presets</h2>
-        <form.Field name="preset">
-          {(field) => (
-            <FormSelectInput
-              label="Preset"
-              value={params.preset}
-              onChange={(val) => {
-                field.handleChange(val as any)
-                updateState({ ...params, preset: val as any })
-              }}
-              options={CTA_PRESET_OPTIONS}
-              error={field.state.meta.errors?.[0]}
-            />
-          )}
-        </form.Field>
+        <PresetCards
+          presets={CTA_PRESET_CARDS}
+          value={params.preset}
+          onSelect={(val) => updateState({ ...params, preset: val as any })}
+        />
       </div>
 
       {/* Custom Presets Manager */}

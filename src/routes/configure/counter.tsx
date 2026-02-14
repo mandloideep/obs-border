@@ -20,10 +20,11 @@ import { IconSelect } from '../../components/configure/form/IconSelect'
 import { FontSelect } from '../../components/configure/form/FontSelect'
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { PresetManager } from '../../components/configure/PresetManager'
+import { PresetCards } from '../../components/configure/PresetCards'
+import { COUNTER_PRESET_CARDS } from '../../config/preset-cards'
 import {
   COUNTER_LAYOUT_OPTIONS,
   COUNTER_ICON_OPTIONS,
-  COUNTER_PRESET_OPTIONS,
   HORIZONTAL_ALIGN_OPTIONS,
   NUMBER_NOTATION_OPTIONS,
   API_SERVICE_OPTIONS,
@@ -38,6 +39,7 @@ import { Label } from '../../components/ui/label'
 import { COUNTER_DEFAULTS } from '../../types/counter.types'
 import type { CounterOverlayParams } from '../../types/counter.types'
 import { useHistory } from '../../hooks/useHistory'
+import { useGlobalSettings, applyGlobalDefaults } from '../../hooks/useGlobalSettings'
 import { useFormWithHistory } from '../../hooks/useFormWithHistory'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { usePresets } from '../../hooks/usePresets'
@@ -49,8 +51,12 @@ export const Route = createFileRoute('/configure/counter')({
 })
 
 function CounterConfigurator() {
+  // Global brand settings
+  const { settings: globalSettings } = useGlobalSettings()
+  const resolvedDefaults = useMemo(() => applyGlobalDefaults(COUNTER_DEFAULTS, globalSettings), [globalSettings])
+
   // History management (undo/redo + debouncing)
-  const history = useHistory<CounterOverlayParams>(COUNTER_DEFAULTS)
+  const history = useHistory<CounterOverlayParams>(resolvedDefaults)
   const { state: params, updateState, undo, redo, canUndo, canRedo } = history
 
   // TanStack Form with Zod validation
@@ -203,20 +209,11 @@ function CounterConfigurator() {
       {/* Section: Quick Presets */}
       <div className="config-section">
         <h2 className="text-2xl font-semibold mb-6">Quick Presets</h2>
-        <form.Field name="preset">
-          {(field) => (
-            <FormSelectInput
-              label="Preset"
-              value={params.preset}
-              onChange={(val) => {
-                field.handleChange(val as any)
-                updateState({ ...params, preset: val as any })
-              }}
-              options={COUNTER_PRESET_OPTIONS}
-              error={field.state.meta.errors?.[0]}
-            />
-          )}
-        </form.Field>
+        <PresetCards
+          presets={COUNTER_PRESET_CARDS}
+          value={params.preset}
+          onSelect={(val) => updateState({ ...params, preset: val as any })}
+        />
       </div>
 
       {/* Custom Presets Manager */}

@@ -5,13 +5,14 @@
 
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
+import { getErrorMessage } from '@/lib/validation/validators'
 
 interface FormSwitchProps {
   label: string
   checked: boolean
   onCheckedChange: (checked: boolean) => void
   help?: string
-  error?: string
+  error?: unknown
 }
 
 /**
@@ -65,7 +66,7 @@ export function FormSwitch({
 
       {/* Error Message */}
       {error && (
-        <p className="text-xs text-destructive">{error}</p>
+        <p className="text-xs text-destructive">{getErrorMessage(error)}</p>
       )}
     </div>
   )

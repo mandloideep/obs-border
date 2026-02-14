@@ -17,18 +17,20 @@ import { FormSwitch } from '../../components/configure/form/FormSwitch'
 import { AnimationSelect } from '../../components/configure/form/AnimationSelect'
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { PresetManager } from '../../components/configure/PresetManager'
+import { PresetCards } from '../../components/configure/PresetCards'
+import { BORDER_PRESET_CARDS } from '../../config/preset-cards'
 import { Label } from '../../components/ui/label'
 import {
   SHAPE_OPTIONS,
   BORDER_STYLE_OPTIONS,
   BORDER_ANIMATION_OPTIONS,
-  BORDER_PRESET_OPTIONS,
   COLOR_MODE_OPTIONS,
   GRADIENT_TYPE_OPTIONS,
 } from '../../lib/constants'
 import { BORDER_DEFAULTS } from '../../types/border.types'
 import type { BorderOverlayParams } from '../../types/border.types'
 import { useHistory } from '../../hooks/useHistory'
+import { useGlobalSettings, applyGlobalDefaults } from '../../hooks/useGlobalSettings'
 import { useFormWithHistory } from '../../hooks/useFormWithHistory'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { usePresets } from '../../hooks/usePresets'
@@ -40,8 +42,12 @@ export const Route = createFileRoute('/configure/border')({
 })
 
 function BorderConfigurator() {
+  // Global brand settings
+  const { settings: globalSettings } = useGlobalSettings()
+  const resolvedDefaults = useMemo(() => applyGlobalDefaults(BORDER_DEFAULTS, globalSettings), [globalSettings])
+
   // History management (undo/redo + debouncing)
-  const history = useHistory<BorderOverlayParams>(BORDER_DEFAULTS)
+  const history = useHistory<BorderOverlayParams>(resolvedDefaults)
   const { state: params, updateState, undo, redo, canUndo, canRedo } = history
 
   // TanStack Form with Zod validation
@@ -120,20 +126,11 @@ function BorderConfigurator() {
       {/* Section: Quick Presets */}
       <div className="config-section">
         <h2 className="text-2xl font-semibold mb-6">Quick Presets</h2>
-        <form.Field name="preset">
-          {(field) => (
-            <FormSelectInput
-              label="Preset"
-              value={params.preset}
-              onChange={(val) => {
-                field.handleChange(val as any)
-                updateState({ ...params, preset: val as any })
-              }}
-              options={BORDER_PRESET_OPTIONS}
-              error={field.state.meta.errors?.[0]}
-            />
-          )}
-        </form.Field>
+        <PresetCards
+          presets={BORDER_PRESET_CARDS}
+          value={params.preset}
+          onSelect={(val) => updateState({ ...params, preset: val as any })}
+        />
       </div>
 
       {/* Custom Presets Manager */}

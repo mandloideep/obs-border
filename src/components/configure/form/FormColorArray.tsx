@@ -11,13 +11,14 @@ import { Label } from '@/components/ui/label'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { Plus, X } from 'lucide-react'
 import { hexToRgba, rgbaToHex, hexToCssColor } from '../../../utils/color.utils'
+import { getErrorMessage } from '@/lib/validation/validators'
 
 interface FormColorArrayProps {
   label: string
   colors: string[]
   onChange: (colors: string[]) => void
   maxColors?: number
-  error?: string
+  error?: unknown
 }
 
 /**
@@ -179,7 +180,7 @@ export function FormColorArray({
       </div>
 
       {error && (
-        <p className="text-xs text-destructive">{error}</p>
+        <p className="text-xs text-destructive">{getErrorMessage(error)}</p>
       )}
     </div>
   )

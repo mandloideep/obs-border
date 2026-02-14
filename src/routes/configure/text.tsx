@@ -21,8 +21,9 @@ import { AnimationSelect } from '../../components/configure/form/AnimationSelect
 import { AnimationTimeline } from '../../components/configure/form/AnimationTimeline'
 import { GradientGrid } from '../../components/configure/form/GradientGrid'
 import { PresetManager } from '../../components/configure/PresetManager'
+import { PresetCards } from '../../components/configure/PresetCards'
+import { TEXT_PRESET_CARDS } from '../../config/preset-cards'
 import {
-  TEXT_PRESET_OPTIONS,
   LINE_STYLE_OPTIONS,
   LINE_ANIMATION_OPTIONS,
   LINE_POSITION_OPTIONS,
@@ -38,6 +39,7 @@ import {
 import { TEXT_DEFAULTS } from '../../types/text.types'
 import type { TextOverlayParams } from '../../types/text.types'
 import { useHistory } from '../../hooks/useHistory'
+import { useGlobalSettings, applyGlobalDefaults } from '../../hooks/useGlobalSettings'
 import { useFormWithHistory } from '../../hooks/useFormWithHistory'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { usePresets } from '../../hooks/usePresets'
@@ -49,8 +51,12 @@ export const Route = createFileRoute('/configure/text')({
 })
 
 function TextConfigurator() {
+  // Global brand settings
+  const { settings: globalSettings } = useGlobalSettings()
+  const resolvedDefaults = useMemo(() => applyGlobalDefaults(TEXT_DEFAULTS, globalSettings), [globalSettings])
+
   // History management (undo/redo + debouncing)
-  const history = useHistory<TextOverlayParams>(TEXT_DEFAULTS)
+  const history = useHistory<TextOverlayParams>(resolvedDefaults)
   const { state: params, updateState, undo, redo, canUndo, canRedo } = history
 
   // TanStack Form with Zod validation
@@ -128,20 +134,11 @@ function TextConfigurator() {
         {/* Section 1: Quick Presets */}
         <div className="config-section">
           <h2 className="text-2xl font-semibold mb-6">Quick Presets</h2>
-          <form.Field name="preset">
-            {(field) => (
-              <FormSelectInput
-                label="Preset"
-                value={params.preset}
-                onChange={(val) => {
-                  field.handleChange(val as any)
-                  updateState({ ...params, preset: val as any })
-                }}
-                options={TEXT_PRESET_OPTIONS}
-                error={field.state.meta.errors?.[0]}
-              />
-            )}
-          </form.Field>
+          <PresetCards
+            presets={TEXT_PRESET_CARDS}
+            value={params.preset}
+            onSelect={(val) => updateState({ ...params, preset: val as any })}
+          />
         </div>
 
         {/* Custom Presets Manager */}

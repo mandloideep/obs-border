@@ -13,6 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { getErrorMessage } from '@/lib/validation/validators'
 
 interface FormNumberSliderProps {
   label: string
@@ -24,7 +25,7 @@ interface FormNumberSliderProps {
   step?: number
   unit?: string
   help?: string
-  error?: string
+  error?: unknown
 }
 
 /**
@@ -142,7 +143,7 @@ export function FormNumberSlider({
 
       {/* Error Message */}
       {error && (
-        <p className="text-xs text-destructive mt-1">{error}</p>
+        <p className="text-xs text-destructive mt-1">{getErrorMessage(error)}</p>
       )}
     </div>
   )

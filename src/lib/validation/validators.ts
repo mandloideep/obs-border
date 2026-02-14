@@ -101,3 +101,16 @@ export const fontFamilyValidator = z.string()
  * Validates comma-separated values
  */
 export const commaSeparatedValidator = z.string()
+
+/**
+ * Extract a displayable error message from TanStack Form validation errors.
+ * Zod v4 Standard Schema can return error objects instead of strings.
+ */
+export function getErrorMessage(error: unknown): string | undefined {
+  if (!error) return undefined
+  if (typeof error === 'string') return error
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    return String((error as { message: unknown }).message)
+  }
+  return String(error)
+}
