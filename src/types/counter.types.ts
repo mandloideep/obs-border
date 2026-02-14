@@ -11,6 +11,7 @@ import type {
   NumberNotation,
   APIService,
   GradientName,
+  GradientType,
   ThemeName,
   BgShadow,
   ColorMode,
@@ -76,8 +77,10 @@ export interface CounterOverlayParams {
   // Global
   theme: ThemeName
   gradient: GradientName
+  gradienttype: GradientType
   colors: string[]
   colormode: ColorMode
+  bggradient: boolean
 }
 
 /**
@@ -152,6 +155,8 @@ export const COUNTER_DEFAULTS: CounterOverlayParams = {
   ...BG_PANEL_DEFAULTS,
   theme: 'dark',
   gradient: 'indigo',
+  gradienttype: 'linear',
   colors: [],
   colormode: 'normal',
+  bggradient: false,
 }

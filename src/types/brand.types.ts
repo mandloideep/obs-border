@@ -28,6 +28,8 @@ import {
   API_SERVICES,
   THEMES,
   GRADIENT_NAMES,
+  ALL_GRADIENT_NAMES,
+  GRADIENT_TYPES,
   SOCIAL_PLATFORMS,
   TEXT_PRESETS,
   CTA_PRESETS,
@@ -68,9 +70,13 @@ export interface ThemeConfig {
   light: ThemeColors
 }
 
-export type GradientName = typeof GRADIENT_NAMES[number]
+export type GradientName = typeof ALL_GRADIENT_NAMES[number]
 
-export type GradientMap = Record<GradientName, string[]>
+export type BrandGradientName = typeof GRADIENT_NAMES[number]
+
+export type GradientType = typeof GRADIENT_TYPES[number]
+
+export type GradientMap = Record<BrandGradientName, string[]>
 
 export interface FontConfig {
   display: string

@@ -1,5 +1,6 @@
 import { BRAND_CONFIG } from '@/config/brand.config'
 import type { GradientName } from '@/types/brand.types'
+import { PALETTE_GRADIENTS } from '@/lib/meshPalettes'
 import { cn } from '@/lib/utils'
 
 interface GradientGridProps {
@@ -33,23 +34,38 @@ const getAllGradients = (): GradientName[] => {
   return Array.from(allFromCategories) as GradientName[]
 }
 
+// Get all palette gradient entries
+const getPaletteGradients = (): { name: string; key: string; colors: string[] }[] => {
+  return Object.entries(PALETTE_GRADIENTS).map(([name, colors]) => ({
+    name: name.charAt(0).toUpperCase() + name.slice(1),
+    key: `palette:${name}`,
+    colors,
+  }))
+}
+
 export function GradientGrid({ value, onValueChange, onBlur, className }: GradientGridProps) {
   const allGradients = getAllGradients()
+  const paletteGradients = getPaletteGradients()
 
   // Handler that calls both onChange and onBlur
-  const handleSelect = (gradientName: GradientName) => {
+  const handleSelect = (gradientName: string) => {
     onValueChange(gradientName)
     if (onBlur) {
       onBlur()
     }
   }
 
-  // Render a single gradient button
-  const renderGradientButton = (gradientName: GradientName) => {
-    const colors = BRAND_CONFIG.gradients[gradientName]
+  // Render a single gradient button (supports both brand and palette gradients)
+  const renderGradientButton = (
+    gradientName: string,
+    colorsOverride?: string[],
+    displayName?: string
+  ) => {
+    const colors = colorsOverride || BRAND_CONFIG.gradients[gradientName as keyof typeof BRAND_CONFIG.gradients]
     if (!colors) return null
 
     const isSelected = value === gradientName
+    const label = displayName || gradientName
     const gradientStyle = {
       background: `linear-gradient(to right, ${colors.join(', ')})`,
     }
@@ -64,8 +80,8 @@ export function GradientGrid({ value, onValueChange, onBlur, className }: Gradie
           'focus:outline-none focus:ring-2 focus:ring-brand-indigo focus:ring-offset-2 focus:ring-offset-dark-bg',
           isSelected && 'ring-2 ring-brand-indigo ring-offset-2 ring-offset-dark-bg scale-105'
         )}
-        aria-label={`Select ${gradientName} gradient`}
-        title={gradientName.charAt(0).toUpperCase() + gradientName.slice(1)}
+        aria-label={`Select ${label} gradient`}
+        title={label.charAt(0).toUpperCase() + label.slice(1)}
       >
         {/* Gradient preview */}
         <div className="w-full h-12" style={gradientStyle} />
@@ -83,7 +99,7 @@ export function GradientGrid({ value, onValueChange, onBlur, className }: Gradie
               opacity: isSelected ? 1 : undefined,
             }}
           >
-            {gradientName.charAt(0).toUpperCase() + gradientName.slice(1)}
+            {label.charAt(0).toUpperCase() + label.slice(1)}
           </span>
         </div>
 
@@ -109,14 +125,26 @@ export function GradientGrid({ value, onValueChange, onBlur, className }: Gradie
 
   return (
     <div className={cn('space-y-6', className)}>
-      {/* Show all gradients in a grid */}
+      {/* Show all brand gradients in a grid */}
       <div className="grid grid-cols-3 gap-3">
         {allGradients.map((gradientName) => renderGradientButton(gradientName))}
       </div>
 
+      {/* Mesh Palettes section */}
+      <div className="space-y-3">
+        <h4 className="text-sm font-semibold text-dark-text">Mesh Palettes</h4>
+        <div className="grid grid-cols-3 gap-3">
+          {paletteGradients.map(({ name, key, colors }) =>
+            renderGradientButton(key, colors, name)
+          )}
+        </div>
+      </div>
+
       {/* Current selection display */}
       <div className="text-xs text-dark-muted text-center">
-        Selected: <span className="text-dark-text font-medium capitalize">{value}</span>
+        Selected: <span className="text-dark-text font-medium capitalize">
+          {value.startsWith('palette:') ? value.replace('palette:', '') + ' (palette)' : value}
+        </span>
       </div>
     </div>
   )

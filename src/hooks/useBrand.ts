@@ -10,6 +10,7 @@ import type {
   ThemeColors,
   ThemeName,
   GradientName,
+  BrandGradientName,
   ContrastAccents,
   FontFamily,
   StandardFontName,
@@ -17,6 +18,7 @@ import type {
 } from '../types/brand.types'
 import { applyColorModeShift } from '../utils/color.utils'
 import { STANDARD_FONT_NAMES } from '../lib/constants'
+import { PALETTE_GRADIENTS } from '../lib/meshPalettes'
 
 /**
  * Get the full brand configuration
@@ -62,15 +64,19 @@ export function useGradient(
     // Custom colors take precedence
     if (customColors && customColors.length > 0) {
       colors = customColors.map((c) => (c.startsWith('#') ? c : `#${c}`))
+    } else if (gradientName?.startsWith('palette:')) {
+      // Palette gradient (e.g., "palette:ocean")
+      const paletteName = gradientName.replace('palette:', '')
+      colors = PALETTE_GRADIENTS[paletteName] || brand.gradients.indigo
     } else if (random) {
       // Random gradient selection
-      const keys = Object.keys(brand.gradients) as GradientName[]
+      const keys = Object.keys(brand.gradients) as BrandGradientName[]
       const randomKey = keys[Math.floor(Math.random() * keys.length)]
       colors = brand.gradients[randomKey]
     } else {
       // Named gradient or default to indigo
       const name = gradientName || 'indigo'
-      colors = brand.gradients[name] || brand.gradients.indigo
+      colors = brand.gradients[name as keyof typeof brand.gradients] || brand.gradients.indigo
     }
 
     // Apply color mode shift

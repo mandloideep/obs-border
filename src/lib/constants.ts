@@ -343,6 +343,24 @@ export const GRADIENT_NAMES = [
   'navy', 'coral', 'slate', 'gold', 'teal', 'magenta',
 ] as const
 
+export const PALETTE_GRADIENT_NAMES = [
+  'palette:pastel', 'palette:vibrant', 'palette:earth', 'palette:ocean', 'palette:neon',
+  'palette:warm', 'palette:cool', 'palette:monochrome', 'palette:sunset', 'palette:forest',
+  'palette:candy', 'palette:aurora', 'palette:twilight', 'palette:tropical', 'palette:lavender',
+  'palette:slate', 'palette:ember', 'palette:sakura',
+] as const
+
+export const ALL_GRADIENT_NAMES = [...GRADIENT_NAMES, ...PALETTE_GRADIENT_NAMES] as const
+
+export const GRADIENT_TYPES = ['linear', 'radial', 'conic', 'mesh'] as const
+
+export const GRADIENT_TYPE_OPTIONS: Option<typeof GRADIENT_TYPES[number]>[] = [
+  { value: 'linear', label: 'Linear' },
+  { value: 'radial', label: 'Radial' },
+  { value: 'conic', label: 'Conic' },
+  { value: 'mesh', label: 'Mesh' },
+]
+
 // === SOCIAL PLATFORM CONSTANTS ===
 
 export const SOCIAL_PLATFORMS = [

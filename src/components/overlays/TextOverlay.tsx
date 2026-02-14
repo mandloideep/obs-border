@@ -16,7 +16,7 @@ import { TEXT_PRESETS } from '../../config/text-presets'
 import { TEXT_DEFAULTS } from '../../types/text.types'
 import type { TextOverlayParams } from '../../types/text.types'
 import type { LoopState } from '../../types/brand.types'
-import { createLinearGradient } from '../../utils/css.utils'
+import { createGradient } from '../../utils/css.utils'
 import { hexToCssColor } from '../../utils/color.utils'
 
 export function TextOverlay() {
@@ -125,7 +125,7 @@ export function TextOverlay() {
     if (params.textgradient) {
       return {
         ...baseStyle,
-        background: createLinearGradient(gradient, 90),
+        background: createGradient(gradient, params.gradienttype, 90),
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
         backgroundClip: 'text',
@@ -177,7 +177,7 @@ export function TextOverlay() {
   const content = (
     <div style={contentStyle}>
       {params.bg ? (
-        <OverlayPanel bgcolor={params.bgcolor} bgopacity={params.bgopacity} bgshadow={params.bgshadow} blur={params.bgblur} borderRadius={params.bgradius}>
+        <OverlayPanel bgcolor={params.bgcolor} bgopacity={params.bgopacity} bgshadow={params.bgshadow} blur={params.bgblur} borderRadius={params.bgradius} gradientColors={params.bggradient ? gradient : undefined} gradientType={params.gradienttype}>
           {renderLine('top')}
           <h1 style={getTextStyle()}>{params.text}</h1>
           {params.sub && <p style={getSubStyle()}>{params.sub}</p>}

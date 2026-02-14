@@ -40,7 +40,8 @@ import {
   DECORATION_STYLES,
   NUMBER_NOTATIONS,
   API_SERVICES,
-  GRADIENT_NAMES,
+  ALL_GRADIENT_NAMES,
+  GRADIENT_TYPES,
   THEMES,
   TEXT_PRESETS,
   CTA_PRESETS,
@@ -67,7 +68,8 @@ export const borderOverlaySchema = z.object({
   dash: rangeValidator(0, 1),
 
   // Colors
-  gradient: z.enum(GRADIENT_NAMES),
+  gradient: z.enum(ALL_GRADIENT_NAMES),
+  gradienttype: z.enum(GRADIENT_TYPES),
   colors: colorArrayValidator(5),
   random: z.boolean(),
 
@@ -154,9 +156,11 @@ export const textOverlaySchema = z.object({
 
   // Global
   theme: z.enum(THEMES),
-  gradient: z.enum(GRADIENT_NAMES),
+  gradient: z.enum(ALL_GRADIENT_NAMES),
+  gradienttype: z.enum(GRADIENT_TYPES),
   colors: colorArrayValidator(5),
   colormode: z.enum(COLOR_MODES),
+  bggradient: z.boolean(),
 }).refine(
   (data) => {
     // Exit speed only relevant if exit animation is not 'none'
@@ -225,9 +229,11 @@ export const counterOverlaySchema = z
 
     // Global
     theme: z.enum(THEMES),
-    gradient: z.enum(GRADIENT_NAMES),
+    gradient: z.enum(ALL_GRADIENT_NAMES),
+    gradienttype: z.enum(GRADIENT_TYPES),
     colors: colorArrayValidator(5),
     colormode: z.enum(COLOR_MODES),
+    bggradient: z.boolean(),
   })
   .refine(
     (data) => {
@@ -318,9 +324,11 @@ export const ctaOverlaySchema = z.object({
 
   // Global Theme
   theme: z.enum(THEMES),
-  gradient: z.enum(GRADIENT_NAMES),
+  gradient: z.enum(ALL_GRADIENT_NAMES),
+  gradienttype: z.enum(GRADIENT_TYPES),
   colors: colorArrayValidator(5),
   colormode: z.enum(COLOR_MODES),
+  bggradient: z.boolean(),
 }) satisfies z.ZodType<CTAOverlayParams>
 
 // ===== SOCIALS OVERLAY SCHEMA =====
@@ -386,9 +394,11 @@ export const socialsOverlaySchema = z.object({
 
   // Global Theme
   theme: z.enum(THEMES),
-  gradient: z.enum(GRADIENT_NAMES),
+  gradient: z.enum(ALL_GRADIENT_NAMES),
+  gradienttype: z.enum(GRADIENT_TYPES),
   colors: colorArrayValidator(5),
   colormode: z.enum(COLOR_MODES),
+  bggradient: z.boolean(),
 }) satisfies z.ZodType<SocialsOverlayParams>
 
 // ===== MESH OVERLAY SCHEMA =====

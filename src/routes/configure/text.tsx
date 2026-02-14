@@ -32,6 +32,7 @@ import {
   EXIT_ANIMATION_OPTIONS,
   BG_SHADOW_OPTIONS,
   COLOR_MODE_OPTIONS,
+  GRADIENT_TYPE_OPTIONS,
   BG_PANEL_DEFAULTS,
 } from '../../lib/constants'
 import { TEXT_DEFAULTS } from '../../types/text.types'
@@ -585,6 +586,21 @@ function TextConfigurator() {
                 )}
               </form.Field>
             </div>
+
+            <form.Field name="bggradient">
+              {(field) => (
+                <FormSwitch
+                  label="Gradient background"
+                  checked={params.bggradient}
+                  onCheckedChange={(checked) => {
+                    field.handleChange(checked)
+                    updateState({ ...params, bggradient: checked })
+                  }}
+                  help="Use gradient colors as panel background"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
           </CollapsibleSection>
         )}
 
@@ -944,6 +960,22 @@ function TextConfigurator() {
                 )}
               </form.Field>
             </div>
+
+            <form.Field name="gradienttype">
+              {(field) => (
+                <FormSelectInput
+                  label="Gradient Style"
+                  value={params.gradienttype}
+                  onChange={(val) => {
+                    field.handleChange(val as any)
+                    updateState({ ...params, gradienttype: val as any })
+                  }}
+                  options={GRADIENT_TYPE_OPTIONS}
+                  help="How gradient colors are blended"
+                  error={field.state.meta.errors?.[0]}
+                />
+              )}
+            </form.Field>
 
             <form.Field name="textgradient">
               {(field) => (

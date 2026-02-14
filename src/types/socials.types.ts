@@ -12,6 +12,7 @@ import type {
   ExitAnimation,
   ThemeName,
   GradientName,
+  GradientType,
   FontFamily,
   PlatformOrder,
   BgShadow,
@@ -85,8 +86,10 @@ export interface SocialsOverlayParams {
   // Global Theme
   theme: ThemeName
   gradient: GradientName
+  gradienttype: GradientType
   colors: string[]
   colormode: ColorMode
+  bggradient: boolean
 }
 
 /**
@@ -138,8 +141,10 @@ export const SOCIALS_DEFAULTS: SocialsOverlayParams = {
   ...BG_PANEL_DEFAULTS,
   theme: 'dark',
   gradient: 'indigo',
+  gradienttype: 'linear',
   colors: [],
   colormode: 'normal',
+  bggradient: false,
 }
 
 /**

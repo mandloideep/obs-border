@@ -347,7 +347,7 @@ export function CTAOverlay() {
             // Force re-mount on loop cycle to retrigger exit animation
             key={`exit-${loopCycle}`}
           >
-            {params.bg ? <OverlayPanel bgcolor={params.bgcolor} bgopacity={params.bgopacity} bgshadow={params.bgshadow} blur={params.bgblur} borderRadius={params.bgradius}>{content}</OverlayPanel> : content}
+            {params.bg ? <OverlayPanel bgcolor={params.bgcolor} bgopacity={params.bgopacity} bgshadow={params.bgshadow} blur={params.bgblur} borderRadius={params.bgradius} gradientColors={params.bggradient ? gradient : undefined} gradientType={params.gradienttype}>{content}</OverlayPanel> : content}
           </ExitAnimation>
         </EntranceAnimation>
       )}

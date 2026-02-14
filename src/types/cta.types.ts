@@ -14,6 +14,7 @@ import type {
   VerticalAlign,
   ThemeName,
   GradientName,
+  GradientType,
   IconPosition,
   DecorationStyle,
   BgShadow,
@@ -80,8 +81,10 @@ export interface CTAOverlayParams {
   // Global Theme
   theme: ThemeName
   gradient: GradientName
+  gradienttype: GradientType
   colors: string[]
   colormode: ColorMode
+  bggradient: boolean
 }
 
 /**
@@ -130,6 +133,8 @@ export const CTA_DEFAULTS: CTAOverlayParams = {
   pause: 20,
   theme: 'dark',
   gradient: 'indigo',
+  gradienttype: 'linear',
   colors: [],
   colormode: 'normal',
+  bggradient: false,
 }

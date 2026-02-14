@@ -23,6 +23,7 @@ import {
   BORDER_STYLE_OPTIONS,
   BORDER_ANIMATION_OPTIONS,
   COLOR_MODE_OPTIONS,
+  GRADIENT_TYPE_OPTIONS,
 } from '../../lib/constants'
 import { BORDER_DEFAULTS } from '../../types/border.types'
 import type { BorderOverlayParams } from '../../types/border.types'
@@ -297,6 +298,22 @@ function BorderConfigurator() {
             )}
           </form.Field>
         </div>
+
+        <form.Field name="gradienttype">
+          {(field) => (
+            <FormSelectInput
+              label="Gradient Style"
+              value={params.gradienttype}
+              onChange={(val) => {
+                field.handleChange(val as any)
+                updateState({ ...params, gradienttype: val as any })
+              }}
+              options={GRADIENT_TYPE_OPTIONS}
+              help="How gradient colors are applied to the border"
+              error={field.state.meta.errors?.[0]}
+            />
+          )}
+        </form.Field>
 
         <form.Field name="multicolor">
           {(field) => (

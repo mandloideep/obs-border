@@ -273,6 +273,77 @@ export function createLinearGradient(colors: string[], angle: number = 90): stri
 }
 
 /**
+ * Generate CSS radial gradient from center
+ *
+ * @param colors - Array of color stops
+ * @returns CSS radial-gradient string
+ */
+export function createRadialGradient(colors: string[]): string {
+  const stops = colors.map((color, index) => {
+    const position = (index / (colors.length - 1)) * 100
+    return `${color} ${position}%`
+  }).join(', ')
+  return `radial-gradient(circle, ${stops})`
+}
+
+/**
+ * Generate CSS conic gradient
+ *
+ * @param colors - Array of color stops
+ * @param angle - Starting angle in degrees (default: 0)
+ * @returns CSS conic-gradient string
+ */
+export function createConicGradient(colors: string[], angle: number = 0): string {
+  const stops = colors.map((color, index) => {
+    const position = (index / (colors.length - 1)) * 100
+    return `${color} ${position}%`
+  }).join(', ')
+  return `conic-gradient(from ${angle}deg, ${stops})`
+}
+
+/**
+ * Generate CSS mesh-style gradient using stacked radial-gradients.
+ * Each color is positioned at a different location with soft falloff.
+ * Pure CSS, GPU-rendered, zero CPU overhead.
+ *
+ * @param colors - Array of color stops
+ * @returns CSS background string with stacked radial-gradients
+ */
+export function createMeshGradient(colors: string[]): string {
+  // Predefined positions for up to 8 color blobs
+  const positions = [
+    '25% 25%', '75% 25%', '50% 50%', '25% 75%', '75% 75%',
+    '10% 50%', '90% 50%', '50% 10%',
+  ]
+
+  const layers = colors.map((color, i) => {
+    const pos = positions[i % positions.length]
+    const rgb = hexToRgb(color)
+    if (!rgb) return `radial-gradient(ellipse at ${pos}, ${color} 0%, transparent 70%)`
+    return `radial-gradient(ellipse at ${pos}, rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.8) 0%, transparent 60%)`
+  })
+
+  return layers.join(', ')
+}
+
+/**
+ * Generate CSS gradient string based on type
+ *
+ * @param colors - Array of color stops
+ * @param type - Gradient type ('linear' | 'radial' | 'conic' | 'mesh')
+ * @param angle - Gradient angle in degrees (default: 90, used for linear/conic)
+ * @returns CSS gradient string
+ */
+export function createGradient(colors: string[], type: string, angle: number = 90): string {
+  switch (type) {
+    case 'radial': return createRadialGradient(colors)
+    case 'conic': return createConicGradient(colors, angle)
+    case 'mesh': return createMeshGradient(colors)
+    default: return createLinearGradient(colors, angle)
+  }
+}
+
+/**
  * Apply theme colors to CSS variables
  *
  * @param theme - Theme colors object

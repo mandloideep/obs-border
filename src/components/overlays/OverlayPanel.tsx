@@ -6,8 +6,9 @@
 import React, { type CSSProperties } from 'react'
 import { useTheme } from '../../hooks/useBrand'
 import { hexToCssColor } from '../../utils/color.utils'
+import { createGradient } from '../../utils/css.utils'
 import { BG_SHADOW_CSS } from '../../lib/constants'
-import type { BgShadow } from '../../types/brand.types'
+import type { BgShadow, GradientType } from '../../types/brand.types'
 
 interface OverlayPanelProps {
   children: React.ReactNode
@@ -18,6 +19,8 @@ interface OverlayPanelProps {
   bgcolor?: string
   bgopacity?: number
   bgshadow?: BgShadow
+  gradientColors?: string[]
+  gradientType?: GradientType
 }
 
 /**
@@ -33,6 +36,8 @@ export function OverlayPanel({
   bgcolor = '',
   bgopacity = 0.9,
   bgshadow = 'md',
+  gradientColors,
+  gradientType = 'linear',
 }: OverlayPanelProps) {
   const theme = useTheme()
 
@@ -62,8 +67,13 @@ export function OverlayPanel({
   const borderHighlight = bgshadow !== 'none' ? `, 0 0 0 1px ${theme.border}40` : ''
   const boxShadow = shadowCss === 'none' ? 'none' : `${shadowCss}${borderHighlight}`
 
+  // Use gradient as background when gradient colors are provided
+  const useGradientBg = gradientColors && gradientColors.length > 0
+
   const panelStyle: CSSProperties = {
-    backgroundColor,
+    backgroundColor: useGradientBg ? undefined : backgroundColor,
+    backgroundImage: useGradientBg ? createGradient(gradientColors, gradientType) : undefined,
+    opacity: useGradientBg ? bgopacity : undefined,
     border: `1px solid ${theme.border}`,
     borderRadius: `${borderRadius}px`,
     padding: `${padding}px`,

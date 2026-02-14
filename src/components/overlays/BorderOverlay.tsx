@@ -13,7 +13,7 @@ import { interpolateColor } from '../../utils/css.utils'
 import { GradientDef } from '../svg/GradientDef'
 import type { BorderOverlayParams } from '../../types/border.types'
 import { BORDER_DEFAULTS } from '../../types/border.types'
-import type { GradientName } from '../../types/brand.types'
+import type { BrandGradientName } from '../../types/brand.types'
 
 export function BorderOverlay() {
   const params = useOverlayParams<BorderOverlayParams>(BORDER_DEFAULTS)
@@ -120,7 +120,7 @@ export function BorderOverlay() {
     (timestamp) => {
       if (!params.multicolor) return
 
-      const gradientKeys = Object.keys(brand.gradients) as GradientName[]
+      const gradientKeys = Object.keys(brand.gradients) as BrandGradientName[]
       const progress = ((timestamp % (params.speed * 1000)) / (params.speed * 1000))
       const index = Math.floor(progress * gradientKeys.length)
       const nextIndex = (index + 1) % gradientKeys.length
@@ -144,7 +144,7 @@ export function BorderOverlay() {
     (timestamp) => {
       if (!params.colorshift || params.multicolor) return
 
-      const gradientKeys = Object.keys(brand.gradients) as GradientName[]
+      const gradientKeys = Object.keys(brand.gradients) as BrandGradientName[]
       const duration = params.shiftspeed * 1000
       const progress = ((timestamp % duration) / duration)
       const index = Math.floor(progress * gradientKeys.length)
@@ -290,6 +290,7 @@ export function BorderOverlay() {
               id="glowGradient"
               colors={currentGradient}
               direction={params.animation === 'rotate' ? gradientRotation : 90}
+              type={params.gradienttype === 'radial' ? 'radial' : 'linear'}
             />
             {renderShape(params.style === 'neon' ? params.thickness * 3 : params.thickness, true, 'glowGradient')}
           </svg>
@@ -311,6 +312,7 @@ export function BorderOverlay() {
                 id="glowGradient2"
                 colors={currentGradient}
                 direction={params.animation === 'rotate' ? gradientRotation : 90}
+                type={params.gradienttype === 'radial' ? 'radial' : 'linear'}
               />
               {renderShape(params.thickness * 5, true, 'glowGradient2')}
             </svg>
@@ -334,6 +336,7 @@ export function BorderOverlay() {
           id="borderGradient"
           colors={currentGradient}
           direction={params.animation === 'rotate' ? gradientRotation : 90}
+          type={params.gradienttype === 'radial' ? 'radial' : 'linear'}
         />
         {renderShape()}
       </svg>

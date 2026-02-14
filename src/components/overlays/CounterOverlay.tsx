@@ -218,7 +218,7 @@ export function CounterOverlay() {
 
   return (
     <OverlayContainer align={params.align} valign="center" showBg={false}>
-      {params.bg ? <OverlayPanel bgcolor={params.bgcolor} bgopacity={params.bgopacity} bgshadow={params.bgshadow} blur={params.bgblur} borderRadius={params.bgradius}>{content}</OverlayPanel> : content}
+      {params.bg ? <OverlayPanel bgcolor={params.bgcolor} bgopacity={params.bgopacity} bgshadow={params.bgshadow} blur={params.bgblur} borderRadius={params.bgradius} gradientColors={params.bggradient ? gradient : undefined} gradientType={params.gradienttype}>{content}</OverlayPanel> : content}
     </OverlayContainer>
   )
 }

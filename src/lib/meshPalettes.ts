@@ -143,6 +143,14 @@ export function applyModeShift(
 }
 
 /**
+ * Convert RGB (0-255) to hex color string
+ */
+function rgbToHex(r: number, g: number, b: number): string {
+  const toHex = (n: number) => Math.round(Math.max(0, Math.min(255, n))).toString(16).padStart(2, '0')
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`
+}
+
+/**
  * Convert HSL (h: 0-360, s: 0-100, l: 0-100) to RGB (0-255)
  */
 function hslToRgb(h: number, s: number, l: number): RGBColor {
@@ -207,3 +215,52 @@ export function generatePaletteColors(
 
   return colors
 }
+
+/**
+ * Generate a fixed gradient array (hex strings) from a mesh palette.
+ * Uses evenly-spaced hues with midpoint saturation/lightness.
+ * Deterministic (no RNG) — same palette always produces same colors.
+ */
+export function paletteToGradient(paletteName: string, count = 5): string[] {
+  const palette = MESH_PALETTE_DEFINITIONS[paletteName]
+  if (!palette) return ['#6366f1', '#8b5cf6', '#a78bfa', '#c4b5fd', '#818cf8']
+
+  // Calculate hue range
+  let totalRange: number
+  let startHue: number
+  if (palette.hue[0] <= palette.hue[1]) {
+    totalRange = palette.hue[1] - palette.hue[0]
+    startHue = palette.hue[0]
+  } else {
+    totalRange = 360 - palette.hue[0] + palette.hue[1]
+    startHue = palette.hue[0]
+  }
+
+  const effectiveRange = palette.hueSpread
+    ? Math.min(palette.hueSpread, totalRange)
+    : totalRange
+
+  // Use midpoints of saturation and lightness for representative colors
+  const satMid = (palette.saturation[0] + palette.saturation[1]) / 2
+  const lightMid = (palette.lightness[0] + palette.lightness[1]) / 2
+
+  const colors: string[] = []
+  for (let i = 0; i < count; i++) {
+    const h = ((startHue + (effectiveRange / count) * (i + 0.5)) % 360 + 360) % 360
+    // Alternate lightness slightly for visual depth
+    const l = lightMid + (i % 2 === 0 ? -3 : 3)
+    const rgb = hslToRgb(h, satMid, l)
+    colors.push(rgbToHex(rgb.r, rgb.g, rgb.b))
+  }
+
+  return colors
+}
+
+/**
+ * Pre-generated gradient arrays for all 18 mesh palettes.
+ * Used by GradientGrid and useGradient to make mesh palettes
+ * available across all overlays (not just MeshOverlay).
+ */
+export const PALETTE_GRADIENTS: Record<string, string[]> = Object.fromEntries(
+  Object.keys(MESH_PALETTE_DEFINITIONS).map((name) => [name, paletteToGradient(name)])
+)

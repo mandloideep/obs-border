@@ -8,6 +8,7 @@ import type {
   BorderStyle,
   BorderAnimation,
   GradientName,
+  GradientType,
   ThemeName,
   ColorMode,
 } from './brand.types'
@@ -29,6 +30,7 @@ export interface BorderOverlayParams {
 
   // Colors
   gradient: GradientName
+  gradienttype: GradientType
   colors: string[] // Custom gradient colors (hex without #)
   random: boolean // Randomize gradient on load
 
@@ -61,6 +63,7 @@ export const BORDER_DEFAULTS: BorderOverlayParams = {
   thickness: 2,
   dash: 0.3,
   gradient: 'indigo',
+  gradienttype: 'linear',
   colors: [],
   random: false,
   glow: true,
